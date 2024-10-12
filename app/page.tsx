@@ -1,7 +1,11 @@
 "use client";
+import AboutMe from "./component/AboutMe";
 import Hero from "./component/Hero";
 import Navbar from "./component/Layout/Navbar";
 import { navItems } from "@/data/helper";
+import RecentProjects from "./component/RecentProjects";
+import WorkExperience from "./component/WorkExperience";
+import Footer from "./component/Layout/Footer";
 
 export default function Home() {
   return (
@@ -9,6 +13,14 @@ export default function Home() {
       <div className="max-w-7xl w-full">
         <Navbar navItems={navItems}/>
         <Hero />
+        <AboutMe />
+        <RecentProjects />
+        <WorkExperience />
+        {/* <Education /> */}
+        {/* <Certifications /> */}
+        {/* <Hobbies /> */}
+        {/* <ContactMe /> */}
+        <Footer />
       </div>
     </main>
   );
