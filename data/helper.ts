@@ -14,7 +14,7 @@ export const gridItems = [
     imgClassName: '',
     titleClassName: 'justify-center',
     img: '',
-    spareImg: '',
+    spareImg: '/grid.svg',
   },
   {
     id: 1,
@@ -23,8 +23,8 @@ export const gridItems = [
     className: 'lg:col-span-2 md:col-span-3 md:row-span-2 min-h-30',
     imgClassName: 'w-full h-full',
     titleClassName: 'justify-start',
-    img: '/b1.svg',
-    spareImg: '',
+    img: '/grid.svg',
+    spareImg: '/b4.svg',
   },
   {
     id: 2,
@@ -33,8 +33,8 @@ export const gridItems = [
     className: 'lg:col-span-2 md:col-span-3 md:row-span-2',
     imgClassName: '',
     titleClassName: 'justify-start',
-    img: '',
-    spareImg: '',
+    img: '/grid.svg',
+    spareImg: '/b4.svg',
   },
   {
     id: 4,
@@ -54,7 +54,7 @@ export const gridItems = [
     className: 'md:col-span-3 md:row-span-2',
     imgClassName: 'absolute right-0 bottom-0 md:w-96 w-60',
     titleClassName: 'justify-start md:justify-start lg:justify-center',
-    img: '/b5.svg',
+    img: '',
     spareImg: '/grid.svg',
   },
   {
@@ -64,8 +64,8 @@ export const gridItems = [
     className: 'lg:col-span-2 md:col-span-3 md:row-span-1',
     imgClassName: '',
     titleClassName: 'justify-center md:justify-start lg:justify-center',
-    img: '',
-    spareImg: '',
+    img: '/grid.svg',
+    spareImg: '/b4.svg',
   },
 ]
 
@@ -173,31 +173,31 @@ export const companies = [
 export const workExperience = [
   {
     id: 1,
-    title: 'Frontend Engineer Intern',
-    desc: 'Assisted in the development of a web-based platform using React.js, enhancing interactivity.',
+    title: 'Frontend Developer',
+    desc: 'Assisted in the development of a web-based platform using React.js.',
     className: 'md:col-span-2',
     thumbnail: '/exp1.svg',
   },
   {
     id: 2,
-    title: 'Mobile App Dev - JSM Tech',
-    desc: 'Designed and developed mobile app for both iOS & Android platforms using React Native.',
-    className: 'md:col-span-2', // change to md:col-span-2
-    thumbnail: '/exp2.svg',
+    title: 'Built for Shopify',
+    desc: 'Design and develop applications to meet BFS standards (UX/UI innovation and LCP optimization).',
+    className: 'md:col-span-2',
+    thumbnail: '/bfs.webp',
   },
   {
     id: 3,
-    title: 'Freelance App Dev Project',
-    desc: 'Led the dev of a mobile app for a client, from initial concept to deployment on app stores.',
-    className: 'md:col-span-2', // change to md:col-span-2
+    title: 'SEO in Wordpress',
+    desc: 'Optimize SEO quality for website built by Wordpress.',
+    className: 'md:col-span-2',
     thumbnail: '/exp3.svg',
   },
   {
     id: 4,
-    title: 'Lead Frontend Developer',
-    desc: 'Developed and maintained user-facing features using modern frontend technologies.',
+    title: 'Scrum master',
+    desc: 'Manage and guide team members to operate according to Scrum frame-word.',
     className: 'md:col-span-2',
-    thumbnail: '/exp4.svg',
+    thumbnail: '/exp2.svg',
   },
 ]
 

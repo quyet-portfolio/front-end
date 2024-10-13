@@ -67,9 +67,19 @@ export const LayoutGridItem = ({
       }}
     >
       <div className={`h-full`}>
-        {/* {id === 6 && (
-          <div className="absolute z-50 inset-0 flex items-center text-white font-bold px-4 pointer-events-none text-3xl  md:text-4xl lg:text-7xl"></div>
-        )} */}
+        <div className="w-full h-full absolute">
+          {img && <img src={img} alt={img} className={cn(imgClassName, 'object-cover object-center ')} />}
+        </div>
+        <div className={`absolute right-0 -bottom-8 ${id === 5 && 'w-full opacity-80'} `}>
+          {spareImg && (
+            <img
+              src={spareImg}
+              alt={spareImg}
+              //   width={220}
+              className="object-cover object-center w-full h-full"
+            />
+          )}
+        </div>
 
         <div
           className={cn(
@@ -80,7 +90,7 @@ export const LayoutGridItem = ({
           <div className={`font-sans text-lg font-bold z-10`}>{title}</div>
 
           {id === 3 && (
-            <div className="flex gap-1 lg:gap-5 w-fit absolute -right-3 lg:-right-2">
+            <div className="flex gap-1 lg:gap-5 w-fit absolute -right-3 lg:right-10">
               <div className="flex flex-col gap-3 md:gap-3 lg:gap-8">
                 {leftLists.map((item, i) => (
                   <span

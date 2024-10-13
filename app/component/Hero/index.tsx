@@ -23,13 +23,15 @@ const Hero = () => {
         />
       </div>
 
-      <div className="flex justify-center relative my-20 z-10">
+      <div className="flex justify-center relative my-5 z-10">
         <div className="max-w-[89vw] md:max-w-2xl lg:max-w-[60vw] flex flex-col items-center justify-center">
+          <div className="">
+            <img className="rounded-full w-40 h-40 object-cover" src="/avt_2.jpg" alt="" />
+          </div>
           <TextGenerateEffect
             words="Hello. I am Quyet, a front-end developer"
             className="text-center text-[40px] md:text-5xl lg:text-6xl"
           />
-
           <a href="#about">
             <MagicButton title="Show about me" icon={<FaLocationArrow />} position="right" />
           </a>
