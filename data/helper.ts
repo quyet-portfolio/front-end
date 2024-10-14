@@ -2,7 +2,7 @@ export const navItems = [
   { name: 'About', link: '#about' },
   { name: 'Projects', link: '#projects' },
   { name: 'Experience', link: '#experience' },
-  // { name: "Contact", link: "#contact" },
+  { name: 'Contact', link: '#contact' },
 ]
 
 export const gridItems = [
@@ -75,7 +75,7 @@ export const projects = [
     title: 'Omega Facebook Pixel Ad Report',
     des: 'Optimize ads & ROAS with Facebook Pixel, CAPI, manage product feeds & access key metrics in one app.',
     img: '/facebook-pixel.webp',
-    iconLists: ['/laravel.svg', '/re.svg', '/ts.svg'],
+    iconLists: ['/laravel.svg', '/re.svg', '/redux.svg', 'antd.svg', '/ts.svg'],
     link: 'https://apps.shopify.com/facebook-multi-pixels',
   },
   {
@@ -83,7 +83,7 @@ export const projects = [
     title: 'TikShop: Feed & Omega Pixel',
     des: 'Master your TikTok Ad with ease - grab your trio of Pixel, Events API and Feed.',
     img: '/tiktok-pixel.webp',
-    iconLists: ['/laravel.svg', '/re.svg', '/tail.svg', '/ts.svg'],
+    iconLists: ['/laravel.svg', '/re.svg', '/redux.svg', '/tail.svg', '/ts.svg'],
     link: 'https://apps.shopify.com/tiktok-multi-pixels',
   },
   {
@@ -91,7 +91,7 @@ export const projects = [
     title: 'Omega Twitter Pixel,Conversion',
     des: "Skyrocket your conversions with Multi Twitter Pixels' 5 powerful events & Conversion API.",
     img: '/twitter-pixel.webp',
-    iconLists: ['/laravel.svg', '/re.svg'],
+    iconLists: ['/laravel.svg', '/re.svg', '/redux.svg'],
     link: 'https://apps.shopify.com/twitter-multi-pixels',
   },
   {
@@ -206,6 +206,11 @@ export const socialMedia = [
     id: 1,
     img: '/git.svg',
     link: 'https://github.com/buiduyquyet',
+  },
+  {
+    id: 1,
+    img: '/facebook.svg',
+    link: 'https://www.facebook.com/quyetdaica.09/',
   },
   {
     id: 2,
