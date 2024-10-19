@@ -6,7 +6,6 @@ import { navItems } from '@/data/helper'
 import RecentProjects from './pages/component/RecentProjects'
 import WorkExperience from './pages/component/WorkExperience'
 import Footer from './pages/component/Layout/Footer'
-import RegisterPage from './pages/register/route'
 
 export default function Home() {
   return (
