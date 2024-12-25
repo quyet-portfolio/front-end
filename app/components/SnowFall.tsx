@@ -39,7 +39,7 @@ export default function Snowfall() {
           opacity: 0.8;
         }
         100% {
-          transform: translateY(45vh) rotate(360deg);
+          transform: translateY(30vh) rotate(360deg);
           opacity: 0.3;
         }
       }
