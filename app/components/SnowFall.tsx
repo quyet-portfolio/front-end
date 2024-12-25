@@ -32,6 +32,7 @@ export default function Snowfall() {
         opacity: 0.8;
         animation: fall linear infinite;
         pointer-events: none;
+        z-index: 9999;
       }
       @keyframes fall {
         0% {

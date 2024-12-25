@@ -12,7 +12,7 @@ type TCardContainer = {
   containerClassName?: string
 }
 
-const CardContainer = ({ children, title, href, className, containerClassName }: TCardContainer) => {
+const CardContainer = ({ children, className, containerClassName }: TCardContainer) => {
   const [transform, setTransform] = useState('translate(-50%,-50%) rotateX(0deg)')
 
   const onMouseEnter = () => {
