@@ -1,21 +1,17 @@
 'use client'
+import { navItems } from '@/data/helper'
+import Snowfall from './components/SnowFall'
 import AboutMe from './pages/component/AboutMe'
 import Hero from './pages/component/Hero'
+import Footer from './pages/component/Layout/Footer'
 import Navbar from './pages/component/Layout/Navbar'
-import { navItems } from '@/data/helper'
 import RecentProjects from './pages/component/RecentProjects'
 import WorkExperience from './pages/component/WorkExperience'
-import Footer from './pages/component/Layout/Footer'
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-import Snowfall from './components/SnowFall'
 
 export default function Home() {
-  const { status } = useSession()
-  const router = useRouter()
 
   return (
-    <main className="relative bg-black-100 flex justify-center items-center flex-col overflow-hidden mx-auto sm:px-10 px-5">
+    <div className="relative bg-black-100 flex justify-center items-center flex-col overflow-hidden mx-auto sm:px-10 px-5">
       <Snowfall />
       <div className="max-w-7xl w-full">
         <Navbar navItems={navItems} />
@@ -29,6 +25,6 @@ export default function Home() {
         {/* <ContactMe /> */}
         <Footer />
       </div>
-    </main>
+    </div>
   )
 }
