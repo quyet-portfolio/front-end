@@ -1,8 +1,8 @@
 import React from 'react'
-import Spotlight from '../../../(my-app)/_layout/ui/Spotlight'
-import TextGenerateEffect from '../../../(my-app)/_layout/ui/TextGenerateEffect'
-import MagicButton from '../../../(my-app)/_layout/ui/MagicButton'
 import { FaLocationArrow } from 'react-icons/fa6'
+import Spotlight from '../../component/Layout/ui/Spotlight'
+import TextGenerateEffect from '../../component/Layout/ui/TextGenerateEffect'
+import MagicButton from '../../component/Layout/ui/MagicButton'
 
 const Hero = () => {
   return (

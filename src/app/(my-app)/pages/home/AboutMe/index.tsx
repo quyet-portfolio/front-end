@@ -1,6 +1,6 @@
 import React from 'react'
-import LayoutGrid, { LayoutGridItem } from '../../../(my-app)/_layout/ui/LayoutGrid'
 import { gridItems } from '@/src/app/(my-app)/data/helper'
+import LayoutGrid, { LayoutGridItem } from '../../component/Layout/ui/LayoutGrid'
 
 const AboutMe = () => {
   return (

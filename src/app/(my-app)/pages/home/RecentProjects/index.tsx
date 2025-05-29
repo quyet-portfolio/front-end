@@ -1,8 +1,8 @@
 'use client'
 import React from 'react'
 import { FaLocationArrow } from 'react-icons/fa6'
-import CardContainer from '../../../(my-app)/_layout/ui/CardContainer'
 import { projects } from '@/src/app/(my-app)/data/helper'
+import CardContainer from '../../component/Layout/ui/CardContainer'
 
 const RecentProjects = () => {
   return (
