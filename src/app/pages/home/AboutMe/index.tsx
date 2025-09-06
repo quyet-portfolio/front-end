@@ -1,5 +1,5 @@
 import React from 'react'
-import { gridItems } from '@/src/app/(my-app)/data/helper'
+import { gridItems } from '@/src/app/data/helper'
 import LayoutGrid, { LayoutGridItem } from '../../component/Layout/ui/LayoutGrid'
 
 const AboutMe = () => {

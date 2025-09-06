@@ -1,4 +1,4 @@
-import { socialMedia } from '@/src/app/(my-app)/data/helper'
+import { socialMedia } from '@/src/app/data/helper'
 import React from 'react'
 import MagicButton from '../ui/MagicButton'
 import { FaLocationArrow } from 'react-icons/fa6'

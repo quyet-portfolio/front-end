@@ -1,5 +1,5 @@
 'use client'
-import { navItems } from '@/src/app/(my-app)/data/helper'
+import { navItems } from '@/src/app/data/helper'
 import AboutMe from './pages/component/AboutMe'
 import Hero from './pages/component/Hero'
 import Footer from './pages/component/Layout/Footer'
