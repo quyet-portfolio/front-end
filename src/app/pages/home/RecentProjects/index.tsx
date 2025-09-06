@@ -2,7 +2,7 @@
 import React from 'react'
 import { FaLocationArrow } from 'react-icons/fa6'
 import { projects } from '@/src/app/data/helper'
-import CardContainer from '../../component/Layout/ui/CardContainer'
+import CardContainer from '../../../components/Layout/ui/CardContainer'
 
 const RecentProjects = () => {
   return (

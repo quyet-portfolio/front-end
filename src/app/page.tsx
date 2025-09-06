@@ -1,11 +1,11 @@
 'use client'
 import { navItems } from '@/src/app/data/helper'
-import AboutMe from './pages/component/AboutMe'
-import Hero from './pages/component/Hero'
-import Footer from './pages/component/Layout/Footer'
-import Navbar from './pages/component/Layout/Navbar'
-import RecentProjects from './pages/component/RecentProjects'
-import WorkExperience from './pages/component/WorkExperience'
+import AboutMe from './components/AboutMe'
+import Hero from './components/Hero'
+import Footer from './components/Layout/Footer'
+import Navbar from './components/Layout/Navbar'
+import RecentProjects from './components/RecentProjects'
+import WorkExperience from './components/WorkExperience'
 import Snowfall from './components/SnowFall'
 
 export default function Home() {
