@@ -3,6 +3,8 @@ import Spotlight from '../../components/Layout/ui/Spotlight'
 import { dataBlogs } from '../../data/blogs'
 import Image from 'next/image'
 import BlogHeading from './BlogsHeading'
+import Navbar from '../../components/Layout/Navbar'
+import { navItems } from '../../data/helper'
 
 const BlogsView = () => {
   return (
@@ -14,7 +16,8 @@ const BlogsView = () => {
           <Spotlight className="left-80 top-28 h-[80vh] w-[50vw]" fill="blue" />
         </div>
 
-        <div className="relative my-4 z-10 flex flex-col items-center justify-center gap-4">
+          <Navbar navItems={navItems} />
+        <div className="relative my-14 z-10 flex flex-col items-center justify-center gap-4">
           <BlogHeading />
           <div className="grid grid-cols-3 gap-4 ">
             {dataBlogs.map((blog) => (
