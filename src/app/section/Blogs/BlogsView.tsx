@@ -4,8 +4,8 @@ import { dataBlogs } from '../../data/blogs'
 import Image from 'next/image'
 import BlogHeading from './BlogsHeading'
 import Navbar from '../../components/Layout/Navbar'
-import { navItems } from '../../data/helper'
 import Footer from '../../_layout/Footer'
+import { navItems } from '../../data/helper'
 
 const BlogsView = () => {
   return (

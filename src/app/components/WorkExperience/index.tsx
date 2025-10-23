@@ -1,6 +1,6 @@
-import { workExperience } from '@/src/app/data/helper'
 import React from 'react'
 import { MagicCard } from '../Layout/ui/MagicCard'
+import { workExperience } from '../../data/helper'
 
 const WorkExperience = () => {
   return (
