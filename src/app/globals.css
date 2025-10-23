@@ -83,3 +83,13 @@
     @apply font-bold text-4xl md:text-5xl text-center;
   }
 }
+
+.ant-input-outlined {
+  background-color: #0a0f24 !important;
+  border: unset !important;
+  color: #fff !important;
+}
+
+.ant-input-outlined input::placeholder {
+  color: #bbb !important;
+}

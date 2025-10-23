@@ -5,6 +5,7 @@ import Image from 'next/image'
 import BlogHeading from './BlogsHeading'
 import Navbar from '../../components/Layout/Navbar'
 import { navItems } from '../../data/helper'
+import Footer from '../../_layout/Footer'
 
 const BlogsView = () => {
   return (
@@ -16,14 +17,14 @@ const BlogsView = () => {
           <Spotlight className="left-80 top-28 h-[80vh] w-[50vw]" fill="blue" />
         </div>
 
-          <Navbar navItems={navItems} />
-        <div className="relative my-14 z-10 flex flex-col items-center justify-center gap-4">
+        <Navbar navItems={navItems} />
+        <div className="relative my-16 z-10 flex flex-col items-center justify-center gap-4">
           <BlogHeading />
-          <div className="grid grid-cols-3 gap-4 ">
+          <div className="grid grid-cols-3 gap-4">
             {dataBlogs.map((blog) => (
               <div
                 key={blog.id}
-                className="max-w-sm rounded-sm border-2 border-white bg-black-100 hover: overflow-hidden shadow-lg m-4"
+                className="max-w-sm rounded-sm border-2 border-blue-950 bg-black-100 hover: overflow-hidden shadow-lg m-4"
               >
                 <Image
                   className="w-full h-48 object-cover"
@@ -37,7 +38,7 @@ const BlogsView = () => {
                   <p className="text-white-200 text-base"> {blog.description}</p>
                 </div>
                 <div className="px-6 pt-4 pb-2 flex justify-between">
-                  <span className="text-sm font-semibold text-white-100">By: {blog.author}</span>
+                  <span className="text-xs font-semibold text-white-100">By: {blog.author}</span>
                   {/* <span className="text-sm font-semibold text-white-100">
                     Created: {new Date(blog.createAt).toLocaleDateString()}
                   </span> */}
@@ -49,6 +50,7 @@ const BlogsView = () => {
             ))}
           </div>
         </div>
+        <Footer />
       </div>
     </div>
   )
