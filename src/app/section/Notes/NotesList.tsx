@@ -1,4 +1,3 @@
-import React from 'react'
 import { dataNotes } from '../../data/notes'
 
 const NotesList = () => {

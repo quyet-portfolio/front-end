@@ -1,30 +1,20 @@
 'use client'
 
-import React, { use } from 'react'
 import {
-  HomeOutlined,
-  LoginOutlined,
   PlusCircleFilled,
-  PlusCircleOutlined,
   SearchOutlined,
-  UserOutlined,
+  UserOutlined
 } from '@ant-design/icons'
 import { Avatar, Input } from 'antd'
 import { useRouter } from 'next/navigation'
+import SidebarMenu from '../../components/Layout/Navbar/SidebarMenu'
 
 const NotesHeading = () => {
   const router = useRouter()
 
   return (
     <div className="flex justify-between items-center w-full">
-      <div>
-        <HomeOutlined
-          style={{ fontSize: '32px', cursor: "pointer" }}
-          onClick={() => {
-            router.push('/')
-          }}
-        />
-      </div>
+      <SidebarMenu />
       <div className="w-[30%]">
         <Input
           placeholder="Find something ..."

@@ -1,7 +1,7 @@
 'use client'
 
+import { AnimatePresence, motion } from 'framer-motion'
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 
 const posts = [
   {
@@ -43,7 +43,7 @@ export default function BlogHeading() {
 
   return (
     <div className="relative w-full flex items-center justify-center overflow-hidden py-10">
-      <div className="flex items-end justify-center w-full max-w-6xl relative h-[400px]">
+      <div className="flex items-end justify-center w-[90%] relative h-[400px]">
         {/* Left Card */}
         <motion.div
           key={posts[prevIndex].id}
