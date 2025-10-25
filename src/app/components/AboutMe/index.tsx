@@ -6,7 +6,7 @@ import { gridItems } from '../../data/helper'
 const AboutMe = () => {
   return (
     <section id="about">
-      <LayoutGrid className="w-full py-20">
+      <LayoutGrid className="w-full py-10 lg:py-20">
         {gridItems.map((item, i) => (
           <LayoutGridItem
             id={item.id}

@@ -38,23 +38,6 @@ export const LayoutGridItem = ({
   const leftLists = ['NodeJS', 'ReactJS', 'Typescript']
   const rightLists = ['RemixJS', 'NextJS', 'MySql']
 
-  const [copied, setCopied] = useState(false)
-
-  // const defaultOptions = {
-  //   loop: copied,
-  //   autoplay: copied,
-  //   animationData: animationData,
-  //   rendererSettings: {
-  //     preserveAspectRatio: "xMidYMid slice",
-  //   },
-  // };
-
-  const handleCopy = () => {
-    const text = 'bquyet09@gmail.com'
-    navigator.clipboard.writeText(text)
-    setCopied(true)
-  }
-
   return (
     <div
       className={cn(
@@ -90,7 +73,7 @@ export const LayoutGridItem = ({
           <div className={`font-sans text-lg font-bold z-10`}>{title}</div>
 
           {id === 3 && (
-            <div className="flex gap-1 lg:gap-5 w-fit absolute -right-3 lg:right-10">
+            <div className="flex gap-1 lg:gap-5 w-fit absolute top-1 right-4 lg:right-10">
               <div className="flex flex-col gap-3 md:gap-3 lg:gap-8">
                 {leftLists.map((item, i) => (
                   <span
@@ -103,7 +86,7 @@ export const LayoutGridItem = ({
                 ))}
                 <span className="lg:py-4 lg:px-3 py-4 px-3 rounded-lg  bg-[#10132E]"></span>
               </div>
-              <div className="flex flex-col gap-3 md:gap-3 lg:gap-8">
+              <div className="flex flex-col gap-2 md:gap-2 lg:gap-6">
                 <span className="lg:py-4 lg:px-3 py-4 px-3 rounded-lg  bg-[#10132E]"></span>
                 {rightLists.map((item, i) => (
                   <span

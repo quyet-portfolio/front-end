@@ -9,7 +9,7 @@ const LayoutContent = ({ children }: { children: React.ReactNode }) => {
         <Spotlight className="h-[80vh] w-[50vw] top-10 left-full" fill="purple" />
         <Spotlight className="left-80 top-28 h-[80vh] w-[50vw]" fill="blue" />
       </div>
-      <div className="relative h-screen flex-1 max-w-[75%] w-full">{children}</div>
+      <div className="relative h-screen flex-1 max-w-[90%] lg:max-w-[75%] w-full">{children}</div>
       <div className="max-w-[75%] w-full">
         <Footer />
       </div>

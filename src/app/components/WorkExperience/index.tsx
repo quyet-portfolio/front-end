@@ -5,7 +5,7 @@ import { workExperience } from '../../data/helper'
 const WorkExperience = () => {
   return (
     <section id="experience">
-      <div className="py-20 w-full">
+      <div className="py-10 lg:py-20 w-full">
         <h1 className="heading">
           <span className="text-purple">Work Experience</span>
         </h1>

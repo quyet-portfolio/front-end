@@ -1,30 +1,27 @@
 'use client'
 import React from 'react'
 import { FaLocationArrow } from 'react-icons/fa6'
-import CardContainer from '../Layout/ui/CardContainer'
 import Image from 'next/image'
 import { projects } from '../../data/helper'
 
 const RecentProjects = () => {
   return (
     <section id="projects">
-      <div className="py-20">
+      <div className="py-10 lg:py-20">
         <h1 className="heading">
           <span className="text-purple">Recent Projects</span>
         </h1>
-        <div className="flex flex-wrap items-center justify-center p-4 gap-16 mt-10">
+        <div className="flex justify-between flex-wrap gap-10 mt-10">
           {projects.map((item) => (
             <div
-              className="lg:min-h-[32.5rem] h-[25rem] flex items-center justify-center sm:w-96 w-[80vw]"
+              className="flex items-center justify-center w-full lg:w-[calc((100%-40px)/2)] p-4 rounded-2xl border border-white/[0.1] hover:border-white/[0.3] transition duration-500"
               key={item.id}
             >
-              <CardContainer>
-                <div className="relative flex items-center justify-center sm:w-96 w-[80vw] overflow-hidden h-[26vh] lg:h-[30vh] mb-10">
-                  <Image src={item.img} alt="cover" className="z-10 absolute bottom-0" fill />
+              <div>
+                <div className="overflow-hidden mb-6 rounded-lg">
+                  <Image src={item.img} alt="cover" className='w-[100%] h-auto' width={400} height={300} />
                 </div>
-
                 <h1 className="font-bold lg:text-2xl md:text-xl text-base line-clamp-1">{item.title}</h1>
-
                 <p
                   className="lg:text-xl lg:font-normal font-light text-sm line-clamp-2"
                   style={{
@@ -55,7 +52,7 @@ const RecentProjects = () => {
                     <FaLocationArrow className="ms-3" color="#CBACF9" />
                   </div>
                 </div>
-              </CardContainer>
+              </div>
             </div>
           ))}
         </div>
