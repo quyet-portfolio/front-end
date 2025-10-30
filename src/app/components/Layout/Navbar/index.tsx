@@ -51,13 +51,13 @@ const Navbar = ({ navItems, className }: TNavbar) => {
           duration: 0.2,
         }}
         className={cn(
-          'flex max-w-[75%] fixed z-[5000] top-4 inset-x-0 mx-auto items-center justify-between gap-4',
+          'flex max-w-[90%] lg:max-w-[75%] fixed z-[5000] top-4 inset-x-0 mx-auto items-center justify-between gap-4',
           className,
         )}
       >
         <SidebarMenu />
         <div
-          className="flex px-10 py-5 rounded-lg border shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] items-center justify-center space-x-4"
+          className="hidden md:flex px-6 lg:px-10 py-4 lg:py-5 rounded-lg border shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] items-center justify-center space-x-3 lg:space-x-4"
           style={{
             backdropFilter: 'blur(16px) saturate(180%)',
             backgroundColor: 'rgba(17, 25, 40, 0.75)',
