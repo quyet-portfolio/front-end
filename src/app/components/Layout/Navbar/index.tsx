@@ -15,28 +15,13 @@ type TNavbar = {
     icon?: JSX.Element
   }[]
   className?: string
+  isShowLoginButton?: boolean
 }
 
-const Navbar = ({ navItems, className }: TNavbar) => {
+const Navbar = ({ navItems, className, isShowLoginButton }: TNavbar) => {
   const router = useRouter()
-  const { scrollYProgress } = useScroll()
   const [visible, setVisible] = useState(true)
 
-  // useMotionValueEvent(scrollYProgress, "change", (current) => {
-  //   if (typeof current === "number") {
-  //     let direction = current! - scrollYProgress.getPrevious()!;
-
-  //     if (scrollYProgress.get() < 0.05) {
-  //       setVisible(true);
-  //     } else {
-  //       if (direction < 0) {
-  //         setVisible(true);
-  //       } else {
-  //         setVisible(false);
-  //       }
-  //     }
-  //   }
-  // });
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -80,22 +65,28 @@ const Navbar = ({ navItems, className }: TNavbar) => {
           ))}
         </div>
 
-        <Tooltip title="Login" color="#10132E">
-          <motion.button
-            onClick={() => router.push('/login')}
-            className="p-3 rounded-lg border shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)]"
-            style={{
-              backdropFilter: 'blur(16px) saturate(180%)',
-              backgroundColor: 'rgba(17, 25, 40, 0.5)',
-              borderRadius: '12px',
-              border: '1px solid rgba(255, 255, 255, 0.125)',
-            }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <LoginOutlined className="text-neutral-50 text-xl" />
-          </motion.button>
-        </Tooltip>
+        <div className="w-[50px]">
+          {
+            isShowLoginButton ? (
+          <Tooltip title="Login" color="#10132E">
+            <motion.button
+              onClick={() => router.push('/login')}
+              className="p-3 rounded-lg border shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)]"
+              style={{
+                backdropFilter: 'blur(16px) saturate(180%)',
+                backgroundColor: 'rgba(17, 25, 40, 0.5)',
+                borderRadius: '12px',
+                border: '1px solid rgba(255, 255, 255, 0.125)',
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <LoginOutlined className="text-neutral-50 text-xl" />
+            </motion.button>
+          </Tooltip>
+            ) : null
+          }
+        </div>
       </motion.div>
     </AnimatePresence>
   )

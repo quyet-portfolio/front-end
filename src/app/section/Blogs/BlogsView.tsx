@@ -7,7 +7,7 @@ import BlogHeading from './BlogsHeading'
 const BlogsView = () => {
   return (
     <div>
-      <Navbar navItems={navItems} />
+      <Navbar navItems={navItems} isShowLoginButton={true} />
       <div className="relative my-16 z-10 flex flex-col items-center justify-center gap-4">
         <BlogHeading />
         <div className="grid grid-cols-3 gap-4">
