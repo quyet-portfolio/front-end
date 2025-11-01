@@ -2,7 +2,7 @@
 import { cn } from '@/src/lib/utils'
 import { LoginOutlined } from '@ant-design/icons'
 import { Tooltip } from 'antd'
-import { AnimatePresence, motion, useScroll } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -30,8 +30,8 @@ const Navbar = ({ navItems, className, isShowLoginButton }: TNavbar) => {
           y: -100,
         }}
         animate={{
-          y: visible ? 0 : -100,
-          opacity: visible ? 1 : 0,
+          y: 0,
+          opacity: 1,
         }}
         transition={{
           duration: 0.2,

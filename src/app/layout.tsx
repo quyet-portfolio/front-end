@@ -1,7 +1,6 @@
 import { AntdRegistry } from '@ant-design/nextjs-registry'
 import { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import LayoutContent from './_layout/LayoutContent'
 import './globals.css'
 import { ThemeProvider } from './provider'
 
@@ -25,7 +24,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <AntdRegistry>
-            <LayoutContent>{children}</LayoutContent>
+            {children}
           </AntdRegistry>
         </ThemeProvider>
       </body>
