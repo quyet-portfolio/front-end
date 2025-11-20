@@ -1,12 +1,13 @@
 'use client'
 import { cn } from '@/src/lib/utils'
-import { LoginOutlined } from '@ant-design/icons'
+import { LoginOutlined, LogoutOutlined } from '@ant-design/icons'
 import { Tooltip } from 'antd'
 import { AnimatePresence, motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import SidebarMenu from './SidebarMenu'
+import { useAuth } from '@/src/contexts/AuthContext'
 
 type TNavbar = {
   navItems: {
@@ -20,7 +21,7 @@ type TNavbar = {
 
 const Navbar = ({ navItems, className, isShowLoginButton }: TNavbar) => {
   const router = useRouter()
-  const [visible, setVisible] = useState(true)
+  const { isAuthenticated, logout } = useAuth()
 
   return (
     <AnimatePresence mode="wait">
@@ -42,6 +43,7 @@ const Navbar = ({ navItems, className, isShowLoginButton }: TNavbar) => {
         )}
       >
         <SidebarMenu />
+        <div className="w-[50px]"></div>
         <div
           className="hidden md:flex px-6 lg:px-10 py-4 lg:py-5 rounded-lg border shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] items-center justify-center space-x-3 lg:space-x-4"
           style={{
@@ -66,26 +68,34 @@ const Navbar = ({ navItems, className, isShowLoginButton }: TNavbar) => {
         </div>
 
         <div className="w-[50px]">
-          {
-            isShowLoginButton ? (
-          <Tooltip title="Login" color="#10132E">
-            <motion.button
-              onClick={() => router.push('/login')}
-              className="p-3 rounded-lg border shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)]"
-              style={{
-                backdropFilter: 'blur(16px) saturate(180%)',
-                backgroundColor: 'rgba(17, 25, 40, 0.5)',
-                borderRadius: '12px',
-                border: '1px solid rgba(255, 255, 255, 0.125)',
-              }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <LoginOutlined className="text-neutral-50 text-xl" />
-            </motion.button>
-          </Tooltip>
-            ) : null
-          }
+          {isShowLoginButton ? (
+            <Tooltip title={isAuthenticated ? 'Logout' : 'Login'} color="#10132E">
+              <motion.button
+                onClick={() => {
+                  if (isAuthenticated) {
+                    logout()
+                    return
+                  }
+                  router.push('/login')
+                }}
+                className="p-3 rounded-lg border shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)]"
+                style={{
+                  backdropFilter: 'blur(16px) saturate(180%)',
+                  backgroundColor: 'rgba(17, 25, 40, 0.5)',
+                  borderRadius: '12px',
+                  border: '1px solid rgba(255, 255, 255, 0.125)',
+                }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {isAuthenticated ? (
+                  <LogoutOutlined className="text-neutral-50 text-xl" />
+                ) : (
+                  <LoginOutlined className="text-neutral-50 text-xl" />
+                )}
+              </motion.button>
+            </Tooltip>
+          ) : null}
         </div>
       </motion.div>
     </AnimatePresence>

@@ -19,7 +19,7 @@ const Hero = () => {
       <div className="flex justify-center relative my-5 z-10">
         <div className="max-w-[89vw] md:max-w-2xl lg:max-w-[60vw] flex flex-col items-center justify-center">
           <div className="">
-            <Image className="rounded-full w-40 h-40 object-cover" src="/avt_2.jpg" width={160} height={160} alt="avatar_quyet" />
+            <Image className="rounded-full w-40 h-40 object-cover" src="/avt.jpg" width={160} height={160} alt="avatar_quyet" />
           </div>
           <TextGenerateEffect
             words="Hello. I am Quyet, a front-end developer"

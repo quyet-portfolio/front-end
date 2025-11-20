@@ -71,6 +71,9 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
               headerBg: 'rgba(255, 255, 255, 0.05)',
               rowHoverBg: 'rgba(255, 255, 255, 0.08)',
             },
+            Message: {
+              zIndexPopup: 9999
+            }
           },
         }}
       >

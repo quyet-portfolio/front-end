@@ -2,10 +2,37 @@
 
 import { Button, Input } from 'antd'
 import { MagicCard } from '../../components/Layout/ui/MagicCard'
+import { useState } from 'react'
+import { useAuth } from '@/src/contexts/AuthContext'
+import { useRouter } from 'next/navigation'
+import { authApi } from '@/src/lib/api/auth'
 
 const LoginView = () => {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const { login } = useAuth()
+  const router = useRouter()
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    try {
+      const data = await authApi.login({ email, password })
+      login(data.token, data.user)
+      router.push('/blogs')
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Login failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
-    <div className="mt-20 mx-auto w-[100%] md:w-[50%] lg:w-[40%] pt-6">
+    <div className="mt-24 mx-auto max-w-[600px] w-[100%] md:w-[50%] lg:w-[40%] pt-6">
       <MagicCard
         duration={Math.floor(Math.random() * 10000) + 10000}
         borderRadius="1.75rem"
@@ -21,9 +48,17 @@ const LoginView = () => {
           <div className="mx-auto mb-10">
             <h1 className="text-start text-xl md:text-4xl font-bold">Login</h1>
           </div>
-          <Input placeholder="Email" size="large" />
-          <Input.Password placeholder="Password" size="large" />
-          <Button size='large'>Login</Button>
+          <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" size="large" />
+          <Input.Password
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            size="large"
+          />
+          <Button size="large" onClick={handleSubmit} loading={loading}>
+            Login
+          </Button>
+          {error && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">{error}</div>}
         </div>
       </MagicCard>
     </div>
