@@ -13,7 +13,7 @@ import { cn } from "@/src/lib/utils";
 export function MagicCard({
   borderRadius = "1.75rem",
   children,
-  as: Component = "button",
+  as: Component = "div",
   containerClassName,
   borderClassName,
   duration,
