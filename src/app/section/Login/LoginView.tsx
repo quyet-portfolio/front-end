@@ -22,7 +22,7 @@ const LoginView = () => {
 
     try {
       const data = await authApi.login({ email, password })
-      login(data.token, data.user)
+      login(data.accessToken, data.refreshToken, data.user)
       router.push('/blogs')
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed')

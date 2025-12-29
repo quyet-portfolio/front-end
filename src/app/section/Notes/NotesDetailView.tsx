@@ -47,7 +47,7 @@ const NotesDetailView = () => {
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-6 flex justify-between items-center">
-        <Button icon={<ArrowLeftOutlined />} onClick={() => router.back()}>
+        <Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/notes')}>
           Back
         </Button>
         {user?.id === flashcard.createdBy._id && (
@@ -77,7 +77,7 @@ const NotesDetailView = () => {
       <h2 className="text-2xl font-bold mt-6 mb-2">Tags</h2>
       <div className="grid gap-4">
         {flashcard.tags.map((tag, index) => (
-          <Card key={index} className="shadow-sm !p-2">
+          <Card key={index} className="shadow-sm">
             <div className="flex items-start gap-4">
               <div className="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0">
                 {index + 1}
