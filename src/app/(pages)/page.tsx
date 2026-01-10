@@ -10,7 +10,6 @@ import { navItems } from '../data/helper'
 export default function Home() {
   return (
     <div>
-      {/* <Snowfall /> */}
       <div>
         <Navbar navItems={navItems} />
         {/* <div className="order-1 lg:order-2 flex justify-center relative reveal">

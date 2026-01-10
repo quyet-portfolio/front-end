@@ -1,6 +1,6 @@
 'use client'
 
-import { LoginOutlined, LogoutOutlined, PlusCircleFilled, SearchOutlined, UserOutlined } from '@ant-design/icons'
+import { LoginOutlined, LogoutOutlined, PlusCircleFilled, PlusCircleOutlined, SearchOutlined, UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Dropdown, Input, Tooltip } from 'antd'
 import { useRouter } from 'next/navigation'
 import SidebarMenu from '../../components/Layout/Navbar/SidebarMenu'
@@ -14,9 +14,7 @@ const NotesHeading = () => {
     {
       key: '1',
       label: (
-        <Tooltip title="Logout" placement='bottom'>
-          <LogoutOutlined onClick={logout} />
-        </Tooltip>
+        <div onClick={logout} ><LogoutOutlined /> Log out</div>
       ),
     },
   ]
@@ -34,19 +32,20 @@ const NotesHeading = () => {
       {isAuthenticated ? (
         <div className="flex items-center gap-6">
           <Tooltip title="Create">
-            <PlusCircleFilled
-              style={{ fontSize: '32px' }}
+            <PlusCircleOutlined
+              style={{ fontSize: '32px',}}
               onClick={() => {
                 router.push('/notes/create')
               }}
             />
           </Tooltip>
-          <Dropdown menu={{ items }} placement="bottomRight" trigger={['click']}>
-            <Avatar style={{ backgroundColor: '#CBACF9' }} size={'large'} icon={<UserOutlined />} />
+          <Dropdown menu={{ items }} placement="bottomCenter" trigger={['click']}>
+            <Avatar style={{ backgroundColor: '#6366F1' }} size={'large'} icon={<UserOutlined />} />
           </Dropdown>
         </div>
       ) : (
-        <LoginOutlined />
+        <Button variant='text' color="default" onClick={() => router.push('/login')}><LoginOutlined /></Button>
+        
       )}
     </div>
   )

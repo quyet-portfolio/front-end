@@ -70,7 +70,7 @@ const config = {
           foreground: 'hsl(var(--popover-foreground))',
         },
         card: {
-          DEFAULT: 'hsl(var(--card))',
+          DEFAULT: 'rgba(15, 23, 42, 0.8)',
           foreground: 'hsl(var(--card-foreground))',
         },
       },

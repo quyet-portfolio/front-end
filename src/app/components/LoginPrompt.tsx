@@ -17,7 +17,6 @@ export function LoginPrompt({
 }: LoginPromptProps) {
   const { isAuthenticated } = useAuth()
 
-  // Không hiển thị nếu đã đăng nhập
   if (isAuthenticated) return null
 
   return (

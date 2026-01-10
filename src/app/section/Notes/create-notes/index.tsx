@@ -1,7 +1,7 @@
 'use client'
 
 import { flashcardApi } from '@/src/lib/api/notes'
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
 import { Button, Card, Form, Input, message, Space } from 'antd'
 import { div } from 'framer-motion/client'
 import { useRouter } from 'next/navigation'
@@ -29,7 +29,10 @@ const CreateNotesView = () => {
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-6">Create New FlashCard</h1>
+      <div className='flex gap-4 items-center mb-6'>
+        <Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/notes')} />
+        <h1 className="text-2xl font-bold">Create a new note</h1>
+      </div>
 
       <Card>
         <Form
@@ -72,13 +75,8 @@ const CreateNotesView = () => {
                 {fields.map(({ key, name, ...restField }) => (
                   <Card key={key} className="mb-4 relative" size="small">
                     {fields.length > 1 && (
-                      <div className='flex justify-end'>
-                        <Button
-                          type="link"
-                          danger
-                          icon={<MinusCircleOutlined />}
-                          onClick={() => remove(name)}
-                        >
+                      <div className="flex justify-end">
+                        <Button type="link" danger icon={<MinusCircleOutlined />} onClick={() => remove(name)}>
                           Remove
                         </Button>
                       </div>

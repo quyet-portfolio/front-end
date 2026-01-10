@@ -14,7 +14,7 @@ export const menuItems = [
     link: '/',
     icon: <HomeOutlined />,
   },
-  { name: 'Blogs', link: '/blogs', icon: <ProductOutlined /> },
+  // { name: 'Blogs', link: '/blogs', icon: <ProductOutlined /> },
   { name: 'Notes', link: '/notes', icon: <FormOutlined /> },
 ]
 
