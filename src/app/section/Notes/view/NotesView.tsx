@@ -1,5 +1,5 @@
-import NotesHeading from './NotesHeading'
-import NotesList from './NotesList'
+import NotesHeading from '../component/NotesHeading'
+import NotesList from '../component/ListNotes'
 
 const NotesView = () => {
   return (

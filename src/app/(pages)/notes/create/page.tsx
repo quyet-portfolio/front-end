@@ -1,4 +1,4 @@
-import CreateNotesView from '@/src/app/section/Notes/create-notes'
+import CreateNotesView from '@/src/app/section/Notes/view/CreatNoteView'
 import ProtectedRoute from '@/src/components/ProtectedRoute'
 import React from 'react'
 

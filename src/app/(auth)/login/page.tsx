@@ -1,4 +1,4 @@
-import LoginView from '../../section/Login/LoginView'
+import LoginView from '../../section/Auth/Login/LoginView'
 
 export const metadata = {
   title: 'Login',

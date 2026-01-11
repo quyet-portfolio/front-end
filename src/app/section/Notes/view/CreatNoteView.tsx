@@ -9,7 +9,7 @@ import React, { useState } from 'react'
 
 const { TextArea } = Input
 
-const CreateNotesView = () => {
+const CreateNoteView = () => {
   const router = useRouter()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
@@ -131,4 +131,4 @@ const CreateNotesView = () => {
   )
 }
 
-export default CreateNotesView
+export default CreateNoteView

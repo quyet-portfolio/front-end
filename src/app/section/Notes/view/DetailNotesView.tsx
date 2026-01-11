@@ -4,7 +4,7 @@ import { useAuth } from '@/src/contexts/AuthContext'
 import { Button, Card, Descriptions, Divider, Progress, Spin, Tag } from 'antd'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
-import { FlashCard } from './types'
+import { FlashCard } from '../types'
 import { flashcardApi } from '@/src/lib/api/notes'
 import {
   ArrowLeftOutlined,
@@ -15,7 +15,7 @@ import {
   RightOutlined,
 } from '@ant-design/icons'
 import { AnimatePresence, motion } from 'framer-motion'
-import { FlipCard } from './FlipCard'
+import { FlipCard } from '../component/FlipCard'
 
 const NotesDetailView = () => {
   const param = useParams()

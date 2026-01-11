@@ -1,18 +1,18 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { dataNotes } from '../../data/notes'
-import { useFlashCards } from './hook/useFlashCards'
+import { dataNotes } from '../../../data/notes'
+import { useFlashCards } from '../hook/useFlashCards'
 import { useAuth } from '@/src/contexts/AuthContext'
 import { useState } from 'react'
 import { Avatar, Spin } from 'antd'
 import { UserOutlined } from '@ant-design/icons'
 import Image from 'next/image'
-import { useFlashCardsStore } from './store'
+import { useFlashCardsStore } from '../store'
 import { useDebounce } from '@/src/hooks/useDebounce'
 import { div } from 'framer-motion/client'
 
-const NotesList = () => {
+const ListNotes = () => {
   const router = useRouter()
   const { user } = useAuth()
   // const [page, setPage] = useState(1)
@@ -33,7 +33,7 @@ const NotesList = () => {
           <Spin size="large" />
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {flashcards.map((item, index) => (
             <div
               key={index}
@@ -66,4 +66,4 @@ const NotesList = () => {
   )
 }
 
-export default NotesList
+export default ListNotes
