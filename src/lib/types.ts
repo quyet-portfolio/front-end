@@ -1,5 +1,5 @@
 export interface User {
-  id: string;
+  _id: string;
   username: string;
   email: string;
   role: 'user' | 'admin';
@@ -46,7 +46,8 @@ export interface BlogsResponse {
 
 export interface AuthResponse {
   message: string;
-  token: string;
+  accessToken: string;
+  refreshToken: string; 
   user: User;
 }
 

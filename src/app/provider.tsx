@@ -12,68 +12,66 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
           algorithm: theme.darkAlgorithm,
           token: {
             // Seed Token
-            colorPrimary: '#667eea',
-            colorSuccess: '#52c41a',
-            colorWarning: '#faad14',
-            colorError: '#ff4d4f',
-            colorInfo: '#1890ff',
+            colorPrimary: '#6366F1',
+            colorSuccess: '#10b981',
+            colorWarning: '#f59e0b',
+            colorError: '#ef4444',
+            colorInfo: '#3b82f6',
 
             // Background
-            colorBgBase: '#000000',
-            colorBgContainer: '#141414',
-            colorBgElevated: '#1a1a1a',
+            colorBgBase: '#020617', // Bg web
+            colorBgContainer: '#0f172a', // Bg big container
+            colorBgElevated: '#1e293b', // Bg Modal, Popover
 
             // Text
-            colorText: '#ffffff',
-            colorTextSecondary: 'rgba(255, 255, 255, 0.65)',
-            colorTextTertiary: 'rgba(255, 255, 255, 0.45)',
+            colorText: '#f8fafc',
+            colorTextSecondary: '#94a3b8',
+            colorTextTertiary: '#64748b',
 
             // Border
-            colorBorder: '#434343',
-            colorBorderSecondary: '#303030',
-            borderRadius: 8,
+            colorBorder: '#1e293b',
+            colorBorderSecondary: '#334155',
+            borderRadius: 9,
 
             // Font
             fontSize: 14,
-            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            fontFamily: 'Inter, -apple-system, system-ui, sans-serif',
           },
           components: {
-            Button: {
-              primaryShadow: '0 2px 0 rgba(102, 126, 234, 0.1)',
-              algorithm: true,
-            },
             Input: {
-              colorBgContainer: '#0a0f24',
-              colorBorder: 'transparent',
-              hoverBorderColor: '#0a0f24',
-              activeBorderColor: '#0a0f24',
-              colorText: '#fff',
-              colorTextPlaceholder: '#bbb',
-              paddingBlock: 8,
-              paddingInline: 12,
-              borderRadius: 8,
+              colorBgContainer: 'rgba(255, 255, 255, 0.03)',
+              colorBorder: 'rgba(255, 255, 255, 0.1)',
+              hoverBorderColor: 'rgba(255, 255, 255, 0.25)',
+              activeBorderColor: '#1e293b',
+              activeShadow: '0 0 8px rgba(255, 255, 255, 0.5)',
+              colorText: 'rgba(255, 255, 255, 0.9)',
+              colorTextPlaceholder: 'rgba(255, 255, 255, 0.3)',
               controlHeight: 40,
-              fontSize: 14,
+              borderRadius: 8,
             },
             Card: {
-              headerBg: 'transparent',
-              colorBgContainer: 'rgba(255, 255, 255, 0.05)',
+              colorBgContainer: 'rgba(15, 23, 42, 0.8)',
+              colorBorderSecondary: 'rgba(255, 255, 255, 0.05)',
             },
-            Modal: {
-              contentBg: '#1a1a1a',
-              headerBg: 'transparent',
-            },
-            Menu: {
-              darkItemBg: 'transparent',
-              darkItemSelectedBg: 'rgba(102, 126, 234, 0.2)',
+            Button: {
+              fontWeight: 500,
+              controlHeight: 40,
+              borderRadius: 8,
             },
             Table: {
-              headerBg: 'rgba(255, 255, 255, 0.05)',
-              rowHoverBg: 'rgba(255, 255, 255, 0.08)',
+              headerBg: '#1e293b',
+              headerColor: '#f8fafc',
+              rowHoverBg: 'rgba(124, 58, 237, 0.05)',
             },
-            Message: {
-              zIndexPopup: 9999
-            }
+            Modal: {
+              contentBg: '#0f172a',
+              headerBg: '#0f172a',
+            },
+            Menu: {
+              itemBg: 'transparent',
+              itemSelectedBg: 'rgba(124, 58, 237, 0.15)',
+              itemSelectedColor: '#a78bfa',
+            },
           },
         }}
       >

@@ -5,7 +5,7 @@ import { Tooltip } from 'antd'
 import { AnimatePresence, motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, type JSX } from 'react';
 import SidebarMenu from './SidebarMenu'
 import { useAuth } from '@/src/contexts/AuthContext'
 
@@ -42,8 +42,8 @@ const Navbar = ({ navItems, className, isShowLoginButton }: TNavbar) => {
           className,
         )}
       >
-        {/* <SidebarMenu /> */}
-        <div className="w-[50px]"></div>
+        <SidebarMenu />
+        {/* <div className="w-[50px]"></div> */}
         <div
           className="hidden md:flex px-6 lg:px-10 py-4 lg:py-5 rounded-lg border shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] items-center justify-center space-x-3 lg:space-x-4"
           style={{

@@ -13,7 +13,7 @@ import { cn } from "@/src/lib/utils";
 export function MagicCard({
   borderRadius = "1.75rem",
   children,
-  as: Component = "button",
+  as: Component = "div",
   containerClassName,
   borderClassName,
   duration,
@@ -83,7 +83,7 @@ export const MovingBorder = ({
   ry?: string;
   [key: string]: any;
 }) => {
-  const pathRef = useRef<any>();
+  const pathRef = useRef<any>(undefined);
   const progress = useMotionValue<number>(0);
 
   useAnimationFrame((time) => {
