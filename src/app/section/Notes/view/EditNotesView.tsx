@@ -3,9 +3,9 @@
 import { Button, Card, Form, Input, message, Space, Spin } from 'antd'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
-import { FlashCard } from './types'
 import { flashcardApi } from '@/src/lib/api/notes'
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
+import { FlashCard } from '../types'
 
 const { TextArea } = Input
 
