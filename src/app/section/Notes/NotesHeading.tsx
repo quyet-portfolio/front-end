@@ -1,31 +1,37 @@
 'use client'
 
-import { LoginOutlined, LogoutOutlined, PlusCircleFilled, PlusCircleOutlined, SearchOutlined, UserOutlined } from '@ant-design/icons'
+import {
+  LoginOutlined,
+  LogoutOutlined,
+  PlusCircleOutlined,
+  SearchOutlined,
+  UserOutlined,
+} from '@ant-design/icons'
 import { Avatar, Button, Dropdown, Input, Tooltip } from 'antd'
 import { useRouter } from 'next/navigation'
 import SidebarMenu from '../../components/Layout/Navbar/SidebarMenu'
 import { useAuth } from '@/src/contexts/AuthContext'
+import { useFlashCardsStore } from './store'
 
 const NotesHeading = () => {
   const router = useRouter()
   const { isAuthenticated, logout } = useAuth()
 
-  const items = [
-    {
-      key: '1',
-      label: (
-        <div onClick={logout} ><LogoutOutlined /> Log out</div>
-      ),
-    },
-  ]
+  const paramsGetFlashCards = useFlashCardsStore((state) => state)
 
   return (
     <div className="flex justify-between items-center w-full">
       <SidebarMenu />
       <div className="w-[30%]">
         <Input
-          placeholder="Find something ..."
+          placeholder="Find notes, term, desc ..."
           size="large"
+          onChange={(e) => {
+            useFlashCardsStore.setState({
+              ...paramsGetFlashCards,
+              search: e.target.value,
+            })
+          }}
           suffix={<SearchOutlined className="cursor-pointer" onClick={() => window.alert('Searching ... ')} />}
         />
       </div>
@@ -33,19 +39,35 @@ const NotesHeading = () => {
         <div className="flex items-center gap-6">
           <Tooltip title="Create">
             <PlusCircleOutlined
-              style={{ fontSize: '32px',}}
+              style={{ fontSize: '32px' }}
               onClick={() => {
                 router.push('/notes/create')
               }}
             />
           </Tooltip>
-          <Dropdown menu={{ items }} placement="bottomCenter" trigger={['click']}>
+          <Dropdown
+            menu={{
+              items: [
+                {
+                  key: '1',
+                  label: (
+                    <div onClick={logout}>
+                      <LogoutOutlined /> Log out
+                    </div>
+                  ),
+                },
+              ],
+            }}
+            placement="bottomCenter"
+            trigger={['click']}
+          >
             <Avatar style={{ backgroundColor: '#6366F1' }} size={'large'} icon={<UserOutlined />} />
           </Dropdown>
         </div>
       ) : (
-        <Button variant='text' color="default" onClick={() => router.push('/login')}><LoginOutlined /></Button>
-        
+        <Button variant="text" color="default" onClick={() => router.push('/login')}>
+          <LoginOutlined />
+        </Button>
       )}
     </div>
   )
