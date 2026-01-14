@@ -21,7 +21,7 @@ export default function FacebookSDK() {
             appId      : process.env.NEXT_PUBLIC_FB_APP_ID,
             cookie     : true,
             xfbml      : true,
-            version    : 'v18.0'
+            version    : 'v20.0'
           });
         };
       }}
