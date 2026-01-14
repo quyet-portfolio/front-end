@@ -77,7 +77,7 @@ const NotesHeading = () => {
             placement="bottom"
             trigger={['click']}
           >
-            <Avatar style={{ backgroundColor: '#6366F1' }} size={'large'} icon={<UserOutlined />} />
+            <Avatar className='cursor-pointer' style={{ backgroundColor: '#6366F1' }} size={'large'} icon={<UserOutlined />} />
           </Dropdown>
         ) : (
           <Tooltip title="Login">

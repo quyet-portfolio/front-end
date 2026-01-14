@@ -1,9 +1,32 @@
+"use client"
+
 import Image from 'next/image'
 import { FaLocationArrow } from 'react-icons/fa6'
 import MagicButton from '../Layout/ui/MagicButton'
 import TextGenerateEffect from '../Layout/ui/TextGenerateEffect'
+import { useMetaExtension } from '@/src/hooks/useMetaExtension'
 
 const Hero = () => {
+  const { launchMBE, loading } = useMetaExtension("1188928850022712");
+
+  const handleConnect = async () => {
+    try {
+      const fbResponse = await launchMBE();
+
+      // Gửi response này về Backend của bạn để BE dùng System User Token
+      // lấy ra Pixel ID chính xác mà Merchant đã chọn trong popup.
+      const res = await fetch("/api/facebook/save-config", {
+        method: "POST",
+        body: JSON.stringify(fbResponse),
+      });
+
+      if (res.ok) alert("Kết nối thành công!");
+    } catch (err) {
+      console.error("Lỗi kết nối:", err);
+    }
+  };
+
+
   return (
     <div className="pb-20 pt-36">
       <div
@@ -28,6 +51,13 @@ const Hero = () => {
           <a href="#about">
             <MagicButton title="Show about me" icon={<FaLocationArrow />} position="right" />
           </a>
+                  <button
+          onClick={handleConnect}
+          disabled={loading}
+          className="bg-[#1877F2] text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+        >
+          {loading ? "Đang xử lý..." : "Kết nối ngay"}
+        </button>
         </div>
       </div>
     </div>
