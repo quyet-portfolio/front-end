@@ -5,7 +5,6 @@ import './globals.css'
 import { ThemeProvider } from './provider'
 import { AuthProvider } from '../contexts/AuthContext'
 import { MessageProvider } from '../contexts/MessageContext'
-import FacebookSDK from './components/FacebookSDK'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -32,7 +31,6 @@ export default function RootLayout({
             </MessageProvider>
           </AntdRegistry>
         </ThemeProvider>
-        <FacebookSDK />
       </body>
     </html>
   )
