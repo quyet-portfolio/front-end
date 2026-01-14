@@ -1,7 +1,6 @@
-// components/FacebookSDK.js
-'use client' // Bắt buộc phải có dòng này để định nghĩa đây là Client Component
+'use client'
 
-import Script from 'next/script'
+import { useEffect } from 'react'
 
 declare global {
   interface Window {
@@ -11,20 +10,23 @@ declare global {
 }
 
 export default function FacebookSDK() {
-  return (
-    <Script
-      src="https://connect.facebook.net/en_US/sdk.js"
-      strategy="afterInteractive" // Thay lazyOnload bằng afterInteractive để tối ưu hơn
-      onLoad={() => {
-        window.fbAsyncInit = () => {
-          window.FB.init({
-            appId      : process.env.NEXT_PUBLIC_FB_APP_ID,
-            cookie     : true,
-            xfbml      : true,
-            version    : 'v20.0'
-          });
-        };
-      }}
-    />
-  )
+  useEffect(() => {
+    if (window.FB) return;
+
+    window.fbAsyncInit = function () {
+      window.FB.init({
+        appId   : process.env.NEXT_PUBLIC_FB_APP_ID,
+        cookie  : true,
+        xfbml   : false,
+        version : 'v20.0',
+      });
+    };
+
+    const script = document.createElement('script');
+    script.src = 'https://connect.facebook.net/en_US/sdk.js';
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
+  return null;
 }

@@ -11,16 +11,8 @@ const Hero = () => {
 
   const handleConnect = async () => {
     try {
-      const fbResponse = await launchMBE();
+      await launchMBE();
 
-      // Gửi response này về Backend của bạn để BE dùng System User Token
-      // lấy ra Pixel ID chính xác mà Merchant đã chọn trong popup.
-      const res = await fetch("/api/facebook/save-config", {
-        method: "POST",
-        body: JSON.stringify(fbResponse),
-      });
-
-      if (res.ok) alert("Kết nối thành công!");
     } catch (err) {
       console.error("Lỗi kết nối:", err);
     }
