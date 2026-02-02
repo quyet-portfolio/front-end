@@ -9,10 +9,12 @@ import { flashcardApi } from '@/src/lib/api/notes'
 import {
   ArrowLeftOutlined,
   EditOutlined,
+  FormOutlined,
   FullscreenOutlined,
   LeftOutlined,
   RedoOutlined,
   RightOutlined,
+  SnippetsOutlined,
 } from '@ant-design/icons'
 import { AnimatePresence, motion } from 'framer-motion'
 import { FlipCard } from '../component/FlipCard'
@@ -96,7 +98,13 @@ const NotesDetailView = () => {
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-6 flex justify-between items-center">
-        <Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/notes')} />
+        <div className="flex gap-4">
+          <Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/notes')} />
+          <div className="flex flex-col justify-between">
+            <h1 className="text-2xl font-bold">{flashcard.title}</h1>
+            {flashcard.description && <p className="text-gray-600">{flashcard.description}</p>}
+          </div>
+        </div>
         {user?._id === flashcard.createdBy._id && (
           <Button type="primary" icon={<EditOutlined />} onClick={() => router.push(`/notes/edit/${param.id}`)}>
             Edit FlashCard
@@ -105,12 +113,6 @@ const NotesDetailView = () => {
       </div>
 
       <Card className="mb-6">
-        <h1 className="text-3xl font-bold mb-4">{flashcard.title}</h1>
-
-        {flashcard.description && <p className="text-gray-600 mb-4">{flashcard.description}</p>}
-
-        <Divider />
-
         <Descriptions column={2}>
           <Descriptions.Item label="Created By">{flashcard.createdBy.username}</Descriptions.Item>
           <Descriptions.Item label="Total Tags">
@@ -120,6 +122,19 @@ const NotesDetailView = () => {
           <Descriptions.Item label="Updated At">{new Date(flashcard.updatedAt).toLocaleString()}</Descriptions.Item>
         </Descriptions>
       </Card>
+
+      <div className="flex gap-2 my-6">
+        <div className="min-w-[100px] h-10 pt-2 text-center rounded-md bg-[#0a0f24] hover:border-b-4 border-b-[#6366F1] cursor-pointer"
+          onClick={() => {
+            router.push(`/notes/${param.id}/learn`)
+          }}
+        >
+          <FormOutlined /> Learn
+        </div>
+        <div className="min-w-[100px] h-10 pt-2 text-center rounded-md bg-[#0a0f24] hover:border-b-4 border-b-[#6366F1] cursor-pointer">
+          <SnippetsOutlined /> Test
+        </div>
+      </div>
 
       <div className="my-6 relative">
         {/* Card Component */}

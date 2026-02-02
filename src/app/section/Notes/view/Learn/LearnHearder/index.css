@@ -1,0 +1,21 @@
+.learn-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.progress-bar {
+  width: 160px;
+  height: 6px;
+  background: #eee;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar__fill {
+  height: 100%;
+  background: #4f46e5;
+  transition: width 0.4s ease;
+}

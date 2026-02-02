@@ -30,3 +30,29 @@ export interface FlashCardsResponse {
   flashcards: FlashCard[];
   pagination: FlashCardPaginationResponse;
 }
+
+// learn.types.ts
+export type LearnState =
+  | "idle"
+  | "loading"
+  | "question"
+  | "feedback"
+  | "completed"
+  | "error";
+
+export type LearnPhase = "learn" | "review";
+
+export interface LearnQuestion {
+  tagIndex: number;
+  phase: LearnPhase;
+  prompt: string;
+}
+
+export interface AnswerResult {
+  correct: boolean;
+  stepCount: number;
+  totalSteps: number;
+  phase: LearnPhase;
+  completed: boolean;
+}
+

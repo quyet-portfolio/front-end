@@ -3,9 +3,8 @@
 import { flashcardApi } from '@/src/lib/api/notes'
 import { ArrowLeftOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
 import { Button, Card, Form, Input, message, Space } from 'antd'
-import { div } from 'framer-motion/client'
 import { useRouter } from 'next/navigation'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 const { TextArea } = Input
 

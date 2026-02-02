@@ -5,7 +5,7 @@ import { dataNotes } from '../../../data/notes'
 import { useFlashCards } from '../hook/useFlashCards'
 import { useAuth } from '@/src/contexts/AuthContext'
 import { useState } from 'react'
-import { Avatar, Spin } from 'antd'
+import { Avatar, Button, Empty, Modal, Spin } from 'antd'
 import { UserOutlined } from '@ant-design/icons'
 import Image from 'next/image'
 import { useFlashCardsStore } from '../store'
@@ -14,7 +14,7 @@ import { div } from 'framer-motion/client'
 
 const ListNotes = () => {
   const router = useRouter()
-  const { user } = useAuth()
+  const { isAuthenticated } = useAuth()
   // const [page, setPage] = useState(1)
 
   const paramsGetFlashCards = useFlashCardsStore((state) => state)
@@ -26,6 +26,8 @@ const ListNotes = () => {
     search: debouncedValue,
   })
 
+  const [isOpenPopupAuthen, setOpenPopupAuthen] = useState(false)
+
   return (
     <div className="mt-4 w-full h-full">
       {loading ? (
@@ -33,35 +35,71 @@ const ListNotes = () => {
           <Spin size="large" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {flashcards.map((item, index) => (
-            <div
-              key={index}
-              onClick={() => {
-                router.push(`/notes/${item?._id}`)
-              }}
-              className="p-4 rounded-md min-h-[150px] bg-[#0a0f24] border-b-4 hover:border-b-[#6366F1] flex flex-col justify-between cursor-pointer"
-            >
-              <div className="flex flex-col gap-1">
-                <p className="text-lg font-semibold">{item.title}</p>
-                <div>
-                  {item?.tags?.length} Item{item?.tags?.length > 1 ? 's' : ''}
+        <div>
+          {flashcards.length === 0 ? (
+            <Empty description="No note here">
+              <Button
+                type="primary"
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    setOpenPopupAuthen(true)
+                    return
+                  }
+
+                  router.push('/notes/create')
+                }}
+              >
+                Creat a note now
+              </Button>
+            </Empty>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {flashcards.map((item, index) => (
+                <div
+                  key={index}
+                  onClick={() => {
+                    router.push(`/notes/${item?._id}`)
+                  }}
+                  className="p-4 rounded-md min-h-[150px] bg-[#0a0f24] border-b-4 hover:border-b-[#6366F1] flex flex-col justify-between cursor-pointer"
+                >
+                  <div className="flex flex-col gap-1">
+                    <p className="text-lg font-semibold">{item.title}</p>
+                    <div>
+                      {item?.tags?.length} Item{item?.tags?.length > 1 ? 's' : ''}
+                    </div>
+                  </div>
+                  <div className="flex justify-between">
+                    <div className="flex gap-2">
+                      {item?.createdBy?.avatar ? (
+                        <Image src={''} alt="avatar-user" width={16} height={16} />
+                      ) : (
+                        <Avatar size="small" icon={<UserOutlined />} />
+                      )}
+                      {item?.createdBy?.username}{' '}
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="flex justify-between">
-                <div className="flex gap-2">
-                  {item?.createdBy?.avatar ? (
-                    <Image src={''} alt="avatar-user" width={16} height={16} />
-                  ) : (
-                    <Avatar size="small" icon={<UserOutlined />} />
-                  )}
-                  {item?.createdBy?.username}{' '}
-                </div>
-              </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
       )}
+      <Modal
+        title="Access denied !!"
+        open={isOpenPopupAuthen}
+        centered
+        closable={false}
+        footer={
+          <div className="flex justify-end gap-4">
+            <Button onClick={() => setOpenPopupAuthen(false)}>Cancel</Button>
+            <Button type="primary" onClick={() => router.push('/login')}>
+              Log in now
+            </Button>
+          </div>
+        }
+      >
+        Log in to create a note.
+      </Modal>
     </div>
   )
 }

@@ -19,7 +19,7 @@ const NotesHeading = () => {
   return (
     <div className="flex justify-between items-center w-full">
       <SidebarMenu />
-      <div className="w-[60%] md:w-[30%]">
+      <div className="w-[65%] md:w-[36%]">
         <Input
           placeholder="Find notes, term, desc ..."
           size="large"
