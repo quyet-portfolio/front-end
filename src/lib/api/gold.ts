@@ -1,14 +1,15 @@
 import axios from '../axios'
 
+export interface GoldPrice {
+  buyPrice: number
+  sellPrice: number
+  source: string
+  _id: string
+  createdAt: string
+  updatedAt: string
+}
 export interface GoldResponse {
-  price: {
-    buyPrice: number
-    sellPrice: number
-    source: string
-    _id: string
-    createdAt: string
-    updatedAt: string
-  }
+  price: GoldPrice
   totalGold: number
   totalInvested: number
   currentValue: number
@@ -33,6 +34,20 @@ export interface InvestmentsResponse {
 export const goldApi = {
   getDataGold: async (): Promise<GoldResponse> => {
     const response = await axios.get<GoldResponse>('/gold/refresh')
+    return response.data
+  },
+  getDataGoldPriceList: async ({
+    month,
+    year,
+    limit,
+  }: {
+    month: number
+    year: number
+    limit: number
+  }): Promise<GoldPrice[]> => {
+    const response = await axios.get<GoldPrice[]>('/gold/list/price', {
+      params: { month, year, limit },
+    })
     return response.data
   },
   getDataInvesments: async (): Promise<InvestmentsResponseData[]> => {

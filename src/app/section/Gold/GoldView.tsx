@@ -4,6 +4,20 @@ import { goldApi, GoldResponse, InvestmentsResponse, InvestmentsResponseData } f
 import { Spin, Table } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { useEffect, useState } from 'react'
+import { Line } from 'react-chartjs-2'
+
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js'
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
 export function formatDate(dateString: string) {
   const date = new Date(dateString)
@@ -21,7 +35,12 @@ const formatPrice = (value: number) => {
 const GoldView = () => {
   const [listInvestments, setListInvestments] = useState<InvestmentsResponseData[]>([])
   const [dataGold, setDataGold] = useState<GoldResponse | null>()
+  const [goldPriceList, setGoldPriceList] = useState<any>({
+    labels: [],
+    datasets: [],
+  })
   const [loading, setLoading] = useState(true)
+  const [chartLoading, setChartLoading] = useState(false)
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -31,10 +50,40 @@ const GoldView = () => {
 
         setListInvestments(investmentsRes)
         setDataGold(goldRes)
+
+        // Fetch gold price list after getting goldRes
+        setChartLoading(true)
+        const goldPriceListRes = await goldApi.getDataGoldPriceList({
+          month: new Date().getMonth() + 1,
+          year: new Date().getFullYear(),
+          limit: 30,
+        })
+
+        const dataGoldPrice = {
+          labels: goldPriceListRes
+            .sort((a, b) => new Date(a?.createdAt).getTime() - new Date(b?.createdAt).getTime())
+            .map((item) => formatDate(item?.createdAt)),
+          datasets: [
+            {
+              label: 'Buy Price',
+              data: goldPriceListRes.map((item) => item?.buyPrice),
+              borderColor: 'rgb(75, 192, 192)',
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            },
+            {
+              label: 'Sell Price',
+              data: goldPriceListRes.map((item) => item?.sellPrice),
+              borderColor: 'rgb(255, 99, 132)',
+              backgroundColor: 'rgba(255, 99, 132, 0.2)',
+            },
+          ],
+        }
+        setGoldPriceList(dataGoldPrice)
       } catch (error) {
         console.log('Error fetching data :: ', error)
       } finally {
         setLoading(false)
+        setChartLoading(false)
       }
     }
 
@@ -76,12 +125,26 @@ const GoldView = () => {
     },
   ]
 
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top' as const,
+      },
+      title: {
+        display: true,
+        text: 'Gold Price History',
+      },
+    },
+  }
+
   return (
-    <div className="mt-10">
+    <div className="mt-10 flex flex-col gap-10">
       <Table
         dataSource={listInvestments}
         columns={columns}
         loading={loading}
+        rowKey={(record) => record._id}
         summary={() => {
           return (
             <>
@@ -113,6 +176,7 @@ const GoldView = () => {
           )
         }}
       />
+      {chartLoading ? <Spin /> : <Line options={options} data={goldPriceList} />}
     </div>
   )
 }
