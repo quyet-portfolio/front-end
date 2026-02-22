@@ -46,6 +46,7 @@ export interface LearnQuestion {
   tagIndex: number;
   phase: LearnPhase;
   prompt: string;
+  quizOptions: string[]
 }
 
 export interface AnswerResult {

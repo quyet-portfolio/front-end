@@ -1,8 +1,8 @@
 import React from 'react'
-import { AnswerResult, LearnQuestion, LearnState } from '../../../types';
-import LoadingView from './LoadingView';
-import QuestionView from './QuestionView/QuestionView';
-import FeedbackView from './FeedbackView/FeedbackView';
+import { AnswerResult, LearnQuestion, LearnState } from '../../../types'
+import LoadingView from './LoadingView'
+import QuestionView from './QuestionView/QuestionView'
+import FeedbackView from './FeedbackView/FeedbackView'
 
 const LearnBody = ({
   state,
@@ -10,7 +10,7 @@ const LearnBody = ({
   result,
   onSubmit,
   onNext,
-} : {
+}: {
   state: LearnState
   question: LearnQuestion | null
   result: AnswerResult | null
@@ -18,24 +18,25 @@ const LearnBody = ({
   onNext: () => Promise<void>
 }) => {
   switch (state) {
-    case "loading":
-      return <LoadingView />;
+    case 'loading':
+      return <LoadingView />
 
-    case "question":
-      return (
-        <QuestionView
-          question={question}
-          onSubmit={onSubmit}
-        />
-      );
+    // case "question":
+    //   return (
+    //     <QuestionView
+    //       question={question}
+    //       onSubmit={onSubmit}
+    //       result={result}
+    //     />
+    //   );
 
-    case "feedback":
-      return (
-        <FeedbackView
-          result={result}
-          onNext={onNext}
-        />
-      );
+    // case "feedback":
+    //   return (
+    //     <FeedbackView
+    //       result={result}
+    //       onNext={onNext}
+    //     />
+    //   );
 
     // case "completed":
     //   return <CompletedView />;
@@ -44,7 +45,7 @@ const LearnBody = ({
     //   return <ErrorView />;
 
     default:
-      return null;
+      return <QuestionView question={question} onSubmit={onSubmit} result={result} />
   }
 }
 

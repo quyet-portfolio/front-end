@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import React, { useEffect } from 'react'
 import { useLearnStore } from '../../store'
@@ -11,19 +11,16 @@ const LearnView = () => {
   const param = useParams()
   const flashcardId = param.id
 
-  const { state, start, next } = useLearnStore()
+  const { state, start, next, question, result, submit } = useLearnStore()
 
   useEffect(() => {
     start(flashcardId as string)
-  }, [flashcardId])
+  }, [])
 
   return (
-    <div className="mt-10 flex flex-col gap-6">
+    <div className="mt-16 flex flex-col gap-6 max-w-[912px] mx-auto">
       <LearnHeader />
-
-      {/* <LearnBody state={state} question={currentQuestion} result={lastResult} onSubmit={submitAnswer} onNext={next} /> */}
-
-      <LearnFooter />
+      <LearnBody state={state} question={question} result={result} onSubmit={submit} onNext={next} />
     </div>
   )
 }

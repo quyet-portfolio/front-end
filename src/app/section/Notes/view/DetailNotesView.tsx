@@ -1,7 +1,7 @@
 'use client'
 
 import { useAuth } from '@/src/contexts/AuthContext'
-import { Button, Card, Descriptions, Divider, Progress, Spin, Tag } from 'antd'
+import { Button, Card, Descriptions, Divider, message, Progress, Spin, Tag } from 'antd'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import { FlashCard } from '../types'
@@ -18,11 +18,14 @@ import {
 } from '@ant-design/icons'
 import { AnimatePresence, motion } from 'framer-motion'
 import { FlipCard } from '../component/FlipCard'
+import { useLearnStore } from '../store'
 
 const NotesDetailView = () => {
   const param = useParams()
   const router = useRouter()
   const { user } = useAuth()
+
+  const { reset } = useLearnStore()
 
   const [flashcard, setFlashcard] = useState<FlashCard | null>(null)
   const [loading, setLoading] = useState(true)
@@ -130,6 +133,14 @@ const NotesDetailView = () => {
           }}
         >
           <FormOutlined /> Learn
+        </div>
+        <div className="min-w-[100px] h-10 pt-2 text-center rounded-md bg-[#0a0f24] hover:border-b-4 border-b-[#6366F1] cursor-pointer"
+          onClick={() => {
+            reset()
+            message.success('Reset successfully')
+          }}
+        >
+          <RedoOutlined /> Reset
         </div>
         <div className="min-w-[100px] h-10 pt-2 text-center rounded-md bg-[#0a0f24] hover:border-b-4 border-b-[#6366F1] cursor-pointer">
           <SnippetsOutlined /> Test

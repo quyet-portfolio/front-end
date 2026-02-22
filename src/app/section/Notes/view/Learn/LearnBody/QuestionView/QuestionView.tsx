@@ -1,34 +1,28 @@
 import React from 'react'
-import { LearnQuestion } from '../../../../types'
+import { AnswerResult, LearnQuestion } from '../../../../types'
 import MultipleChoiceQuestion from './MultipleChoiceQuestion'
 import TypedQuestion from './TypedQuestion'
 
-const QuestionView = ({ question, onSubmit } : {
+const QuestionView = ({ question, onSubmit, result } : {
   question: LearnQuestion | null
   onSubmit: (answer: string) => Promise<void>
+  result: AnswerResult | null;
 }) => {
-  switch (question?.questionType) {
-    case "mcq":
+  switch (question?.phase) {
+    case "learn":
       return (
         <MultipleChoiceQuestion
           question={question}
           onSubmit={onSubmit}
+          result={result}
         />
       );
 
-    case "typed_with_hint":
+    case "review":
       return (
         <TypedQuestion
           question={question}
           showHint
-          onSubmit={onSubmit}
-        />
-      );
-
-    case "typed_full":
-      return (
-        <TypedQuestion
-          question={question}
           onSubmit={onSubmit}
         />
       );

@@ -1,6 +1,7 @@
 import { GetFlashCardsParams, learnApi } from "@/src/lib/api/notes";
 import { create } from "zustand";
 import { AnswerResult, LearnQuestion, LearnState } from "./types";
+import { message } from "antd";
 
 interface LearnStore {
   // ===== STATE =====
@@ -106,7 +107,7 @@ export const useLearnStore = create<LearnStore>((set, get) => ({
     const { sessionId, state } = get();
     if (!sessionId || state !== "question") return;
 
-    set({ state: "loading" });
+    // set({ state: "loading" });
 
     try {
       const result: AnswerResult = await learnApi.submitAnswer(sessionId, {
@@ -115,11 +116,19 @@ export const useLearnStore = create<LearnStore>((set, get) => ({
 
       set({
         result,
+        state: "feedback",
         stepCount: result.stepCount,
         totalSteps: result.totalSteps,
         phase: result.phase,
-        state: "feedback",
       });
+
+      if (result.correct) {
+        // message.success('Correct!')
+        setTimeout(() => {
+          get().loadQuestion();
+        }, 3000)
+      }
+
     } catch {
       set({ state: "error", error: "Submit failed" });
     }
@@ -146,7 +155,6 @@ export const useLearnStore = create<LearnStore>((set, get) => ({
   reset: () => {
     set({
       sessionId: null,
-      state: "idle",
       question: null,
       result: null,
       stepCount: 0,

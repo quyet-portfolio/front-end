@@ -1,19 +1,21 @@
 import { Progress } from 'antd'
 import { useLearnStore } from '../../../store'
-import './index.css'
 
 export function ProgressIndicator() {
   const { stepCount, totalSteps } = useLearnStore()
 
-  console.log("check: ", {
-    stepCount, totalSteps
-  })
+  /*
+  - Fix UI khi chọn đáp án sai
+  - Tìm cách clear session khi thoát learn mode
+  - Fix dup call api start, question
+  */
+
 
   return (
-    <div className="progress-indicator">
+    <div>
       <Progress
         percent={totalSteps === 0 ? 0 : Math.round((stepCount / totalSteps) * 100)}
-        steps={stepCount}
+        className='w-full'
         showInfo={false}
       />
     </div>

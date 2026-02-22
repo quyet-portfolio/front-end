@@ -1,8 +1,9 @@
+import { Spin } from 'antd'
 import React from 'react'
 
 const LoadingView = () => {
   return (
-    <div>LoadingView</div>
+    <div><Spin /></div>
   )
 }
 

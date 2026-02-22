@@ -1,24 +1,25 @@
-import React from 'react'
-import { LearnQuestion } from '../../../../types'
-import QuestionFooter from './QuestionFooter'
+import { AnswerResult, LearnQuestion } from '../../../../types'
 import QuestionPrompt from './QuestionPrompt'
 import OptionList from './OptionList'
+import { Card } from 'antd'
 
-const MultipleChoiceQuestion = ({ question, onSubmit } : {
+const MultipleChoiceQuestion = ({
+  question,
+  onSubmit,
+  result
+}: {
   question: LearnQuestion | null
   onSubmit: (answer: string) => Promise<void>
+  result: AnswerResult | null;
 }) => {
   return (
-        <div>
-      <QuestionPrompt text={question?.prompt} />
+    <Card className="p-4">
+      <div className="flex flex-col gap-6">
+        <QuestionPrompt text={question?.prompt} />
 
-      <OptionList
-        options={question?.options}
-        onSelect={onSubmit}
-      />
-
-      <QuestionFooter />
-    </div>
+        <OptionList options={question?.quizOptions} result={result} onSelect={onSubmit} />
+      </div>
+    </Card>
   )
 }
 
