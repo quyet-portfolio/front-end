@@ -8,6 +8,17 @@ export interface GoldPrice {
   createdAt: string
   updatedAt: string
 }
+
+export interface GoldPriceListResponse {
+  data: GoldPrice[]
+  filter: {
+    days: number
+    startDate: string
+    endDate: string
+  }
+  count: number
+}
+
 export interface GoldResponse {
   price: GoldPrice
   totalGold: number
@@ -31,25 +42,21 @@ export interface InvestmentsResponse {
   data: InvestmentsResponseData[]
 }
 
+export type TimeRange = 7 | 30 | 60 | 365
+
 export const goldApi = {
   getDataGold: async (): Promise<GoldResponse> => {
     const response = await axios.get<GoldResponse>('/gold/refresh')
     return response.data
   },
-  getDataGoldPriceList: async ({
-    month,
-    year,
-    limit,
-  }: {
-    month: number
-    year: number
-    limit: number
-  }): Promise<GoldPrice[]> => {
-    const response = await axios.get<GoldPrice[]>('/gold/list/price', {
-      params: { month, year, limit },
+
+  getDataGoldPriceList: async (days: TimeRange = 30): Promise<GoldPrice[]> => {
+    const response = await axios.get<GoldPriceListResponse>('/gold/list/price', {
+      params: { days },
     })
-    return response.data
+    return response.data.data
   },
+
   getDataInvesments: async (): Promise<InvestmentsResponseData[]> => {
     const response = await axios.get<InvestmentsResponse>('/investments/list')
     return response.data.data
