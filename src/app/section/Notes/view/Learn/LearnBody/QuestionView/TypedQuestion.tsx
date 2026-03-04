@@ -14,7 +14,6 @@ const TypedQuestion = ({
 }) => {
   const [answer, setAnswer] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
 
   const handleSubmit = async () => {
     if (!answer.trim() || isSubmitting) return
@@ -44,7 +43,6 @@ const TypedQuestion = ({
         {/* Input section */}
         <div className="flex flex-col gap-4">
           <Input
-            ref={inputRef}
             size="large"
             placeholder="Nhập câu trả lờiof bạn..."
             value={answer}
