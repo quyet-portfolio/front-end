@@ -1,10 +1,12 @@
 'use client'
 
+import { useMessageApi } from '@/src/contexts/MessageContext'
 import { flashcardApi } from '@/src/lib/api/notes'
-import { ArrowLeftOutlined, MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons'
 import { Button, Card, Form, Input, message, Space } from 'antd'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import ImportFlashcardsModal from '../component/ImportFlashcardsModal'
 
 const { TextArea } = Input
 
@@ -12,25 +14,40 @@ const CreateNoteView = () => {
   const router = useRouter()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
+  const [importModalOpen, setImportModalOpen] = useState(false)
+  const messageApi = useMessageApi()
 
   const onFinish = async (values: any) => {
     try {
       setLoading(true)
       await flashcardApi.createFlashCard(values)
-      message.success('FlashCard created successfully')
+      messageApi?.success('FlashCard created successfully')
       router.push('/notes')
     } catch (error: any) {
-      message.error(error.response?.data?.message || 'Failed to create flashcard')
+      messageApi?.error(error.response?.data?.message || 'Failed to create flashcard')
     } finally {
       setLoading(false)
     }
   }
 
+  const handleImportSuccess = () => {
+    router.push('/notes')
+  }
+
   return (
     <div className="container mx-auto p-6 max-w-4xl">
-      <div className='flex gap-4 items-center mb-6'>
-        <Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/notes')} />
-        <h1 className="text-2xl font-bold">Create a new note</h1>
+      <div className='flex gap-4 items-center mb-6 justify-between'>
+        <div className='flex gap-4 items-center'>
+          <Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/notes')} />
+          <h1 className="text-2xl font-bold">Create a new note</h1>
+        </div>
+        <Button 
+          icon={<UploadOutlined />} 
+          onClick={() => setImportModalOpen(true)}
+          type="default"
+        >
+          Import from file
+        </Button>
       </div>
 
       <Card>
@@ -126,6 +143,12 @@ const CreateNoteView = () => {
           </Form.Item>
         </Form>
       </Card>
+
+      <ImportFlashcardsModal
+        open={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onSuccess={handleImportSuccess}
+      />
     </div>
   )
 }

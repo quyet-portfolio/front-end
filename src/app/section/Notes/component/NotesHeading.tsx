@@ -1,12 +1,13 @@
 'use client'
 
-import { LoginOutlined, LogoutOutlined, PlusCircleOutlined, SearchOutlined, UserOutlined } from '@ant-design/icons'
+import { LoginOutlined, LogoutOutlined, PlusCircleOutlined, SearchOutlined, UserOutlined, UploadOutlined } from '@ant-design/icons'
 import { Avatar, Button, Dropdown, Input, Modal, Tooltip } from 'antd'
 import { useRouter } from 'next/navigation'
 import SidebarMenu from '../../../components/Layout/Navbar/SidebarMenu'
 import { useAuth } from '@/src/contexts/AuthContext'
 import { useFlashCardsStore } from '../store'
 import { useState } from 'react'
+import ImportFlashcardsModal from './ImportFlashcardsModal'
 
 const NotesHeading = () => {
   const router = useRouter()
@@ -15,6 +16,7 @@ const NotesHeading = () => {
   const paramsGetFlashCards = useFlashCardsStore((state) => state)
 
   const [isOpenPopupAuthen, setOpenPopupAuthen] = useState(false)
+  const [importModalOpen, setImportModalOpen] = useState(false)
 
   return (
     <div className="flex justify-between items-center w-full">
@@ -44,6 +46,20 @@ const NotesHeading = () => {
               }
 
               router.push('/notes/create')
+            }}
+          />
+        </Tooltip>
+        <Tooltip title="Import from file" trigger={'hover'}>
+          <UploadOutlined
+            style={{ fontSize: '28px' }}
+            disabled={!isAuthenticated}
+            onClick={() => {
+              if (!isAuthenticated) {
+                setOpenPopupAuthen(true)
+                return
+              }
+
+              setImportModalOpen(true)
             }}
           />
         </Tooltip>
@@ -103,6 +119,15 @@ const NotesHeading = () => {
       >
         Log in to create a note.
       </Modal>
+
+      <ImportFlashcardsModal
+        open={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onSuccess={() => {
+          // Refresh the list after import
+          window.location.reload()
+        }}
+      />
     </div>
   )
 }

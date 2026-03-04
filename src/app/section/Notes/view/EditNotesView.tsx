@@ -4,8 +4,10 @@ import { Button, Card, Form, Input, message, Space, Spin } from 'antd'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { flashcardApi } from '@/src/lib/api/notes'
-import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
+import { MinusCircleOutlined, PlusOutlined, UploadOutlined, ArrowLeftOutlined } from '@ant-design/icons'
 import { FlashCard } from '../types'
+import { useMessageApi } from '@/src/contexts/MessageContext'
+import ImportTagsModal from '../component/ImportTagsModal'
 
 const { TextArea } = Input
 
@@ -13,9 +15,12 @@ const EditNotesView = () => {
   const params = useParams()
   const router = useRouter()
   const [form] = Form.useForm()
+  const messageApi = useMessageApi()
+
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
   const [flashcard, setFlashcard] = useState<FlashCard | null>(null)
+  const [importModalOpen, setImportModalOpen] = useState(false)
 
   useEffect(() => {
     const fetchFlashCard = async () => {
@@ -28,7 +33,7 @@ const EditNotesView = () => {
           tags: data.flashcard.tags,
         })
       } catch (error) {
-        message.error('Failed to fetch flashcard')
+        messageApi?.error('Failed to fetch flashcard')
       } finally {
         setFetching(false)
       }
@@ -41,10 +46,10 @@ const EditNotesView = () => {
     try {
       setLoading(true)
       await flashcardApi.updateFlashCard(params.id as string, values)
-      message.success('FlashCard updated successfully')
+      messageApi?.success('FlashCard updated successfully')
       router.push(`/notes/${params.id}`)
     } catch (error: any) {
-      message.error(error.response?.data?.message || 'Failed to update flashcard')
+      messageApi?.error(error.response?.data?.message || 'Failed to update flashcard')
     } finally {
       setLoading(false)
     }
@@ -62,9 +67,28 @@ const EditNotesView = () => {
     return <div className="text-center p-8">FlashCard not found</div>
   }
 
+  const handleImportSuccess = async () => {
+    // Refresh flashcard data
+    const data = await flashcardApi.getFlashCardById(params.id as string)
+    setFlashcard(data.flashcard)
+    form.setFieldsValue({
+      title: data.flashcard.title,
+      description: data.flashcard.description,
+      tags: data.flashcard.tags,
+    })
+  }
+
   return (
     <div className="container mx-auto p-6 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-6">Edit FlashCard</h1>
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex gap-4 items-center">
+          <Button icon={<ArrowLeftOutlined />} onClick={() => router.back()} />
+          <h1 className="text-3xl font-bold">Edit FlashCard</h1>
+        </div>
+        <Button icon={<UploadOutlined />} onClick={() => setImportModalOpen(true)}>
+          Import Tags
+        </Button>
+      </div>
 
       <Card>
         <Form form={form} layout="vertical" onFinish={onFinish}>
@@ -155,6 +179,14 @@ const EditNotesView = () => {
           </Form.Item>
         </Form>
       </Card>
+
+      <ImportTagsModal
+        open={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onSuccess={handleImportSuccess}
+        flashcardId={params.id as string}
+        currentTagCount={flashcard?.tags.length || 0}
+      />
     </div>
   )
 }

@@ -42,18 +42,47 @@ export type LearnState =
 
 export type LearnPhase = "learn" | "review";
 
+export interface LearnProgress {
+  currentChunk: number;
+  totalChunks: number;
+  completedTerms: number;
+  totalTerms: number;
+  percentage: number;
+}
+
 export interface LearnQuestion {
   tagIndex: number;
+  flashcardId: string; // For redirect after completion
   phase: LearnPhase;
   prompt: string;
-  quizOptions: string[]
+  quizOptions: string[];
+  // correctAnswer removed from question - only revealed in feedback after answering
+  progress: LearnProgress;
+  serverTime: number;
 }
 
 export interface AnswerResult {
   correct: boolean;
+  correctAnswer: string;
   stepCount: number;
   totalSteps: number;
   phase: LearnPhase;
   completed: boolean;
+  chunkCompleted: boolean;
+  progress: LearnProgress;
 }
 
+export interface LearnSessionStats {
+  session: {
+    completed: boolean;
+    currentChunk: number;
+    totalChunks: number;
+  };
+  stats: {
+    totalQuestions: number;
+    correct: number;
+    incorrect: number;
+    accuracy: number;
+    avgResponseTimeMs: number;
+  };
+}

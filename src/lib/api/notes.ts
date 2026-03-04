@@ -1,5 +1,5 @@
 import axios from '../axios'
-import { AnswerResult, FlashCard, FlashCardsResponse, ITag, LearnQuestion } from '@/src/app/section/Notes/types'
+import { AnswerResult, FlashCard, FlashCardsResponse, ITag, LearnQuestion, LearnSessionStats } from '@/src/app/section/Notes/types'
 
 export interface CreateFlashCardData {
   title: string
@@ -22,15 +22,21 @@ export interface GetFlashCardsParams {
 
 export interface StartLearnSessionResponse {
   sessionId: string
+  totalChunks: number
+  currentChunkIndex: number
+  completed: boolean
 }
 
 export interface SubmitAnswerPayload {
   answer: string
-  responseTimeMs: number
+  startTime: number
 }
 
-export interface SubmitAnswerResponse {
-  message: string
+export interface ImportFlashCardData {
+  title: string
+  description?: string
+  fileContent: string
+  fileType: 'csv' | 'json' | 'xlsx'
 }
 
 export const flashcardApi = {
@@ -121,6 +127,18 @@ export const flashcardApi = {
     })
     return response.data
   },
+
+  // Import flashcards from file
+  importFlashCards: async (data: ImportFlashCardData): Promise<{ message: string; flashcard: FlashCard; importedCount: number }> => {
+    const response = await axios.post<{ message: string; flashcard: FlashCard; importedCount: number }>('/flashcards/import', data)
+    return response.data
+  },
+
+  // Import tags into existing flashcard
+  importTags: async (flashcardId: string, data: Omit<ImportFlashCardData, 'title' | 'description'>): Promise<{ message: string; flashcard: FlashCard; importedCount: number; totalTags: number }> => {
+    const response = await axios.post<{ message: string; flashcard: FlashCard; importedCount: number; totalTags: number }>(`/flashcards/${flashcardId}/import-tags`, data)
+    return response.data
+  },
 }
 
 // learn
@@ -147,12 +165,24 @@ export const learnApi = {
   // Submit answer to a question
   submitAnswer: async (
     sessionId: string,
-    payload: { answer: string },
+    payload: SubmitAnswerPayload,
   ): Promise<AnswerResult> => {
     const response = await axios.post<AnswerResult>(
       `/learn/${sessionId}/answer`,
       payload,
     )
+    return response.data
+  },
+
+  // Get learning session statistics
+  getStats: async (sessionId: string): Promise<LearnSessionStats> => {
+    const response = await axios.get<LearnSessionStats>(`/learn/${sessionId}/stats`)
+    return response.data
+  },
+
+  // Reset learning session
+  reset: async (flashcardId: string): Promise<{ message: string }> => {
+    const response = await axios.post<{ message: string }>(`/learn/${flashcardId}/reset`)
     return response.data
   },
 };

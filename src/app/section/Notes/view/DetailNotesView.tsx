@@ -15,15 +15,19 @@ import {
   RedoOutlined,
   RightOutlined,
   SnippetsOutlined,
+  UploadOutlined,
 } from '@ant-design/icons'
 import { AnimatePresence, motion } from 'framer-motion'
 import { FlipCard } from '../component/FlipCard'
 import { useLearnStore } from '../store'
+import { useMessageApi } from '@/src/contexts/MessageContext'
+import ImportTagsModal from '../component/ImportTagsModal'
 
 const NotesDetailView = () => {
   const param = useParams()
   const router = useRouter()
   const { user } = useAuth()
+  const messageApi = useMessageApi()
 
   const { reset } = useLearnStore()
 
@@ -31,6 +35,7 @@ const NotesDetailView = () => {
   const [loading, setLoading] = useState(true)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFlipped, setIsFlipped] = useState(false)
+  const [importModalOpen, setImportModalOpen] = useState(false)
 
   useEffect(() => {
     const fetchFlashCard = async () => {
@@ -109,9 +114,14 @@ const NotesDetailView = () => {
           </div>
         </div>
         {user?._id === flashcard.createdBy._id && (
-          <Button type="primary" icon={<EditOutlined />} onClick={() => router.push(`/notes/edit/${param.id}`)}>
-            Edit FlashCard
-          </Button>
+          <div className="flex gap-2">
+            <Button icon={<UploadOutlined />} onClick={() => setImportModalOpen(true)}>
+              Import Tags
+            </Button>
+            <Button type="primary" icon={<EditOutlined />} onClick={() => router.push(`/notes/edit/${param.id}`)}>
+              Edit FlashCard
+            </Button>
+          </div>
         )}
       </div>
 
@@ -137,14 +147,14 @@ const NotesDetailView = () => {
         <div className="min-w-[100px] h-10 pt-2 text-center rounded-md bg-[#0a0f24] hover:border-b-4 border-b-[#6366F1] cursor-pointer"
           onClick={() => {
             reset()
-            message.success('Reset successfully')
+            messageApi?.success('Reset successfully')
           }}
         >
           <RedoOutlined /> Reset
         </div>
-        <div className="min-w-[100px] h-10 pt-2 text-center rounded-md bg-[#0a0f24] hover:border-b-4 border-b-[#6366F1] cursor-pointer">
+        {/* <div className="min-w-[100px] h-10 pt-2 text-center rounded-md bg-[#0a0f24] hover:border-b-4 border-b-[#6366F1] cursor-pointer">
           <SnippetsOutlined /> Test
-        </div>
+        </div> */}
       </div>
 
       <div className="my-6 relative">
@@ -227,17 +237,28 @@ const NotesDetailView = () => {
               <div className="flex-1">
                 <h3 className="text-lg font-semibold mb-2">{tag.term}</h3>
                 <p className="text-gray-700 mb-2">{tag.definition}</p>
-                {tag.related && (
-                  <div className="bg-gray-50 p-2 rounded">
+                {/* {tag.related && (
+                  <div className=" p-2 rounded">
                     <span className="text-sm text-gray-600">Related: </span>
                     <span className="text-sm">{tag.related}</span>
                   </div>
-                )}
+                )} */}
               </div>
             </div>
           </Card>
         ))}
       </div>
+
+      <ImportTagsModal
+        open={importModalOpen}
+        onClose={() => setImportModalOpen(false)}
+        onSuccess={() => {
+          // Refresh flashcard data
+          window.location.reload()
+        }}
+        flashcardId={param.id as string}
+        currentTagCount={flashcard.tags.length}
+      />
     </div>
   )
 }

@@ -1,8 +1,16 @@
 import React from 'react'
+import { Badge } from 'antd'
 
-const QuestionPrompt = ({ text } : { text: string | undefined }) => {
+interface QuestionPromptProps {
+  text: string | undefined
+  phase?: 'learn' | 'review'
+}
+
+const QuestionPrompt = ({ text, phase = 'learn' }: QuestionPromptProps) => {
   return (
-    <div>{text}</div>
+    <div className="flex items-center justify-center gap-3">
+      <span className="text-xl font-semibold text-white">{text}</span>
+    </div>
   )
 }
 
