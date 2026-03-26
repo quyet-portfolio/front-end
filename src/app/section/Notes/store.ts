@@ -117,6 +117,9 @@ export const useLearnStore = create<LearnStore>((set, get) => ({
         state: "question",
         questionStartTime: startTime,
         progress: question.progress,
+        phase: question.phase,
+        stepCount: question.stepCount,
+        totalSteps: question.totalSteps,
       });
     } catch {
       set({ state: "error", error: "Failed to load question" });

@@ -76,7 +76,7 @@ axiosInstance.interceptors.response.use(
         // Không có refresh token → Logout
         isRefreshing = false
         localStorage.clear()
-        window.location.href = '/auth/login'
+        window.location.href = '/login'
         return Promise.reject(error)
       }
 
@@ -110,7 +110,7 @@ axiosInstance.interceptors.response.use(
         processQueue(refreshError)
         isRefreshing = false
         localStorage.clear()
-        window.location.href = '/auth/login'
+        window.location.href = '/login'
         return Promise.reject(refreshError)
       }
     }
@@ -118,7 +118,7 @@ axiosInstance.interceptors.response.use(
     // Các lỗi khác
     if (error.response?.status === 401) {
       localStorage.clear()
-      window.location.href = '/auth/login'
+      window.location.href = '/login'
     }
     return Promise.reject(error)
   },

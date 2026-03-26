@@ -15,10 +15,10 @@ export function ProgressIndicator() {
     <div className="w-full">
       <div className="flex justify-between items-center mb-2 text-sm text-gray-600">
         <span>
-          {phase === 'learn' ? '📚 Đang học' : '🔄 Đang ôn tập'}
+          {phase === 'learn' ? 'Learning' : 'Reviewing'}
         </span>
         <span>
-          {completedTerms}/{totalTerms} từ • Chunk {currentChunk}/{totalChunks}
+          {completedTerms}/{totalTerms} terms • Chunk {currentChunk}/{totalChunks}
         </span>
       </div>
       <Progress

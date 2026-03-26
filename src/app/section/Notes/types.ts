@@ -54,9 +54,10 @@ export interface LearnQuestion {
   tagIndex: number;
   flashcardId: string; // For redirect after completion
   phase: LearnPhase;
+  stepCount: number;
+  totalSteps: number;
   prompt: string;
   quizOptions: string[];
-  // correctAnswer removed from question - only revealed in feedback after answering
   progress: LearnProgress;
   serverTime: number;
 }

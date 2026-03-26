@@ -1,10 +1,9 @@
 'use client'
 
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { useLearnStore } from '../../store'
 import LearnHeader from './LearnHeader/LearnHeader'
 import LearnBody from './LearnBody/LearnBody'
-import LearnFooter from './LearnFooter'
 import { useParams } from 'next/navigation'
 
 const LearnView = () => {
@@ -17,7 +16,7 @@ const LearnView = () => {
     if (flashcardId) {
       start(flashcardId as string)
     }
-    
+
     // Cleanup when unmount
     return () => {
       reset()

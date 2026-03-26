@@ -44,7 +44,7 @@ const TypedQuestion = ({
         <div className="flex flex-col gap-4">
           <Input
             size="large"
-            placeholder="Nhập câu trả lờiof bạn..."
+            placeholder="Type your answer..."
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -61,13 +61,13 @@ const TypedQuestion = ({
             disabled={!answer.trim()}
             className="w-full"
           >
-            Kiểm tra
+            Check
           </Button>
         </div>
 
         {/* Keyboard shortcut hint */}
         <div className="text-xs text-gray-400 text-center">
-          Nhấn Enter để kiểm tra
+          Press Enter to check
         </div>
       </div>
     </Card>

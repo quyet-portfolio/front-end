@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { AnswerResult, LearnQuestion, LearnState } from '../../../types'
 import LoadingView from './LoadingView'
 import QuestionView from './QuestionView/QuestionView'
@@ -19,7 +19,8 @@ interface LearnBodyProps {
 
 const LearnBody = ({ state, question, result, onSubmit, onNext }: LearnBodyProps) => {
   const router = useRouter()
-  const flashcardId = question?.flashcardId
+  const params = useParams()
+  const flashcardId = params.id as string
 
   const handleGoToDetail = () => {
     if (flashcardId) {
@@ -45,8 +46,8 @@ const LearnBody = ({ state, question, result, onSubmit, onNext }: LearnBodyProps
           <Result
             status="success"
             icon={<CheckCircleOutlined className="text-green-500 text-6xl" />}
-            title="Chúc mừng! Bạn đã hoàn thành bài học! 🎉"
-            subTitle="Bạn đã học xong tất cả các từ trong bộ flashcard này."
+            title="Congratulations! You have completed the session! 🎉"
+            subTitle="You have learned all terms in this flashcard set."
             extra={[
               <Button
                 key="detail"
@@ -55,7 +56,7 @@ const LearnBody = ({ state, question, result, onSubmit, onNext }: LearnBodyProps
                 size="large"
                 onClick={handleGoToDetail}
               >
-                Quay về trang chi tiết
+                Return to details
               </Button>,
             ]}
           />
@@ -66,10 +67,10 @@ const LearnBody = ({ state, question, result, onSubmit, onNext }: LearnBodyProps
       return (
         <div className="flex flex-col items-center justify-center py-20">
           <div className="text-6xl mb-4">😕</div>
-          <h2 className="text-2xl font-bold mb-2">Có lỗi xảy ra</h2>
-          <p className="text-gray-600 mb-4">Vui lòng thử lại sau.</p>
+          <h2 className="text-2xl font-bold mb-2">An error occurred</h2>
+          <p className="text-gray-600 mb-4">Please try again later.</p>
           <Button type="primary" onClick={handleGoToDetail}>
-            Quay về trang chi tiết
+            Return to details
           </Button>
         </div>
       )

@@ -1,22 +1,24 @@
-import React, { useState } from 'react'
+'use client'
+
+import { useState } from 'react'
+import { motion } from 'framer-motion'
 
 interface OptionListProps {
   options: string[] | undefined
   onSelect: (answer: string) => Promise<void>
 }
 
-const getOptionClassName = (isSelected: boolean, isSubmitting: boolean): string => {
-  const baseClass = 'w-[48%] rounded-lg p-4 border-2 transition-all duration-200'
-  
-  // if (isSubmitting) {
-  //   return `${baseClass} border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed opacity-50`
-  // }
-  
+const OPTION_LETTERS = ['A', 'B', 'C', 'D']
+
+const getOptionStyle = (isSelected: boolean): string => {
+  const base =
+    'w-[48%] rounded-xl p-4 border-2 transition-all duration-200 cursor-pointer select-none'
+
   if (isSelected) {
-    return `${baseClass} border-[#6366F1] bg-blue-50 text-blue-700 cursor-default`
+    return `${base} border-indigo-500 bg-indigo-500/10 text-indigo-300`
   }
-  
-  return `${baseClass} border-gray-200 hover:border-[#6366F1] cursor-pointer shadow-sm`
+
+  return `${base} border-white/10 bg-white/5 hover:border-indigo-400 hover:bg-indigo-500/10`
 }
 
 const OptionList = ({ options, onSelect }: OptionListProps) => {
@@ -29,11 +31,8 @@ const OptionList = ({ options, onSelect }: OptionListProps) => {
     setSelectedIndex(index)
     setIsSubmitting(true)
 
-    try {
-      await onSelect(item)
-    } finally {
-      // Không reset isSubmitting vì sau khi submit sẽ chuyển sang feedback view
-    }
+    await onSelect(item)
+    // Not resetting isSubmitting — view transitions to feedback after this
   }
 
   return (
@@ -42,18 +41,24 @@ const OptionList = ({ options, onSelect }: OptionListProps) => {
         const isSelected = selectedIndex === index
 
         return (
-          <div
+          <motion.div
             key={index}
-            className={getOptionClassName(isSelected, isSubmitting)}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, delay: index * 0.07 }}
+            className={getOptionStyle(isSelected)}
             onClick={() => handleSelect(item, index)}
           >
             <div className="flex items-center gap-3">
-              <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full text-white font-semibold text-sm">
-                {String.fromCharCode(65 + index)}
+              <span
+                className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full font-bold text-sm
+                  ${isSelected ? 'bg-indigo-500 text-white' : 'bg-white/10 text-gray-300'}`}
+              >
+                {OPTION_LETTERS[index]}
               </span>
-              <span className="flex-grow">{item}</span>
+              <span className="flex-grow text-sm leading-snug">{item}</span>
             </div>
-          </div>
+          </motion.div>
         )
       })}
     </div>
