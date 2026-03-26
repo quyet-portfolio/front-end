@@ -1,4 +1,4 @@
-import { FormOutlined, HomeOutlined, ProductOutlined, FacebookOutlined } from '@ant-design/icons'
+import { FormOutlined, HomeOutlined, ProductOutlined } from '@ant-design/icons'
 
 export const navItems = [
   { name: 'Home', link: '/' },
@@ -14,9 +14,8 @@ export const menuItems = [
     link: '/',
     icon: <HomeOutlined />,
   },
-  // { name: 'Blogs', link: '/blogs', icon: <ProductOutlined /> },
+  { name: 'Blogs', link: '/blogs', icon: <ProductOutlined /> },
   { name: 'Notes', link: '/notes', icon: <FormOutlined /> },
-  { name: 'Social', link: '/social', icon: <FacebookOutlined /> },
 ]
 
 export const gridItems = [
@@ -32,8 +31,8 @@ export const gridItems = [
   },
   {
     id: 1,
-    title: 'Junior Front-End Developer with ReactJS',
-    description: '',
+    title: 'Front-end Developer at Sky Corporation',
+    description: 'Specializing in building high-performance SaaS Platforms and modern CMS solutions.',
     className: 'lg:col-span-2 md:col-span-3 md:row-span-2 min-h-30',
     imgClassName: 'w-full h-full',
     titleClassName: 'justify-start',
@@ -42,8 +41,8 @@ export const gridItems = [
   },
   {
     id: 2,
-    title: 'More than 1 year experience developing software on Shopify platform',
-    description: '',
+    title: 'Over 2 years of expertise in Shopify App development',
+    description: 'Building merchant-facing applications that meet Built for Shopify standards.',
     className: 'lg:col-span-2 md:col-span-3 md:row-span-2',
     imgClassName: '',
     titleClassName: 'justify-start',
@@ -52,8 +51,8 @@ export const gridItems = [
   },
   {
     id: 4,
-    title: 'To aim to become a full-stack developer.',
-    description: '',
+    title: 'Airing towards Full-stack proficiency',
+    description: 'Expanding expertise in Node.js, Express, and MongoDB for comprehensive product development.',
     className: 'lg:col-span-2 md:col-span-3 md:row-span-1',
     imgClassName: '',
     titleClassName: 'justify-start',
@@ -63,7 +62,7 @@ export const gridItems = [
 
   {
     id: 5,
-    title: 'Currently building apps on Shopify platform by Shopify Polaris library.',
+    title: 'Building scalable SaaS modules with TypeScript & Tailwind CSS.',
     description: 'The Inside Scoop',
     className: 'md:col-span-3 md:row-span-2',
     imgClassName: 'absolute right-0 bottom-0 md:w-96 w-60',
@@ -73,7 +72,7 @@ export const gridItems = [
   },
   {
     id: 6,
-    title: 'High sense of responsibility.',
+    title: 'Focus on Performace, Core Web Vitals, and SEO Optimization.',
     description: '',
     className: 'lg:col-span-2 md:col-span-3 md:row-span-1',
     imgClassName: '',
@@ -86,6 +85,22 @@ export const gridItems = [
 export const projects = [
   {
     id: 1,
+    title: 'BettaMax: E-commerce SaaS',
+    des: 'A comprehensive SaaS Platform for merchants with RBAC security, performance analytics, and store operations.',
+    img: '/bettamax.webp',
+    iconLists: ['/next.svg', '/ts.svg', '/tail.svg', 'antd.svg', '/re.svg'],
+    link: 'https://admin.bettamax.com',
+  },
+  {
+    id: 2,
+    title: 'Sky Solution Website',
+    des: 'A business website with integrated Admin CMS. High-performance SSR with Payload CMS and optimized SEO.',
+    img: '/sky-solution.webp',
+    iconLists: ['/next.svg', '/tail.svg', 'antd.svg', '/ps.svg'],
+    link: 'https://skysolution.com/',
+  },
+  {
+    id: 3,
     title: 'Omega Facebook Pixel Ad Report',
     des: 'Optimize ads & ROAS with Facebook Pixel, CAPI, manage product feeds & access key metrics in one app.',
     img: '/facebook-pixel.webp',
@@ -93,7 +108,7 @@ export const projects = [
     link: 'https://apps.shopify.com/facebook-multi-pixels',
   },
   {
-    id: 2,
+    id: 4,
     title: 'TikShop: Feed & Omega Pixel',
     des: 'Master your TikTok Ad with ease - grab your trio of Pixel, Events API and Feed.',
     img: '/tiktok-pixel.webp',
@@ -101,7 +116,7 @@ export const projects = [
     link: 'https://apps.shopify.com/tiktok-multi-pixels',
   },
   {
-    id: 3,
+    id: 5,
     title: 'Omega Twitter Pixel,Conversion',
     des: "Skyrocket your conversions with Multi Twitter Pixels' 5 powerful events & Conversion API.",
     img: '/twitter-pixel.webp',
@@ -109,7 +124,7 @@ export const projects = [
     link: 'https://apps.shopify.com/twitter-multi-pixels',
   },
   {
-    id: 4,
+    id: 6,
     title: 'Dingdoong: Delivery Date',
     des: 'Plan your delivery schedule ahead with date picker for shipping, local delivery and store pickup.',
     img: '/dingdoong.webp',
@@ -118,98 +133,32 @@ export const projects = [
   },
 ]
 
-export const testimonials = [
-  {
-    quote:
-      "Collaborating with Adrian was an absolute pleasure. His professionalism, promptness, and dedication to delivering exceptional results were evident throughout our project. Adrian's enthusiasm for every facet of development truly stands out. If you're seeking to elevate your website and elevate your brand, Adrian is the ideal partner.",
-    name: 'Michael Johnson',
-    title: 'Director of AlphaStream Technologies',
-  },
-  {
-    quote:
-      "Collaborating with Adrian was an absolute pleasure. His professionalism, promptness, and dedication to delivering exceptional results were evident throughout our project. Adrian's enthusiasm for every facet of development truly stands out. If you're seeking to elevate your website and elevate your brand, Adrian is the ideal partner.",
-    name: 'Michael Johnson',
-    title: 'Director of AlphaStream Technologies',
-  },
-  {
-    quote:
-      "Collaborating with Adrian was an absolute pleasure. His professionalism, promptness, and dedication to delivering exceptional results were evident throughout our project. Adrian's enthusiasm for every facet of development truly stands out. If you're seeking to elevate your website and elevate your brand, Adrian is the ideal partner.",
-    name: 'Michael Johnson',
-    title: 'Director of AlphaStream Technologies',
-  },
-  {
-    quote:
-      "Collaborating with Adrian was an absolute pleasure. His professionalism, promptness, and dedication to delivering exceptional results were evident throughout our project. Adrian's enthusiasm for every facet of development truly stands out. If you're seeking to elevate your website and elevate your brand, Adrian is the ideal partner.",
-    name: 'Michael Johnson',
-    title: 'Director of AlphaStream Technologies',
-  },
-  {
-    quote:
-      "Collaborating with Adrian was an absolute pleasure. His professionalism, promptness, and dedication to delivering exceptional results were evident throughout our project. Adrian's enthusiasm for every facet of development truly stands out. If you're seeking to elevate your website and elevate your brand, Adrian is the ideal partner.",
-    name: 'Michael Johnson',
-    title: 'Director of AlphaStream Technologies',
-  },
-]
-
-export const companies = [
-  {
-    id: 1,
-    name: 'cloudinary',
-    img: '/cloud.svg',
-    nameImg: '/cloudName.svg',
-  },
-  {
-    id: 2,
-    name: 'appwrite',
-    img: '/app.svg',
-    nameImg: '/appName.svg',
-  },
-  {
-    id: 3,
-    name: 'HOSTINGER',
-    img: '/host.svg',
-    nameImg: '/hostName.svg',
-  },
-  {
-    id: 4,
-    name: 'stream',
-    img: '/s.svg',
-    nameImg: '/streamName.svg',
-  },
-  {
-    id: 5,
-    name: 'docker.',
-    img: '/dock.svg',
-    nameImg: '/dockerName.svg',
-  },
-]
-
 export const workExperience = [
   {
     id: 1,
-    title: 'Frontend Developer',
-    desc: 'Assisted in the development of a web-based platform using React.js.',
+    title: 'SaaS Platform Development',
+    desc: 'Led the frontend architecture for BettaMax, a complex E-commerce SaaS. Implemented RBAC, scalable state management, and real-time performance tracking.',
     className: 'md:col-span-2',
     thumbnail: '/exp1.svg',
   },
   {
     id: 2,
-    title: 'Built for Shopify',
-    desc: 'Design and develop applications to meet BFS standards (UX/UI innovation and LCP optimization).',
+    title: 'Shopify Ecosystem Expertise',
+    desc: 'Architected high-conversion Shopify Apps following "Built for Shopify" standards. Optimized LCP and refined UX/UI for merchant-facing dashboards.',
     className: 'md:col-span-2',
     thumbnail: '/bfs.webp',
   },
   {
     id: 3,
-    title: 'SEO in Wordpress',
-    desc: 'Optimize SEO quality for website built by Wordpress.',
+    title: 'Headless CMS & SSR Architecture',
+    desc: 'Developed blazingly fast websites using Next.js and Payload CMS. Focused on Server-Side Rendering (SSR) and seamless content management workflows.',
     className: 'md:col-span-2',
     thumbnail: '/exp3.svg',
   },
   {
     id: 4,
-    title: 'Scrum master',
-    desc: 'Manage and guide team members to operate according to Scrum frame-word.',
+    title: 'Technical SEO & Performance',
+    desc: 'Specialized in technical SEO optimization, implementing semantic HTML, Schema markup, and Core Web Vitals improvements for maximum search visibility.',
     className: 'md:col-span-2',
     thumbnail: '/exp2.svg',
   },

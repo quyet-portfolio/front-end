@@ -3,7 +3,7 @@
 import { LoginOutlined, LogoutOutlined, PlusCircleOutlined, SearchOutlined, UserOutlined, UploadOutlined } from '@ant-design/icons'
 import { Avatar, Button, Dropdown, Input, Modal, Tooltip } from 'antd'
 import { useRouter } from 'next/navigation'
-import SidebarMenu from '../../../components/Layout/Navbar/SidebarMenu'
+import SidebarMenu from '@/src/layouts/navbar/SidebarMenu'
 import { useAuth } from '@/src/contexts/AuthContext'
 import { useFlashCardsStore } from '../store'
 import { useState } from 'react'

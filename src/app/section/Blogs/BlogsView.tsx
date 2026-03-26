@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import Navbar from '../../components/Layout/Navbar'
+import Navbar from '@/src/layouts/navbar'
 import { dataBlogs } from '../../data/blogs'
 import { navItems } from '../../data/helper'
 import BlogHeading from './BlogsHeading'

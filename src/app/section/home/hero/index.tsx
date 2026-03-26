@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { FaLocationArrow } from 'react-icons/fa6'
-import MagicButton from '../Layout/ui/MagicButton'
-import TextGenerateEffect from '../Layout/ui/TextGenerateEffect'
+import MagicButton from '@/src/components/ui/MagicButton'
+import TextGenerateEffect from '@/src/components/ui/TextGenerateEffect'
 
 const Hero = () => {
   return (
@@ -22,7 +22,7 @@ const Hero = () => {
             <Image className="rounded-full w-40 h-40 object-cover" src="/avt.jpg" width={160} height={160} alt="avatar_quyet" />
           </div>
           <TextGenerateEffect
-            words="Hello. I am Quyet, a front-end developer"
+            words="Hello. I am Quyet, a Front-end Developer"
             className="text-center text-[40px] md:text-5xl lg:text-6xl"
           />
           <a href="#about">

@@ -35,8 +35,8 @@ export const LayoutGridItem = ({
   titleClassName,
   spareImg,
 }: TLayoutGrid) => {
-  const leftLists = ['NodeJS', 'ReactJS', 'Typescript']
-  const rightLists = ['RemixJS', 'NextJS', 'MySql']
+  const rightLists = ['NodeJS', 'ExpressJS', 'MongoDB']
+  const leftLists = ['ReactJS', 'NextJS', 'TypeScript']
 
   return (
     <div
@@ -74,25 +74,25 @@ export const LayoutGridItem = ({
 
           {id === 3 && (
             <div className="flex gap-1 lg:gap-5 w-fit absolute top-1 right-4 lg:right-10">
-              <div className="flex flex-col gap-3 md:gap-3 lg:gap-8">
+              <div className="flex flex-col gap-2 md:gap-2 lg:gap-4">
                 {leftLists.map((item, i) => (
                   <span
                     key={i}
                     className="lg:py-4 lg:px-3 py-2 px-3 text-xs lg:text-base opacity-50 
-                    lg:opacity-100 rounded-lg  bg-[#10132E]"
+                    lg:opacity-100 rounded-3xl  bg-[#10132E]"
                   >
                     {item}
                   </span>
                 ))}
-                <span className="lg:py-4 lg:px-3 py-4 px-3 rounded-lg  bg-[#10132E]"></span>
+                <span className="lg:py-4 lg:px-3 py-4 px-3 rounded-3xl  bg-[#10132E]"></span>
               </div>
-              <div className="flex flex-col gap-2 md:gap-2 lg:gap-6">
-                <span className="lg:py-4 lg:px-3 py-4 px-3 rounded-lg  bg-[#10132E]"></span>
+              <div className="flex flex-col gap-2 md:gap-2 lg:gap-4">
+                <span className="lg:py-4 lg:px-3 py-4 px-3 rounded-3xl  bg-[#10132E]"></span>
                 {rightLists.map((item, i) => (
                   <span
                     key={i}
                     className="lg:py-4 lg:px-3 py-2 px-3 text-xs lg:text-base opacity-50 
-                    lg:opacity-100 rounded-lg  bg-[#10132E]"
+                    lg:opacity-100 rounded-3xl  bg-[#10132E]"
                   >
                     {item}
                   </span>

@@ -1,6 +1,6 @@
 'use client'
 
-import { MagicCard } from '../../../components/Layout/ui/MagicCard'
+import { MagicCard } from '@/src/components/ui/MagicCard'
 import { useMessageApi } from '@/src/contexts/MessageContext'
 import { authApi } from '@/src/lib/api/auth'
 import { EMAIL_REGEX, PASSWORD_REGEX } from '@/src/lib/constants'

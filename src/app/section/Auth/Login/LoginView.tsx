@@ -1,7 +1,7 @@
 'use client'
 
 import { Button, Form, Input } from 'antd'
-import { MagicCard } from '../../../components/Layout/ui/MagicCard'
+import { MagicCard } from '@/src/components/ui/MagicCard'
 import { useState } from 'react'
 import { useAuth } from '@/src/contexts/AuthContext'
 import { useRouter } from 'next/navigation'

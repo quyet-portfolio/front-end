@@ -1,6 +1,6 @@
-import Footer from '../components/Layout/Footer'
-import Spotlight from '../components/Layout/ui/Spotlight'
-import Snowfall from '../components/SnowFall'
+import Footer from '@/src/layouts/footer'
+import Spotlight from '@/src/components/ui/Spotlight'
+import Snowfall from '@/src/components/snow-fall'
 
 const LayoutContent = ({ children }: { children: React.ReactNode }) => {
   return (

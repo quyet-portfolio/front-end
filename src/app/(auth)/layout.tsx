@@ -1,7 +1,7 @@
 'use client'
 
-import Spotlight from '../components/Layout/ui/Spotlight'
-import Snowfall from '../components/SnowFall'
+import Spotlight from '@/src/components/ui/Spotlight'
+import Snowfall from '@/src/components/snow-fall'
 
 const LoginLayout = ({ children }: { children: React.ReactNode }) => {
   return (

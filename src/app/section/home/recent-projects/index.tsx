@@ -1,8 +1,7 @@
 'use client'
-import React from 'react'
 import { FaLocationArrow } from 'react-icons/fa6'
 import Image from 'next/image'
-import { projects } from '../../data/helper'
+import { projects } from '@/src/app/data/helper'
 
 const RecentProjects = () => {
   return (
@@ -19,16 +18,10 @@ const RecentProjects = () => {
             >
               <div>
                 <div className="overflow-hidden mb-6 rounded-lg">
-                  <Image src={item.img} alt="cover" className='w-[100%] h-auto' width={400} height={300} />
+                  <Image src={item.img} alt="cover" className='w-full h-full hover:scale-105 transition duration-500 object-cover' width={400} height={300} />
                 </div>
                 <h1 className="font-bold lg:text-2xl md:text-xl text-base line-clamp-1">{item.title}</h1>
-                <p
-                  className="lg:text-xl lg:font-normal font-light text-sm line-clamp-2"
-                  style={{
-                    color: '#BEC1DD',
-                    margin: '1vh 0',
-                  }}
-                >
+                <p className="lg:text-xl lg:font-normal font-light text-sm line-clamp-2 text-[#BEC1DD] my-[1vh]">
                   {item.des}
                 </p>
 
@@ -42,12 +35,12 @@ const RecentProjects = () => {
                           transform: `translateX(-${5 * index + 2}px)`,
                         }}
                       >
-                        <img src={icon} alt="icon5" className="p-2" />
+                        <Image src={icon} alt="icon5" className="p-2" width={40} height={40} />
                       </div>
                     ))}
                   </div>
 
-                  <div onClick={() => window.open(item.link)} className="flex justify-center items-center">
+                  <div onClick={() => window.open(item.link)} className="flex justify-center items-center cursor-pointer hover:bg-purple/20 p-2 rounded-full transition duration-500">
                     <p className="flex lg:text-xl md:text-xs text-xs text-purple">Check Live Site</p>
                     <FaLocationArrow className="ms-3" color="#CBACF9" />
                   </div>

@@ -38,7 +38,7 @@ const SidebarMenu = () => {
                 'fixed top-[60px] bottom-auto max-h-[80vh] overflow-y-auto',
                 // Desktop
                 'lg:absolute lg:top-full lg:mt-2 lg:left-0 lg:inset-x-auto lg:max-h-[70vh]',
-                'min-w-[250px] rounded-lg border shadow-2xl',
+                'min-w-[250px] rounded-lg border shadow-2xl z-50',
               )}
               style={{
                 backdropFilter: 'blur(16px) saturate(180%)',
