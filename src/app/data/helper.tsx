@@ -87,7 +87,7 @@ export const projects = [
     id: 1,
     title: 'BettaMax: E-commerce SaaS',
     des: 'A comprehensive SaaS Platform for merchants with RBAC security, performance analytics, and store operations.',
-    img: '/bettamax.webp',
+    img: '/betta-max.webp',
     iconLists: ['/next.svg', '/ts.svg', '/tail.svg', 'antd.svg', '/re.svg'],
     link: 'https://admin.bettamax.com',
   },
