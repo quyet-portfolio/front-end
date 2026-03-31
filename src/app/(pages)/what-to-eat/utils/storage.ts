@@ -53,3 +53,33 @@ export const clearRecentMeals = () => {
     localStorage.removeItem(STORAGE_KEY);
   }
 };
+
+// ─── User Profile Persistence ────────────────────────────────────────────────
+
+const PROFILE_KEY = 'user_profile';
+
+/**
+ * Lưu hồ sơ người dùng vào localStorage để auto-fill khi quay lại
+ */
+export const saveUserProfile = <T>(profile: T) => {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+  } catch (error) {
+    console.error('Error saving user profile to localStorage', error);
+  }
+};
+
+/**
+ * Tải hồ sơ người dùng đã lưu từ localStorage
+ */
+export const loadUserProfile = <T>(): T | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const data = localStorage.getItem(PROFILE_KEY);
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    console.error('Error loading user profile from localStorage', error);
+    return null;
+  }
+};
