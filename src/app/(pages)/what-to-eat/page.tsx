@@ -60,6 +60,7 @@ export default function WhatToEatPage() {
           tier: profile.budgetTier,
           recentMeals,
           macroRatios: profile.macroRatios,
+          cuisineTheme: profile.cuisineTheme,
         }),
       })
 

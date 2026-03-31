@@ -1,15 +1,6 @@
 import { NextResponse } from 'next/server'
 
-// Danh sách chủ đề ẩm thực, được mở rộng để tăng đa dạng
-const CUISINE_THEMES = [
-  'Món Việt truyền thống ít dầu mỡ (canh, luộc, hấp)',
-  'Eat Clean kiểu Tây (salad, ức gà, quinoa...)',
-  'Ẩm thực Á Đông thanh đạm (Nhật, Hàn, Thái)',
-  'Salad và món nướng không dầu',
-  'Món chay / Plant-based (đậu phụ, nấm, rau củ)',
-  'Thực đơn giàu protein cho người tập gym',
-  'Món Địa Trung Hải (cá, olive, rau lá xanh)',
-]
+import { CUISINE_THEMES } from '../../(pages)/what-to-eat/utils/constants'
 
 // Giới hạn và làm sạch danh sách món ăn gần đây từ client để chống prompt injection
 function sanitizeRecentMeals(rawMeals: unknown): string[] {
@@ -39,7 +30,7 @@ function getMealCalorieDistribution(totalCalories: number) {
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { targetCalories, tier, recentMeals, macroRatios } = body
+    const { targetCalories, tier, recentMeals, macroRatios, cuisineTheme } = body
 
     // --- Validation ---
     if (!targetCalories || typeof targetCalories !== 'number' || targetCalories < 800 || targetCalories > 4000) {
@@ -67,7 +58,11 @@ export async function POST(req: Request) {
     }
 
     // --- Chuẩn bị dữ liệu ---
-    const selectedTheme = CUISINE_THEMES[Math.floor(Math.random() * CUISINE_THEMES.length)]
+    const selectedTheme =
+      cuisineTheme && cuisineTheme !== 'Ngẫu nhiên'
+        ? cuisineTheme
+        : CUISINE_THEMES[Math.floor(Math.random() * CUISINE_THEMES.length)]
+
     const sanitizedRecentMeals = sanitizeRecentMeals(recentMeals)
     const { breakfast, lunch, dinner } = getMealCalorieDistribution(targetCalories)
 
