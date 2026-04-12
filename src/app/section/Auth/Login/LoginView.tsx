@@ -24,7 +24,7 @@ const LoginView = () => {
     try {
       const data = await authApi.login(values)
       login(data.accessToken, data.refreshToken, data.user)
-      router.push('/notes')
+      router.back()
     } catch (err: any) {
       messageApi?.error(err.response?.data?.message || 'Login failed')
     } finally {

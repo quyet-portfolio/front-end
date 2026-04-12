@@ -23,10 +23,10 @@ const Footer = () => {
           />
         </a>
       </div>
-      <div className="flex mt-16 md:flex-row flex-col justify-between items-center">
+      <div className="flex mt-16 md:flex-row flex-col justify-between items-center gap-6 md:gap-0">
         <p className="md:text-base text-sm md:font-normal font-light">Copyright © 2024 Bui Duy Quyet</p>
 
-        <div className="flex items-center md:gap-3 gap-6">
+        <div className="flex items-center gap-3">
           {socialMedia.map((info) => (
             <div
               key={info.id}

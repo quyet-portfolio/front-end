@@ -11,12 +11,16 @@
   "dependencies": {
     "@ant-design/icons": "5.x",
     "@ant-design/nextjs-registry": "^1.1.0",
+    "@ckeditor/ckeditor5-react": "^11.1.0",
+    "@tailwindcss/typography": "^0.5.19",
     "antd": "^5.27.5",
     "axios": "^1.7.7",
     "chart.js": "^4.5.1",
+    "ckeditor5": "44.3.0",
     "clsx": "^2.1.0",
     "framer-motion": "^12.25.0",
     "graphql": "^16.11.0",
+    "isomorphic-dompurify": "^3.8.0",
     "mini-svg-data-uri": "^1.4.4",
     "next": "16.1.1",
     "next-themes": "^0.3.0",
@@ -30,6 +34,7 @@
     "zustand": "^5.0.9"
   },
   "devDependencies": {
+    "@types/dompurify": "^3.2.0",
     "@types/node": "^20",
     "@types/react": "19.2.8",
     "@types/react-dom": "19.2.3",

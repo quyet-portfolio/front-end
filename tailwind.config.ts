@@ -46,7 +46,7 @@ const config = {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
+          DEFAULT: '#6366F1',
           foreground: 'hsl(var(--primary-foreground))',
         },
         secondary: {
@@ -173,6 +173,7 @@ const config = {
   },
   plugins: [
     require('tailwindcss-animate'),
+    require('@tailwindcss/typography'),
     addVariablesForColors,
     function ({ matchUtilities, theme }: any) {
       matchUtilities(
