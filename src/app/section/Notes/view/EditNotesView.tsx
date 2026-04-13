@@ -127,41 +127,43 @@ const EditNotesView = () => {
                 </Form.Item>
 
                 {fields.map(({ key, name, ...restField }) => (
-                  <Card key={key} className="mb-4 relative" size="small">
+                  <div key={key} style={{ position: 'relative' }} className="mb-4">
                     {fields.length > 1 && (
-                      <Button
-                        type="link"
-                        danger
-                        icon={<MinusCircleOutlined />}
-                        onClick={() => remove(name)}
-                        className="absolute top-2 right-2"
-                      >
-                        Remove
-                      </Button>
+                      <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}>
+                        <Button
+                          type="link"
+                          danger
+                          icon={<MinusCircleOutlined />}
+                          onClick={() => remove(name)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
                     )}
+                    <Card size="small">
+                      <Form.Item
+                        {...restField}
+                        label="Term"
+                        name={[name, 'term']}
+                        rules={[{ required: true, message: 'Please input term!' }]}
+                      >
+                        <Input placeholder="Enter term" />
+                      </Form.Item>
 
-                    <Form.Item
-                      {...restField}
-                      label="Term"
-                      name={[name, 'term']}
-                      rules={[{ required: true, message: 'Please input term!' }]}
-                    >
-                      <Input placeholder="Enter term" />
-                    </Form.Item>
+                      <Form.Item
+                        {...restField}
+                        label="Definition"
+                        name={[name, 'definition']}
+                        rules={[{ required: true, message: 'Please input definition!' }]}
+                      >
+                        <TextArea placeholder="Enter definition" rows={3} />
+                      </Form.Item>
 
-                    <Form.Item
-                      {...restField}
-                      label="Definition"
-                      name={[name, 'definition']}
-                      rules={[{ required: true, message: 'Please input definition!' }]}
-                    >
-                      <TextArea placeholder="Enter definition" rows={3} />
-                    </Form.Item>
-
-                    <Form.Item {...restField} label="Related (Optional)" name={[name, 'related']}>
-                      <Input placeholder="Enter related information" />
-                    </Form.Item>
-                  </Card>
+                      <Form.Item {...restField} label="Related (Optional)" name={[name, 'related']}>
+                        <Input placeholder="Enter related information" />
+                      </Form.Item>
+                    </Card>
+                  </div>
                 ))}
 
 
