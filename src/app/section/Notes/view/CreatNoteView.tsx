@@ -35,14 +35,14 @@ const CreateNoteView = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <div className="container mx-auto p-6 max-w-5xl">
       <div className='flex gap-4 items-center mb-6 justify-between'>
         <div className='flex gap-4 items-center'>
           <Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/notes')} />
           <h1 className="text-2xl font-bold">Create a new note</h1>
         </div>
-        <Button 
-          icon={<UploadOutlined />} 
+        <Button
+          icon={<UploadOutlined />}
           onClick={() => setImportModalOpen(true)}
           type="default"
         >
@@ -88,6 +88,12 @@ const CreateNoteView = () => {
           <Form.List name="tags">
             {(fields, { add, remove }) => (
               <div className="flex flex-col gap-4">
+                <Form.Item>
+                  <Button type="dashed" onClick={() => add(undefined, 0)} block icon={<PlusOutlined />}>
+                    Add Tag
+                  </Button>
+                </Form.Item>
+
                 {fields.map(({ key, name, ...restField }) => (
                   <Card key={key} className="mb-4 relative" size="small">
                     {fields.length > 1 && (
@@ -121,28 +127,33 @@ const CreateNoteView = () => {
                     </Form.Item>
                   </Card>
                 ))}
-
-                <Form.Item>
-                  <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                    Add Tag
-                  </Button>
-                </Form.Item>
               </div>
             )}
           </Form.List>
 
-          <Form.Item>
-            <Space>
-              <Button type="primary" htmlType="submit" loading={loading} size="large">
-                Create FlashCard
-              </Button>
+          {/* <Form.Item className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-white/90 backdrop-blur-sm dark:bg-gray-900/90">
+            <Space className="mx-auto flex max-w-4xl justify-end gap-4 px-6 py-4">
               <Button onClick={() => router.back()} size="large">
                 Cancel
               </Button>
+              <Button type="primary" htmlType="submit" loading={loading} size="large">
+                Create FlashCard
+              </Button>
             </Space>
-          </Form.Item>
+          </Form.Item> */}
         </Form>
       </Card>
+
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-white/90 backdrop-blur-sm dark:bg-gray-900/90">
+        <div className="max-w-5xl mx-auto flex justify-end gap-4 px-6 py-4">
+          <Button onClick={() => router.back()} size="large">
+            Cancel
+          </Button>
+          <Button type="primary" loading={loading} size="large" onClick={() => form.submit()}>
+            Save Changes
+          </Button>
+        </div>
+      </div>
 
       <ImportFlashcardsModal
         open={importModalOpen}
