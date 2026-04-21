@@ -1,4 +1,4 @@
-import { FormOutlined, HomeOutlined, ProductOutlined } from '@ant-design/icons'
+import { BuildOutlined, FormOutlined, HomeOutlined, ProductOutlined } from '@ant-design/icons'
 
 export const navItems = [
   { name: 'Home', link: '/' },
@@ -16,6 +16,7 @@ export const menuItems = [
   },
   { name: 'Blogs', link: '/blogs', icon: <ProductOutlined /> },
   { name: 'Notes', link: '/notes', icon: <FormOutlined /> },
+  { name: "Page builder", link: '/portfolio-builder', icon: <BuildOutlined /> }
 ]
 
 export const gridItems = [
