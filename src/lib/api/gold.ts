@@ -44,6 +44,17 @@ export interface InvestmentsResponse {
 
 export type TimeRange = 7 | 30 | 60 | 365
 
+export interface AddGoldPricePayload {
+  buyPrice: number
+  sellPrice: number
+  source?: string
+}
+
+export interface AddGoldPriceResponse {
+  message: string
+  data: GoldPrice
+}
+
 export const goldApi = {
   getDataGold: async (): Promise<GoldResponse> => {
     const response = await axios.get<GoldResponse>('/gold/refresh')
@@ -60,5 +71,10 @@ export const goldApi = {
   getDataInvesments: async (): Promise<InvestmentsResponseData[]> => {
     const response = await axios.get<InvestmentsResponse>('/investments/list')
     return response.data.data
+  },
+
+  addGoldPrice: async (payload: AddGoldPricePayload): Promise<AddGoldPriceResponse> => {
+    const response = await axios.post<AddGoldPriceResponse>('/gold/add-price', payload)
+    return response.data
   },
 }
