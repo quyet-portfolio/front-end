@@ -12,6 +12,9 @@ export interface DividerProps {
 }
 
 import { DividerUI } from './DividerUI'
+import { ColorField } from '../shared/ColorField'
+import Select from 'antd/es/select'
+import Slider from 'antd/es/slider'
 
 export const Divider = (props: DividerProps) => {
   const { connectors: { connect, drag }, isSelected } = useNode((node) => ({
@@ -39,38 +42,34 @@ const DividerSettings = () => {
     <div className="space-y-3 p-4">
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Style</label>
-        <select
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
+        <Select
+          size="small"
+          className="w-full"
           value={props.style ?? 'line'}
-          onChange={(e) =>
-            setProp((p: DividerProps) => (p.style = e.target.value as DividerProps['style']))
-          }
-        >
-          <option value="line">Line</option>
-          <option value="dots">Dots</option>
-          <option value="none">None (spacer)</option>
-        </select>
+          onChange={(v) => setProp((p: DividerProps) => (p.style = v as DividerProps['style']))}
+          options={[
+            { value: 'line', label: 'Line' },
+            { value: 'dots', label: 'Dots' },
+            { value: 'none', label: 'None (spacer)' },
+          ]}
+        />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Color</label>
-        <input
-          type="color"
+        <ColorField
           value={props.color ?? '#334155'}
-          onChange={(e) => setProp((p: DividerProps) => (p.color = e.target.value))}
-          className="w-full h-9 rounded cursor-pointer"
+          onChange={(hex) => setProp((p: DividerProps) => (p.color = hex))}
         />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Spacing (px)</label>
-        <input
-          type="range"
+        <Slider
           min={0}
           max={120}
           value={props.spacing ?? 32}
-          onChange={(e) => setProp((p: DividerProps) => (p.spacing = parseInt(e.target.value)))}
-          className="w-full"
+          onChange={(v) => setProp((p: DividerProps) => (p.spacing = v))}
+          tooltip={{ formatter: (v) => `${v}px` }}
         />
-        <span className="text-xs text-slate-500">{props.spacing ?? 32}px</span>
       </div>
     </div>
   )

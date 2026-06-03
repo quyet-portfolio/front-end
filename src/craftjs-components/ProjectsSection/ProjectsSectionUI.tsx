@@ -10,8 +10,8 @@ export const ProjectsSectionUI = ({
       tags: ['Next.js', 'TypeScript'],
     },
   ],
-  bgColor = '#0f172a',
-  accentColor = '#6366F1',
+  bgColor = 'var(--portfolio-bg, #0f172a)',
+  accentColor = 'var(--portfolio-primary, #6366F1)',
 }: ProjectsSectionProps) => {
   return (
     <section

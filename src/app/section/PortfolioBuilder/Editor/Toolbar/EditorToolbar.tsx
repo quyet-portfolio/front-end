@@ -8,6 +8,7 @@ import { useEditor } from '@craftjs/core'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { usePortfolioApi } from '@/src/hooks/usePortfolioApi'
+import Button from 'antd/es/button'
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
@@ -85,13 +86,13 @@ export const EditorToolbar = ({
     >
       {/* Left: Back + Name */}
       <div className="flex items-center gap-3">
-        <button
+        <Button
+          type="text"
+          size="small"
           onClick={() => router.push('/portfolio-builder')}
-          className="flex items-center gap-1.5 text-slate-400 hover:text-white text-sm font-medium
-            transition-colors px-2 py-1 rounded-lg hover:bg-slate-800"
         >
           ← Back
-        </button>
+        </Button>
         <div className="w-px h-5 bg-slate-700" />
         <span className="text-sm font-semibold text-white">{portfolioName}</span>
         {isPublished && (
@@ -120,22 +121,20 @@ export const EditorToolbar = ({
             View live ↗
           </a>
         )}
-        <button
+        <Button
+          size="small"
           onClick={() => window.open(`/portfolio-builder/preview/${portfolioId}`, '_blank')}
-          className="px-3 py-1.5 text-sm font-medium text-slate-300 border border-slate-600
-            rounded-lg hover:border-slate-500 hover:text-white transition-all"
         >
           Preview
-        </button>
-        <button
+        </Button>
+        <Button
+          type="primary"
+          size="small"
+          loading={isPublishing}
           onClick={handlePublish}
-          disabled={isPublishing}
-          className="px-4 py-1.5 text-sm font-semibold bg-indigo-600 text-white rounded-lg
-            hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed transition-all
-            shadow-md shadow-indigo-600/30"
         >
           {isPublishing ? 'Publishing...' : isPublished ? 'Republish' : 'Publish'}
-        </button>
+        </Button>
       </div>
     </div>
   )

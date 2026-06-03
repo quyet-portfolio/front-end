@@ -10,8 +10,8 @@ export const ExperienceSectionUI = ({
       description: 'Built and maintained scalable web applications.',
     },
   ],
-  bgColor = '#1e293b',
-  accentColor = '#6366F1',
+  bgColor = 'var(--portfolio-bg, #1e293b)',
+  accentColor = 'var(--portfolio-primary, #6366F1)',
 }: ExperienceSectionProps) => {
   return (
     <section

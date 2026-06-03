@@ -4,7 +4,7 @@ import type { AboutSectionProps } from './AboutSection'
 export const AboutSectionUI = ({
   bio = 'Write something about yourself here.',
   highlights = ['3+ years experience', 'Open source contributor'],
-  bgColor = '#1e293b',
+  bgColor = 'var(--portfolio-bg, #1e293b)',
 }: AboutSectionProps) => {
   return (
     <section

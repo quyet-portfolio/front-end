@@ -19,6 +19,9 @@ export interface ExperienceSectionProps {
 }
 
 import { ExperienceSectionUI } from './ExperienceSectionUI'
+import { ThemeColorControl } from '../shared/ThemeColorControl'
+import Input from 'antd/es/input'
+import Button from 'antd/es/button'
 
 export const ExperienceSection = (props: ExperienceSectionProps) => {
   const { connectors: { connect, drag }, isSelected } = useNode((node) => ({
@@ -68,51 +71,43 @@ const ExperienceSettings = () => {
 
   return (
     <div className="space-y-3 p-4">
-      <div>
-        <label className="block text-xs font-semibold text-slate-400 mb-1">Accent Color</label>
-        <input
-          type="color"
-          value={props.accentColor ?? '#6366F1'}
-          onChange={(e) => setProp((p: ExperienceSectionProps) => (p.accentColor = e.target.value))}
-          className="w-full h-9 rounded cursor-pointer"
-        />
-      </div>
+      <ThemeColorControl
+        label="Accent Color"
+        value={props.accentColor}
+        fallback="#6366F1"
+        onChange={(v) => setProp((p: ExperienceSectionProps) => (p.accentColor = v))}
+      />
       <div className="space-y-3">
         <label className="block text-xs font-semibold text-slate-400">Jobs</label>
         {jobs.map((job, i) => (
           <div key={i} className="bg-slate-800 rounded p-3 space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-xs font-semibold text-slate-300">Job {i + 1}</span>
-              <button onClick={() => removeJob(i)} className="text-red-400 hover:text-red-300 text-xs">✕</button>
+              <Button size="small" type="text" danger onClick={() => removeJob(i)}>✕</Button>
             </div>
             {jobFields.map((field) => (
               <div key={field}>
                 <label className="block text-xs text-slate-500 mb-0.5 capitalize">{field}</label>
                 {field === 'description' ? (
-                  <textarea
+                  <Input.TextArea
                     rows={2}
                     value={job[field]}
                     onChange={(e) => updateJob(i, field, e.target.value)}
-                    className="w-full bg-slate-700 rounded px-2 py-1 text-xs text-white resize-none"
                   />
                 ) : (
-                  <input
-                    type="text"
+                  <Input
+                    size="small"
                     value={job[field]}
                     onChange={(e) => updateJob(i, field, e.target.value)}
-                    className="w-full bg-slate-700 rounded px-2 py-1 text-xs text-white"
                   />
                 )}
               </div>
             ))}
           </div>
         ))}
-        <button
-          onClick={addJob}
-          className="w-full border border-dashed border-slate-600 rounded py-1.5 text-xs text-slate-400 hover:border-indigo-500 hover:text-indigo-400 transition-colors"
-        >
+        <Button size="small" type="dashed" block onClick={addJob}>
           + Add Job
-        </button>
+        </Button>
       </div>
     </div>
   )
@@ -124,8 +119,7 @@ ExperienceSection.craft = {
     jobs: [
       { company: 'Tech Company', role: 'Frontend Developer', period: '2022 – Present', description: 'Built and maintained scalable web applications.' },
     ],
-    bgColor: '#1e293b',
-    accentColor: '#6366F1',
+    // bgColor / accentColor KHÔNG seed → follow Global Theme.
   },
   related: { settings: ExperienceSettings },
 }

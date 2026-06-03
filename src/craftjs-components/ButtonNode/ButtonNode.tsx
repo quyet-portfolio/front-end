@@ -6,6 +6,12 @@
 
 import { useNode } from '@craftjs/core'
 import { ButtonNodeUI } from './ButtonNodeUI'
+import { ColorField } from '../shared/ColorField'
+import Input from 'antd/es/input'
+import Select from 'antd/es/select'
+import InputNumber from 'antd/es/input-number'
+import Slider from 'antd/es/slider'
+import Checkbox from 'antd/es/checkbox'
 
 export interface ButtonNodeProps {
   text?: string
@@ -47,112 +53,96 @@ const ButtonNodeSettings = () => {
     <div className="space-y-3 p-4">
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Label</label>
-        <input
-          type="text"
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
+        <Input
+          size="small"
           value={props.text ?? 'Click me'}
           onChange={(e) => setProp((p: ButtonNodeProps) => (p.text = e.target.value))}
         />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Link (URL)</label>
-        <input
-          type="text"
+        <Input
+          size="small"
           placeholder="https://…"
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
           value={props.href ?? ''}
           onChange={(e) => setProp((p: ButtonNodeProps) => (p.href = e.target.value))}
         />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Variant</label>
-        <select
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
+        <Select
+          size="small"
+          className="w-full"
           value={props.variant ?? 'solid'}
-          onChange={(e) =>
-            setProp((p: ButtonNodeProps) => (p.variant = e.target.value as ButtonNodeProps['variant']))
-          }
-        >
-          <option value="solid">Solid</option>
-          <option value="outline">Outline</option>
-          <option value="ghost">Ghost</option>
-        </select>
+          onChange={(v) => setProp((p: ButtonNodeProps) => (p.variant = v as ButtonNodeProps['variant']))}
+          options={[
+            { value: 'solid', label: 'Solid' },
+            { value: 'outline', label: 'Outline' },
+            { value: 'ghost', label: 'Ghost' },
+          ]}
+        />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Background Color</label>
-        <input
-          type="color"
-          className="w-full h-9 rounded cursor-pointer"
+        <ColorField
           value={props.color ?? '#6366f1'}
-          onChange={(e) => setProp((p: ButtonNodeProps) => (p.color = e.target.value))}
+          onChange={(hex) => setProp((p: ButtonNodeProps) => (p.color = hex))}
         />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Text Color</label>
-        <input
-          type="color"
-          className="w-full h-9 rounded cursor-pointer"
+        <ColorField
           value={props.textColor ?? '#ffffff'}
-          onChange={(e) => setProp((p: ButtonNodeProps) => (p.textColor = e.target.value))}
+          onChange={(hex) => setProp((p: ButtonNodeProps) => (p.textColor = hex))}
         />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Font Size (px)</label>
-        <input
-          type="number"
+        <InputNumber
+          size="small"
+          className="w-full"
           min={10}
           max={32}
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
           value={props.fontSize ?? 14}
-          onChange={(e) => setProp((p: ButtonNodeProps) => (p.fontSize = parseInt(e.target.value)))}
+          onChange={(v) => setProp((p: ButtonNodeProps) => (p.fontSize = v ?? 14))}
         />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Padding X (px)</label>
-        <input
-          type="range"
+        <Slider
           min={8}
           max={64}
           value={props.paddingX ?? 24}
-          onChange={(e) => setProp((p: ButtonNodeProps) => (p.paddingX = parseInt(e.target.value)))}
-          className="w-full"
+          onChange={(v) => setProp((p: ButtonNodeProps) => (p.paddingX = v))}
+          tooltip={{ formatter: (v) => `${v}px` }}
         />
-        <span className="text-xs text-slate-500">{props.paddingX ?? 24}px</span>
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Padding Y (px)</label>
-        <input
-          type="range"
+        <Slider
           min={4}
           max={24}
           value={props.paddingY ?? 10}
-          onChange={(e) => setProp((p: ButtonNodeProps) => (p.paddingY = parseInt(e.target.value)))}
-          className="w-full"
+          onChange={(v) => setProp((p: ButtonNodeProps) => (p.paddingY = v))}
+          tooltip={{ formatter: (v) => `${v}px` }}
         />
-        <span className="text-xs text-slate-500">{props.paddingY ?? 10}px</span>
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Border Radius (px)</label>
-        <input
-          type="range"
+        <Slider
           min={0}
           max={50}
           value={props.borderRadius ?? 8}
-          onChange={(e) => setProp((p: ButtonNodeProps) => (p.borderRadius = parseInt(e.target.value)))}
-          className="w-full"
+          onChange={(v) => setProp((p: ButtonNodeProps) => (p.borderRadius = v))}
+          tooltip={{ formatter: (v) => `${v}px` }}
         />
-        <span className="text-xs text-slate-500">{props.borderRadius ?? 8}px</span>
       </div>
-      <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          id="btn-fullwidth"
-          checked={props.fullWidth ?? false}
-          onChange={(e) => setProp((p: ButtonNodeProps) => (p.fullWidth = e.target.checked))}
-          className="rounded bg-slate-800 border-slate-700"
-        />
-        <label htmlFor="btn-fullwidth" className="text-xs font-semibold text-slate-400">Full Width</label>
-      </div>
+      <Checkbox
+        checked={props.fullWidth ?? false}
+        onChange={(e) => setProp((p: ButtonNodeProps) => (p.fullWidth = e.target.checked))}
+      >
+        <span className="text-xs font-semibold text-slate-400">Full Width</span>
+      </Checkbox>
     </div>
   )
 }

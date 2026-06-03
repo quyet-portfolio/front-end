@@ -6,8 +6,8 @@ export const SkillsSectionUI = ({
     { name: 'TypeScript', level: 90 },
     { name: 'React / Next.js', level: 88 },
   ],
-  bgColor = '#0f172a',
-  accentColor = '#6366F1',
+  bgColor = 'var(--portfolio-bg, #0f172a)',
+  accentColor = 'var(--portfolio-primary, #6366F1)',
 }: SkillsSectionProps) => {
   return (
     <section

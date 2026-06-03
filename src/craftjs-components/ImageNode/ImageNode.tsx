@@ -6,6 +6,9 @@
 
 import { useNode } from '@craftjs/core'
 import { ImageNodeUI } from './ImageNodeUI'
+import Input from 'antd/es/input'
+import Select from 'antd/es/select'
+import Slider from 'antd/es/slider'
 
 export interface ImageNodeProps {
   src?: string
@@ -44,76 +47,69 @@ const ImageNodeSettings = () => {
     <div className="space-y-3 p-4">
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Image URL</label>
-        <input
-          type="text"
+        <Input
+          size="small"
           placeholder="https://…"
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
           value={props.src ?? ''}
           onChange={(e) => setProp((p: ImageNodeProps) => (p.src = e.target.value))}
         />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Alt Text</label>
-        <input
-          type="text"
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
+        <Input
+          size="small"
           value={props.alt ?? ''}
           onChange={(e) => setProp((p: ImageNodeProps) => (p.alt = e.target.value))}
         />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Width</label>
-        <input
-          type="text"
+        <Input
+          size="small"
           placeholder="100% or 300px"
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
           value={props.width ?? '100%'}
           onChange={(e) => setProp((p: ImageNodeProps) => (p.width = e.target.value))}
         />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Height</label>
-        <input
-          type="text"
+        <Input
+          size="small"
           placeholder="auto or 200px"
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
           value={props.height ?? 'auto'}
           onChange={(e) => setProp((p: ImageNodeProps) => (p.height = e.target.value))}
         />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Object Fit</label>
-        <select
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
+        <Select
+          size="small"
+          className="w-full"
           value={props.objectFit ?? 'cover'}
-          onChange={(e) =>
-            setProp((p: ImageNodeProps) => (p.objectFit = e.target.value as ImageNodeProps['objectFit']))
-          }
-        >
-          <option value="cover">Cover</option>
-          <option value="contain">Contain</option>
-          <option value="fill">Fill</option>
-          <option value="none">None</option>
-        </select>
+          onChange={(v) => setProp((p: ImageNodeProps) => (p.objectFit = v as ImageNodeProps['objectFit']))}
+          options={[
+            { value: 'cover', label: 'Cover' },
+            { value: 'contain', label: 'Contain' },
+            { value: 'fill', label: 'Fill' },
+            { value: 'none', label: 'None' },
+          ]}
+        />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Border Radius (px)</label>
-        <input
-          type="range"
+        <Slider
           min={0}
           max={50}
           value={props.borderRadius ?? 0}
-          onChange={(e) => setProp((p: ImageNodeProps) => (p.borderRadius = parseInt(e.target.value)))}
-          className="w-full"
+          onChange={(v) => setProp((p: ImageNodeProps) => (p.borderRadius = v))}
+          tooltip={{ formatter: (v) => `${v}px` }}
         />
-        <span className="text-xs text-slate-500">{props.borderRadius ?? 0}px</span>
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Link (optional)</label>
-        <input
-          type="text"
+        <Input
+          size="small"
           placeholder="https://…"
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
           value={props.href ?? ''}
           onChange={(e) => setProp((p: ImageNodeProps) => (p.href = e.target.value))}
         />

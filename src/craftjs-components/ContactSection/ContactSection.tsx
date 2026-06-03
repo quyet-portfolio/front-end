@@ -18,6 +18,9 @@ export interface ContactSectionProps {
 }
 
 import { ContactSectionUI } from './ContactSectionUI'
+import { ThemeColorControl } from '../shared/ThemeColorControl'
+import Input from 'antd/es/input'
+import Button from 'antd/es/button'
 
 export const ContactSection = (props: ContactSectionProps) => {
   const { connectors: { connect, drag }, isSelected } = useNode((node) => ({
@@ -67,53 +70,47 @@ const ContactSettings = () => {
     <div className="space-y-3 p-4">
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Email</label>
-        <input
+        <Input
+          size="small"
           type="email"
           value={props.email ?? ''}
           onChange={(e) => setProp((p: ContactSectionProps) => (p.email = e.target.value))}
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
         />
       </div>
-      <div>
-        <label className="block text-xs font-semibold text-slate-400 mb-1">Accent Color</label>
-        <input
-          type="color"
-          value={props.accentColor ?? '#6366F1'}
-          onChange={(e) => setProp((p: ContactSectionProps) => (p.accentColor = e.target.value))}
-          className="w-full h-9 rounded cursor-pointer"
-        />
-      </div>
+      <ThemeColorControl
+        label="Accent Color"
+        value={props.accentColor}
+        fallback="#6366F1"
+        onChange={(v) => setProp((p: ContactSectionProps) => (p.accentColor = v))}
+      />
       <div className="space-y-2">
         <label className="block text-xs font-semibold text-slate-400">Social Links</label>
         {socials.map((s, i) => (
           <div key={i} className="bg-slate-800 rounded p-2 space-y-1">
             <div className="flex gap-1">
-              <input
-                type="text"
+              <Input
+                size="small"
+                className="w-1/3"
                 value={s.platform}
                 onChange={(e) => updateSocial(i, 'platform', e.target.value)}
-                className="w-1/3 bg-slate-700 rounded px-2 py-1 text-xs text-white"
                 placeholder="Platform"
               />
-              <input
-                type="text"
+              <Input
+                size="small"
+                className="flex-1"
                 value={s.url}
                 onChange={(e) => updateSocial(i, 'url', e.target.value)}
-                className="flex-1 bg-slate-700 rounded px-2 py-1 text-xs text-white"
                 placeholder="https://..."
               />
-              <button onClick={() => removeSocial(i)} className="text-red-400 hover:text-red-300 text-xs px-1">
+              <Button size="small" type="text" danger onClick={() => removeSocial(i)}>
                 ✕
-              </button>
+              </Button>
             </div>
           </div>
         ))}
-        <button
-          onClick={addSocial}
-          className="w-full border border-dashed border-slate-600 rounded py-1.5 text-xs text-slate-400 hover:border-indigo-500 hover:text-indigo-400 transition-colors"
-        >
+        <Button size="small" type="dashed" block onClick={addSocial}>
           + Add Social
-        </button>
+        </Button>
       </div>
     </div>
   )
@@ -127,8 +124,7 @@ ContactSection.craft = {
       { platform: 'GitHub', url: 'https://github.com' },
       { platform: 'LinkedIn', url: 'https://linkedin.com' },
     ],
-    bgColor: '#0f172a',
-    accentColor: '#6366F1',
+    // bgColor / accentColor KHÔNG seed → follow Global Theme.
   },
   related: { settings: ContactSettings },
 }

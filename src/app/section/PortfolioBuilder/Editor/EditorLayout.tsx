@@ -6,6 +6,7 @@
 
 import { Editor, Frame, Element } from '@craftjs/core'
 import { useEffect, useState } from 'react'
+import Segmented from 'antd/es/segmented'
 import { craftResolver, CraftContainer } from '@/src/craftjs-components'
 import { ComponentPanel } from './Sidebar/ComponentPanel'
 import { SettingsPanel } from './Settings/SettingsPanel'
@@ -88,6 +89,18 @@ export const EditorLayout = ({ portfolioId }: EditorLayoutProps) => {
   const patchedCraftJson = patchCraftJsonParents(portfolio.layout.craftJson)
   const craftJsonStr = JSON.stringify(patchedCraftJson)
 
+  // Inject Global Theme tokens vào canvas để preview khớp trang public.
+  // Element *UI đọc var(--portfolio-*) khi prop màu undefined (follow theme).
+  const tColors = portfolio.themeOverride?.colors ?? {}
+  const tFont = portfolio.themeOverride?.font ?? {}
+  const canvasThemeCss = `.pf-canvas {
+    --portfolio-primary: ${tColors.primary || '#6366F1'};
+    --portfolio-bg: ${tColors.background || '#0f172a'};
+    --portfolio-text: ${tColors.text || '#f8fafc'};
+    --portfolio-heading-font: '${tFont.heading || 'Inter'}', sans-serif;
+    --portfolio-body-font: '${tFont.body || 'Inter'}', sans-serif;
+  }`
+
   return (
     <Editor
       resolver={craftResolver}
@@ -108,20 +121,17 @@ export const EditorLayout = ({ portfolioId }: EditorLayoutProps) => {
           {/* Left Panel — Component drag list */}
           <aside className="w-56 flex-shrink-0 bg-slate-900 border-r border-slate-700/50 flex flex-col">
             {/* Tabs */}
-            <div className="flex border-b border-slate-700/50">
-              {(['components', 'layers'] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setLeftTab(tab)}
-                  className={`flex-1 py-2.5 text-xs font-semibold capitalize transition-colors
-                    ${leftTab === tab
-                      ? 'text-indigo-400 border-b-2 border-indigo-500 bg-slate-800/50'
-                      : 'text-slate-500 hover:text-slate-300'
-                    }`}
-                >
-                  {tab}
-                </button>
-              ))}
+            <div className="p-2 border-b border-slate-700/50">
+              <Segmented
+                block
+                size="small"
+                value={leftTab}
+                onChange={(v) => setLeftTab(v as 'components' | 'layers')}
+                options={[
+                  { value: 'components', label: 'Components' },
+                  { value: 'layers', label: 'Layers' },
+                ]}
+              />
             </div>
             <div className="flex-1 overflow-y-auto">
               {leftTab === 'components' && <ComponentPanel />}
@@ -136,28 +146,24 @@ export const EditorLayout = ({ portfolioId }: EditorLayoutProps) => {
             {/* Viewport controls */}
             <div className="sticky top-0 z-10 flex justify-center py-2 bg-slate-950/80 backdrop-blur-sm border-b border-slate-800/50">
               <div className="flex items-center gap-4 text-xs">
-                <div className="flex bg-slate-800 rounded-md p-0.5">
-                  <button
-                    onClick={() => setViewMode('desktop')}
-                    className={`px-3 py-1 rounded-sm transition-colors ${viewMode === 'desktop' ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-400 hover:text-slate-300'}`}
-                  >
-                    🖥️ Desktop
-                  </button>
-                  <button
-                    onClick={() => setViewMode('mobile')}
-                    className={`px-3 py-1 rounded-sm transition-colors ${viewMode === 'mobile' ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-400 hover:text-slate-300'}`}
-                  >
-                    📱 Mobile
-                  </button>
-                </div>
+                <Segmented
+                  size="small"
+                  value={viewMode}
+                  onChange={(v) => setViewMode(v as ViewMode)}
+                  options={[
+                    { value: 'desktop', label: '🖥️ Desktop' },
+                    { value: 'mobile', label: '📱 Mobile' },
+                  ]}
+                />
                 <span className="text-slate-600">·</span>
                 <span className="text-slate-500">Click any section to select · Drag from left panel to add</span>
               </div>
             </div>
 
             <div className="flex-1 overflow-y-auto py-8">
+              <style>{canvasThemeCss}</style>
               <div
-                className={`mx-auto shadow-2xl shadow-indigo-900/10 border border-slate-800 transition-all duration-300 bg-black-100 ${
+                className={`pf-canvas mx-auto shadow-2xl shadow-indigo-900/10 border border-slate-800 transition-all duration-300 bg-black-100 ${
                   viewMode === 'desktop' ? 'w-full max-w-[1024px]' : 'w-[400px]'
                 }`}
               >
@@ -170,27 +176,17 @@ export const EditorLayout = ({ portfolioId }: EditorLayoutProps) => {
 
           {/* Right Panel — Settings */}
           <aside className="w-64 flex-shrink-0 bg-slate-900 border-l border-slate-700/50 flex flex-col">
-            <div className="flex border-b border-slate-700/50 bg-slate-800/20">
-              <button
-                onClick={() => setRightTab('element')}
-                className={`flex-1 py-3 text-xs font-semibold capitalize transition-colors
-                  ${rightTab === 'element'
-                    ? 'text-indigo-400 border-b-2 border-indigo-500 bg-slate-800/50'
-                    : 'text-slate-500 hover:text-slate-300'
-                  }`}
-              >
-                Element
-              </button>
-              <button
-                onClick={() => setRightTab('global')}
-                className={`flex-1 py-3 text-xs font-semibold capitalize transition-colors
-                  ${rightTab === 'global'
-                    ? 'text-indigo-400 border-b-2 border-indigo-500 bg-slate-800/50'
-                    : 'text-slate-500 hover:text-slate-300'
-                  }`}
-              >
-                Global
-              </button>
+            <div className="p-2 border-b border-slate-700/50 bg-slate-800/20">
+              <Segmented
+                block
+                size="small"
+                value={rightTab}
+                onChange={(v) => setRightTab(v as 'element' | 'global')}
+                options={[
+                  { value: 'element', label: 'Element' },
+                  { value: 'global', label: 'Global' },
+                ]}
+              />
             </div>
             
             <div className="flex-1 overflow-y-auto">
@@ -201,6 +197,7 @@ export const EditorLayout = ({ portfolioId }: EditorLayoutProps) => {
                   initialSeo={portfolio.seo}
                   initialTheme={portfolio.themeOverride}
                   onSeoChange={(newSeo) => setPortfolio((p) => p ? { ...p, seo: newSeo } : p)}
+                  onThemeChange={(newTheme) => setPortfolio((p) => p ? { ...p, themeOverride: newTheme } : p)}
                 />
               )}
             </div>

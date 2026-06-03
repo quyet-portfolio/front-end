@@ -14,8 +14,13 @@ import { DividerUI } from '@/src/craftjs-components/Divider/DividerUI'
 import { ButtonNodeUI } from '@/src/craftjs-components/ButtonNode/ButtonNodeUI'
 import { ImageNodeUI } from '@/src/craftjs-components/ImageNode/ImageNodeUI'
 import { IconNodeUI } from '@/src/craftjs-components/IconNode/IconNodeUI'
+import { TextNodeUI } from '@/src/craftjs-components/TextNode/TextNodeUI'
+import { ColumnsLayoutUI } from '@/src/craftjs-components/ColumnsLayout/ColumnsLayoutUI'
+import { CraftContainerUI } from '@/src/craftjs-components/shared/CraftContainerUI'
 
 // Map resolvedName → Component (không có Craft.js hooks, dùng props trực tiếp)
+// LƯU Ý: MỌI element trong palette (ComponentPanel) PHẢI có mặt ở đây, nếu không
+// trang public sẽ render null + console.warn.
 const COMPONENT_MAP: Record<string, React.FC<any>> = {
   HeroSection: (props) => <HeroSectionUI {...props} />,
   AboutSection: (props) => <AboutSectionUI {...props} />,
@@ -27,15 +32,17 @@ const COMPONENT_MAP: Record<string, React.FC<any>> = {
   ButtonNode: (props) => <ButtonNodeUI {...props} />,
   ImageNode: (props) => <ImageNodeUI {...props} />,
   IconNode: (props) => <IconNodeUI {...props} />,
-  CraftContainer: ({ children, background, padding }: any) => (
-    <div style={{ background, padding }}>{children}</div>
-  ),
+  TextNode: (props) => <TextNodeUI {...props} />,
+  ColumnsLayout: (props) => <ColumnsLayoutUI {...props} />,
+  CraftContainer: (props) => <CraftContainerUI {...props} />,
 }
 
 interface CraftNode {
   type: { resolvedName: string }
   props: Record<string, any>
   nodes?: string[]
+  /** Canvas con khai báo qua <Element id="..."> (vd cột của ColumnsLayout) */
+  linkedNodes?: Record<string, string>
   displayName?: string
 }
 
@@ -63,8 +70,15 @@ function renderNode(
     renderNode(childId, nodes)
   )
 
+  // Canvas con trong linkedNodes (vd ColumnsLayout: { "col-0": id, "col-1": id }).
+  // Resolve thành map slot → subtree đã render; ColumnsLayoutUI tiêu thụ qua prop này.
+  const linkedChildren: Record<string, React.ReactNode> = {}
+  for (const [slot, childId] of Object.entries(node.linkedNodes ?? {})) {
+    linkedChildren[slot] = renderNode(childId, nodes)
+  }
+
   return (
-    <Component key={nodeId} {...node.props}>
+    <Component key={nodeId} {...node.props} linkedChildren={linkedChildren}>
       {children.length > 0 ? children : undefined}
     </Component>
   )

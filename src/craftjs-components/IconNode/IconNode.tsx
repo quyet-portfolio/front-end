@@ -7,6 +7,11 @@
 
 import { useNode } from '@craftjs/core'
 import { IconNodeUI } from './IconNodeUI'
+import { ColorField } from '../shared/ColorField'
+import Input from 'antd/es/input'
+import Select from 'antd/es/select'
+import Slider from 'antd/es/slider'
+import Button from 'antd/es/button'
 
 export interface IconNodeProps {
   icon?: string
@@ -51,9 +56,8 @@ const IconNodeSettings = () => {
     <div className="space-y-3 p-4">
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Icon / Emoji</label>
-        <input
-          type="text"
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
+        <Input
+          size="small"
           value={props.icon ?? '⭐'}
           onChange={(e) => setProp((p: IconNodeProps) => (p.icon = e.target.value))}
         />
@@ -62,64 +66,54 @@ const IconNodeSettings = () => {
         <label className="block text-xs font-semibold text-slate-400 mb-1.5">Quick Pick</label>
         <div className="flex flex-wrap gap-1.5">
           {ICON_PRESETS.map((emoji) => (
-            <button
+            <Button
               key={emoji}
-              type="button"
+              size="small"
+              type={(props.icon ?? '⭐') === emoji ? 'primary' : 'default'}
               onClick={() => setProp((p: IconNodeProps) => (p.icon = emoji))}
-              className={[
-                'w-8 h-8 flex items-center justify-center rounded text-base',
-                'bg-slate-800 border hover:bg-slate-700 transition-colors',
-                (props.icon ?? '⭐') === emoji
-                  ? 'border-indigo-500 bg-indigo-900/30'
-                  : 'border-slate-700',
-              ].join(' ')}
+              style={{ width: 32, height: 32, padding: 0 }}
             >
               {emoji}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Size (px)</label>
-        <input
-          type="range"
+        <Slider
           min={16}
           max={96}
           value={props.size ?? 32}
-          onChange={(e) => setProp((p: IconNodeProps) => (p.size = parseInt(e.target.value)))}
-          className="w-full"
+          onChange={(v) => setProp((p: IconNodeProps) => (p.size = v))}
+          tooltip={{ formatter: (v) => `${v}px` }}
         />
-        <span className="text-xs text-slate-500">{props.size ?? 32}px</span>
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Color</label>
-        <input
-          type="color"
-          className="w-full h-9 rounded cursor-pointer"
+        <ColorField
           value={props.color ?? '#ffffff'}
-          onChange={(e) => setProp((p: IconNodeProps) => (p.color = e.target.value))}
+          onChange={(hex) => setProp((p: IconNodeProps) => (p.color = hex))}
         />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Alignment</label>
-        <select
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
+        <Select
+          size="small"
+          className="w-full"
           value={props.align ?? 'center'}
-          onChange={(e) =>
-            setProp((p: IconNodeProps) => (p.align = e.target.value as IconNodeProps['align']))
-          }
-        >
-          <option value="left">Left</option>
-          <option value="center">Center</option>
-          <option value="right">Right</option>
-        </select>
+          onChange={(v) => setProp((p: IconNodeProps) => (p.align = v as IconNodeProps['align']))}
+          options={[
+            { value: 'left', label: 'Left' },
+            { value: 'center', label: 'Center' },
+            { value: 'right', label: 'Right' },
+          ]}
+        />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Link (optional)</label>
-        <input
-          type="text"
+        <Input
+          size="small"
           placeholder="https://…"
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
           value={props.href ?? ''}
           onChange={(e) => setProp((p: IconNodeProps) => (p.href = e.target.value))}
         />

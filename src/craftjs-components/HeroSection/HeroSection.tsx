@@ -16,6 +16,9 @@ export interface HeroSectionProps {
 }
 
 import { HeroSectionUI } from './HeroSectionUI'
+import { ThemeColorControl } from '../shared/ThemeColorControl'
+import Input from 'antd/es/input'
+import Select from 'antd/es/select'
 
 export const HeroSection = (props: HeroSectionProps) => {
   const { connectors: { connect, drag }, isSelected } = useNode((node) => ({
@@ -39,12 +42,11 @@ const HeroSettings = () => {
     props: node.data.props as HeroSectionProps,
   }))
 
-  const field = (label: string, key: keyof HeroSectionProps, type = 'text') => (
+  const field = (label: string, key: keyof HeroSectionProps) => (
     <div>
       <label className="block text-xs font-semibold text-slate-400 mb-1">{label}</label>
-      <input
-        type={type}
-        className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
+      <Input
+        size="small"
         value={(props[key] as string) ?? ''}
         onChange={(e) =>
           setProp((p: HeroSectionProps) => ((p[key] as string) = e.target.value))
@@ -58,24 +60,31 @@ const HeroSettings = () => {
       {field('Name', 'name')}
       {field('Title / Role', 'title')}
       {field('Subtitle', 'subtitle')}
-      {field('Background Color', 'bgColor', 'color')}
-      {field('Accent Color', 'accentColor', 'color')}
+      <ThemeColorControl
+        label="Background Color"
+        value={props.bgColor}
+        fallback="#0f172a"
+        onChange={(v) => setProp((p: HeroSectionProps) => (p.bgColor = v))}
+      />
+      <ThemeColorControl
+        label="Accent Color"
+        value={props.accentColor}
+        fallback="#6366F1"
+        onChange={(v) => setProp((p: HeroSectionProps) => (p.accentColor = v))}
+      />
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Layout</label>
-        <select
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
+        <Select
+          size="small"
+          className="w-full"
           value={props.layout ?? 'centered'}
-          onChange={(e) =>
-            setProp(
-              (p: HeroSectionProps) =>
-                (p.layout = e.target.value as HeroSectionProps['layout'])
-            )
-          }
-        >
-          <option value="centered">Centered</option>
-          <option value="left">Left</option>
-          <option value="right">Right</option>
-        </select>
+          onChange={(v) => setProp((p: HeroSectionProps) => (p.layout = v as HeroSectionProps['layout']))}
+          options={[
+            { value: 'centered', label: 'Centered' },
+            { value: 'left', label: 'Left' },
+            { value: 'right', label: 'Right' },
+          ]}
+        />
       </div>
     </div>
   )
@@ -87,8 +96,8 @@ HeroSection.craft = {
     name: 'Your Name',
     title: 'Full-Stack Developer',
     subtitle: 'Building elegant solutions to complex problems.',
-    bgColor: '#0f172a',
-    accentColor: '#6366F1',
+    // bgColor / accentColor cố ý KHÔNG seed default → follow Global Theme.
+    // User set qua Settings = override; "↺ Theme" clear về undefined = follow.
     layout: 'centered',
   },
   related: { settings: HeroSettings },

@@ -2,19 +2,28 @@
 
 import { usePortfolioApi } from '@/src/hooks/usePortfolioApi'
 import { useState, useCallback } from 'react'
+import { ColorField } from '@/src/craftjs-components/shared/ColorField'
+import Input from 'antd/es/input'
+import Select from 'antd/es/select'
+import Button from 'antd/es/button'
 
 interface GlobalSettingsPanelProps {
   portfolioId: string
   initialSeo?: { title?: string; description?: string; ogImage?: string }
   initialTheme?: { colors?: Record<string, string>; font?: { heading?: string; body?: string } }
   onSeoChange?: (seo: any) => void
+  onThemeChange?: (theme: { colors?: Record<string, string>; font?: { heading?: string; body?: string } }) => void
 }
+
+/** Google Fonts được hỗ trợ (load runtime ở trang public /p/[slug]) */
+const FONT_OPTIONS = ['Inter', 'Poppins', 'Roboto', 'Montserrat', 'Lora', 'Playfair Display']
 
 export const GlobalSettingsPanel = ({
   portfolioId,
   initialSeo,
   initialTheme,
   onSeoChange,
+  onThemeChange,
 }: GlobalSettingsPanelProps) => {
   const { updateSeo, updateTheme } = usePortfolioApi()
 
@@ -44,6 +53,7 @@ export const GlobalSettingsPanel = ({
     try {
       setSavingTheme(true)
       await updateTheme(portfolioId, theme)
+      onThemeChange?.(theme)
     } catch (err) {
       console.error(err)
     } finally {
@@ -63,41 +73,34 @@ export const GlobalSettingsPanel = ({
           </h3>
           <div>
             <label className="block text-xs font-semibold text-slate-400 mb-1">Page Title</label>
-            <input
-              type="text"
+            <Input
+              size="small"
               value={seo.title || ''}
               onChange={(e) => setSeo({ ...seo, title: e.target.value })}
-              className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
               placeholder="My Portfolio"
             />
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-400 mb-1">Description</label>
-            <textarea
+            <Input.TextArea
               rows={3}
               value={seo.description || ''}
               onChange={(e) => setSeo({ ...seo, description: e.target.value })}
-              className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white resize-none"
               placeholder="A brief description of myself..."
             />
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-400 mb-1">OG Image URL</label>
-            <input
-              type="text"
+            <Input
+              size="small"
               value={seo.ogImage || ''}
               onChange={(e) => setSeo({ ...seo, ogImage: e.target.value })}
-              className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
               placeholder="https://..."
             />
           </div>
-          <button
-            onClick={handleSeoSave}
-            disabled={savingSeo}
-            className="w-full py-1.5 text-xs font-semibold bg-slate-700 hover:bg-slate-600 text-white rounded transition-colors"
-          >
+          <Button block size="small" loading={savingSeo} onClick={handleSeoSave}>
             {savingSeo ? 'Saving...' : 'Save SEO'}
-          </button>
+          </Button>
         </div>
 
         {/* Theme Settings */}
@@ -106,58 +109,55 @@ export const GlobalSettingsPanel = ({
             Global Theme
           </h3>
           <p className="text-xs text-slate-500 mb-2 leading-relaxed">
-            These settings will be applied to the published site. Note: Some elements in the editor provide their own background and text colors.
+            Elements follow these theme colors &amp; fonts by default. Per-element overrides
+            (set in an element&apos;s settings) take priority; use &quot;↺ Theme&quot; there to follow the theme again.
           </p>
           <div>
             <label className="block text-xs font-semibold text-slate-400 mb-1">Primary Color</label>
-            <input
-              type="color"
+            <ColorField
               value={theme.colors?.primary || '#6366F1'}
-              onChange={(e) =>
-                setTheme({
-                  ...theme,
-                  colors: { ...theme.colors, primary: e.target.value },
-                })
-              }
-              className="w-full h-9 rounded cursor-pointer"
+              onChange={(hex) => setTheme({ ...theme, colors: { ...theme.colors, primary: hex } })}
             />
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-400 mb-1">Background Color</label>
-            <input
-              type="color"
+            <ColorField
               value={theme.colors?.background || '#0f172a'}
-              onChange={(e) =>
-                setTheme({
-                  ...theme,
-                  colors: { ...theme.colors, background: e.target.value },
-                })
-              }
-              className="w-full h-9 rounded cursor-pointer"
+              onChange={(hex) => setTheme({ ...theme, colors: { ...theme.colors, background: hex } })}
             />
           </div>
           <div>
             <label className="block text-xs font-semibold text-slate-400 mb-1">Text Color</label>
-            <input
-              type="color"
+            <ColorField
               value={theme.colors?.text || '#f8fafc'}
-              onChange={(e) =>
-                setTheme({
-                  ...theme,
-                  colors: { ...theme.colors, text: e.target.value },
-                })
-              }
-              className="w-full h-9 rounded cursor-pointer"
+              onChange={(hex) => setTheme({ ...theme, colors: { ...theme.colors, text: hex } })}
             />
           </div>
 
-          <button
-            onClick={handleThemeSave}
-            disabled={savingTheme}
-            className="w-full py-1.5 text-xs font-semibold bg-slate-700 hover:bg-slate-600 text-white rounded transition-colors"
-          >
+          <div>
+            <label className="block text-xs font-semibold text-slate-400 mb-1">Heading Font</label>
+            <Select
+              size="small"
+              className="w-full"
+              value={theme.font?.heading || 'Inter'}
+              onChange={(v) => setTheme({ ...theme, font: { ...theme.font, heading: v } })}
+              options={FONT_OPTIONS.map((f) => ({ value: f, label: f }))}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-400 mb-1">Body Font</label>
+            <Select
+              size="small"
+              className="w-full"
+              value={theme.font?.body || 'Inter'}
+              onChange={(v) => setTheme({ ...theme, font: { ...theme.font, body: v } })}
+              options={FONT_OPTIONS.map((f) => ({ value: f, label: f }))}
+            />
+          </div>
+
+          <Button block size="small" loading={savingTheme} onClick={handleThemeSave}>
             {savingTheme ? 'Saving...' : 'Save Theme'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

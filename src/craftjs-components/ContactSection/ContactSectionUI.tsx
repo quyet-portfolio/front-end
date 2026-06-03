@@ -17,8 +17,8 @@ export const ContactSectionUI = ({
     { platform: 'GitHub', url: 'https://github.com' },
     { platform: 'LinkedIn', url: 'https://linkedin.com' },
   ],
-  bgColor = '#0f172a',
-  accentColor = '#6366F1',
+  bgColor = 'var(--portfolio-bg, #0f172a)',
+  accentColor = 'var(--portfolio-primary, #6366F1)',
 }: ContactSectionProps) => {
   return (
     <section

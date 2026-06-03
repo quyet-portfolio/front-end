@@ -12,6 +12,8 @@ export interface AboutSectionProps {
 }
 
 import { AboutSectionUI } from './AboutSectionUI'
+import { ThemeColorControl } from '../shared/ThemeColorControl'
+import Input from 'antd/es/input'
 
 export const AboutSection = (props: AboutSectionProps) => {
   const { connectors: { connect, drag }, isSelected } = useNode((node) => ({
@@ -39,22 +41,18 @@ const AboutSettings = () => {
     <div className="space-y-3 p-4">
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Bio</label>
-        <textarea
+        <Input.TextArea
           rows={4}
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white resize-none"
           value={props.bio ?? ''}
-          onChange={(e) =>
-            setProp((p: AboutSectionProps) => (p.bio = e.target.value))
-          }
+          onChange={(e) => setProp((p: AboutSectionProps) => (p.bio = e.target.value))}
         />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">
           Highlights <span className="text-slate-600">(one per line)</span>
         </label>
-        <textarea
+        <Input.TextArea
           rows={4}
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white resize-none"
           value={(props.highlights ?? []).join('\n')}
           onChange={(e) =>
             setProp(
@@ -64,17 +62,12 @@ const AboutSettings = () => {
           }
         />
       </div>
-      <div>
-        <label className="block text-xs font-semibold text-slate-400 mb-1">Background</label>
-        <input
-          type="color"
-          value={props.bgColor ?? '#1e293b'}
-          onChange={(e) =>
-            setProp((p: AboutSectionProps) => (p.bgColor = e.target.value))
-          }
-          className="w-full h-9 rounded cursor-pointer"
-        />
-      </div>
+      <ThemeColorControl
+        label="Background"
+        value={props.bgColor}
+        fallback="#1e293b"
+        onChange={(v) => setProp((p: AboutSectionProps) => (p.bgColor = v))}
+      />
     </div>
   )
 }
@@ -84,7 +77,7 @@ AboutSection.craft = {
   props: {
     bio: 'Write something about yourself here.',
     highlights: ['3+ years experience', 'Open source contributor'],
-    bgColor: '#1e293b',
+    // bgColor KHÔNG seed → follow Global Theme (override qua Settings).
   },
   related: { settings: AboutSettings },
 }

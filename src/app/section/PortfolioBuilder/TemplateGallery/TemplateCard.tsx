@@ -3,6 +3,8 @@
  */
 'use client'
 
+import Button from 'antd/es/button'
+
 interface Template {
   _id: string
   name: string
@@ -104,18 +106,17 @@ export const TemplateCard = ({ template, onSelect, isSelecting }: TemplateCardPr
           ))}
         </div>
 
-        <button
+        <Button
+          type="primary"
+          block
+          loading={isSelecting}
           onClick={(e) => {
             e.stopPropagation()
             onSelect(template._id)
           }}
-          disabled={isSelecting}
-          className="w-full py-2 text-sm font-semibold bg-indigo-600 text-white rounded-lg
-            hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed
-            transition-all shadow-md shadow-indigo-600/20"
         >
           {isSelecting ? 'Creating...' : 'Use This Template →'}
-        </button>
+        </Button>
       </div>
     </div>
   )

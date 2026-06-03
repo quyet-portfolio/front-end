@@ -8,6 +8,10 @@
 
 import { useNode } from '@craftjs/core'
 import { useCallback, useRef, useState } from 'react'
+import { ColorField } from '../shared/ColorField'
+import Input from 'antd/es/input'
+import Select from 'antd/es/select'
+import InputNumber from 'antd/es/input-number'
 
 export interface TextNodeProps {
   text?: string
@@ -108,73 +112,72 @@ const TextNodeSettings = () => {
     <div className="space-y-3 p-4">
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Text</label>
-        <textarea
+        <Input.TextArea
           rows={3}
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white resize-none"
           value={props.text ?? ''}
           onChange={(e) => setProp((p: TextNodeProps) => (p.text = e.target.value))}
         />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Tag</label>
-        <select
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
+        <Select
+          size="small"
+          className="w-full"
           value={props.tag ?? 'p'}
-          onChange={(e) => setProp((p: TextNodeProps) => (p.tag = e.target.value as TextNodeProps['tag']))}
-        >
-          <option value="h1">H1 — Heading 1</option>
-          <option value="h2">H2 — Heading 2</option>
-          <option value="h3">H3 — Heading 3</option>
-          <option value="p">P — Paragraph</option>
-          <option value="span">Span — Inline</option>
-        </select>
+          onChange={(v) => setProp((p: TextNodeProps) => (p.tag = v as TextNodeProps['tag']))}
+          options={[
+            { value: 'h1', label: 'H1 — Heading 1' },
+            { value: 'h2', label: 'H2 — Heading 2' },
+            { value: 'h3', label: 'H3 — Heading 3' },
+            { value: 'p', label: 'P — Paragraph' },
+            { value: 'span', label: 'Span — Inline' },
+          ]}
+        />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Font Size (px)</label>
-        <input
-          type="number"
+        <InputNumber
+          size="small"
+          className="w-full"
           min={8}
           max={120}
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
           value={props.fontSize ?? 16}
-          onChange={(e) => setProp((p: TextNodeProps) => (p.fontSize = parseInt(e.target.value)))}
+          onChange={(v) => setProp((p: TextNodeProps) => (p.fontSize = v ?? 16))}
         />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Color</label>
-        <input
-          type="color"
-          className="w-full h-9 rounded cursor-pointer"
+        <ColorField
           value={props.color ?? '#ffffff'}
-          onChange={(e) => setProp((p: TextNodeProps) => (p.color = e.target.value))}
+          onChange={(hex) => setProp((p: TextNodeProps) => (p.color = hex))}
         />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Font Weight</label>
-        <select
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
+        <Select
+          size="small"
+          className="w-full"
           value={props.fontWeight ?? 'normal'}
-          onChange={(e) =>
-            setProp((p: TextNodeProps) => (p.fontWeight = e.target.value as TextNodeProps['fontWeight']))
-          }
-        >
-          <option value="normal">Normal</option>
-          <option value="bold">Bold</option>
-        </select>
+          onChange={(v) => setProp((p: TextNodeProps) => (p.fontWeight = v as TextNodeProps['fontWeight']))}
+          options={[
+            { value: 'normal', label: 'Normal' },
+            { value: 'bold', label: 'Bold' },
+          ]}
+        />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Text Align</label>
-        <select
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
+        <Select
+          size="small"
+          className="w-full"
           value={props.textAlign ?? 'left'}
-          onChange={(e) =>
-            setProp((p: TextNodeProps) => (p.textAlign = e.target.value as TextNodeProps['textAlign']))
-          }
-        >
-          <option value="left">Left</option>
-          <option value="center">Center</option>
-          <option value="right">Right</option>
-        </select>
+          onChange={(v) => setProp((p: TextNodeProps) => (p.textAlign = v as TextNodeProps['textAlign']))}
+          options={[
+            { value: 'left', label: 'Left' },
+            { value: 'center', label: 'Center' },
+            { value: 'right', label: 'Right' },
+          ]}
+        />
       </div>
     </div>
   )

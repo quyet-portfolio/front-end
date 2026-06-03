@@ -17,6 +17,10 @@ export interface SkillsSectionProps {
 }
 
 import { SkillsSectionUI } from './SkillsSectionUI'
+import { ThemeColorControl } from '../shared/ThemeColorControl'
+import Input from 'antd/es/input'
+import Slider from 'antd/es/slider'
+import Button from 'antd/es/button'
 
 export const SkillsSection = (props: SkillsSectionProps) => {
   const { connectors: { connect, drag }, isSelected } = useNode((node) => ({
@@ -64,51 +68,40 @@ const SkillsSettings = () => {
 
   return (
     <div className="space-y-3 p-4">
-      <div>
-        <label className="block text-xs font-semibold text-slate-400 mb-1">Accent Color</label>
-        <input
-          type="color"
-          value={props.accentColor ?? '#6366F1'}
-          onChange={(e) => setProp((p: SkillsSectionProps) => (p.accentColor = e.target.value))}
-          className="w-full h-9 rounded cursor-pointer"
-        />
-      </div>
+      <ThemeColorControl
+        label="Accent Color"
+        value={props.accentColor}
+        fallback="#6366F1"
+        onChange={(v) => setProp((p: SkillsSectionProps) => (p.accentColor = v))}
+      />
       <div className="space-y-2">
         <label className="block text-xs font-semibold text-slate-400">Skills</label>
         {skills.map((skill, i) => (
           <div key={i} className="bg-slate-800 rounded p-2 space-y-1">
-            <input
-              type="text"
+            <Input
+              size="small"
               value={skill.name}
               onChange={(e) => updateSkill(i, 'name', e.target.value)}
-              className="w-full bg-slate-700 rounded px-2 py-1 text-xs text-white"
               placeholder="Skill name"
             />
             <div className="flex items-center gap-2">
-              <input
-                type="range"
+              <Slider
+                className="flex-1"
                 min={0}
                 max={100}
                 value={skill.level}
-                onChange={(e) => updateSkill(i, 'level', parseInt(e.target.value))}
-                className="flex-1"
+                onChange={(v) => updateSkill(i, 'level', v)}
               />
               <span className="text-xs text-slate-400 w-8 text-right">{skill.level}%</span>
-              <button
-                onClick={() => removeSkill(i)}
-                className="text-red-400 hover:text-red-300 text-xs"
-              >
+              <Button size="small" type="text" danger onClick={() => removeSkill(i)}>
                 ✕
-              </button>
+              </Button>
             </div>
           </div>
         ))}
-        <button
-          onClick={addSkill}
-          className="w-full border border-dashed border-slate-600 rounded py-1.5 text-xs text-slate-400 hover:border-indigo-500 hover:text-indigo-400 transition-colors"
-        >
+        <Button size="small" type="dashed" block onClick={addSkill}>
           + Add Skill
-        </button>
+        </Button>
       </div>
     </div>
   )
@@ -121,8 +114,7 @@ SkillsSection.craft = {
       { name: 'TypeScript', level: 90 },
       { name: 'React / Next.js', level: 88 },
     ],
-    bgColor: '#0f172a',
-    accentColor: '#6366F1',
+    // bgColor / accentColor KHÔNG seed → follow Global Theme.
   },
   related: { settings: SkillsSettings },
 }

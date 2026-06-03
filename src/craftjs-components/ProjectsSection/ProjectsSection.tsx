@@ -20,6 +20,9 @@ export interface ProjectsSectionProps {
 }
 
 import { ProjectsSectionUI } from './ProjectsSectionUI'
+import { ThemeColorControl } from '../shared/ThemeColorControl'
+import Input from 'antd/es/input'
+import Button from 'antd/es/button'
 
 export const ProjectsSection = (props: ProjectsSectionProps) => {
   const { connectors: { connect, drag }, isSelected } = useNode((node) => ({
@@ -71,53 +74,45 @@ const ProjectsSettings = () => {
 
   return (
     <div className="space-y-3 p-4">
-      <div>
-        <label className="block text-xs font-semibold text-slate-400 mb-1">Accent Color</label>
-        <input
-          type="color"
-          value={props.accentColor ?? '#6366F1'}
-          onChange={(e) => setProp((p: ProjectsSectionProps) => (p.accentColor = e.target.value))}
-          className="w-full h-9 rounded cursor-pointer"
-        />
-      </div>
+      <ThemeColorControl
+        label="Accent Color"
+        value={props.accentColor}
+        fallback="#6366F1"
+        onChange={(v) => setProp((p: ProjectsSectionProps) => (p.accentColor = v))}
+      />
       <div className="space-y-3">
         <label className="block text-xs font-semibold text-slate-400">Projects</label>
         {projects.map((project, i) => (
           <div key={i} className="bg-slate-800 rounded p-3 space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-xs font-semibold text-slate-300">Project {i + 1}</span>
-              <button onClick={() => removeProject(i)} className="text-red-400 hover:text-red-300 text-xs">✕ Remove</button>
+              <Button size="small" type="text" danger onClick={() => removeProject(i)}>✕ Remove</Button>
             </div>
             {(['title', 'description', 'link', 'image'] as (keyof Project)[]).map((field) => (
               <div key={field}>
                 <label className="block text-xs text-slate-500 mb-0.5 capitalize">{field}</label>
-                <input
-                  type="text"
+                <Input
+                  size="small"
                   value={(project[field] as string) ?? ''}
                   onChange={(e) => updateProject(i, field, e.target.value)}
-                  className="w-full bg-slate-700 rounded px-2 py-1 text-xs text-white"
                   placeholder={field === 'link' ? 'https://...' : ''}
                 />
               </div>
             ))}
             <div>
               <label className="block text-xs text-slate-500 mb-0.5">Tags (comma separated)</label>
-              <input
-                type="text"
+              <Input
+                size="small"
                 value={(project.tags ?? []).join(', ')}
                 onChange={(e) => updateProject(i, 'tags', e.target.value)}
-                className="w-full bg-slate-700 rounded px-2 py-1 text-xs text-white"
                 placeholder="React, TypeScript, ..."
               />
             </div>
           </div>
         ))}
-        <button
-          onClick={addProject}
-          className="w-full border border-dashed border-slate-600 rounded py-1.5 text-xs text-slate-400 hover:border-indigo-500 hover:text-indigo-400 transition-colors"
-        >
+        <Button size="small" type="dashed" block onClick={addProject}>
           + Add Project
-        </button>
+        </Button>
       </div>
     </div>
   )
@@ -129,8 +124,7 @@ ProjectsSection.craft = {
     projects: [
       { title: 'Project Alpha', description: 'A SaaS dashboard with real-time analytics.', link: 'https://github.com', tags: ['Next.js', 'TypeScript'] },
     ],
-    bgColor: '#0f172a',
-    accentColor: '#6366F1',
+    // bgColor / accentColor KHÔNG seed → follow Global Theme.
   },
   related: { settings: ProjectsSettings },
 }

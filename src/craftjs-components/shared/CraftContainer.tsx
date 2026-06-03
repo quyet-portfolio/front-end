@@ -5,6 +5,8 @@
 'use client'
 
 import { useNode, Element } from '@craftjs/core'
+import { ColorField } from './ColorField'
+import Slider from 'antd/es/slider'
 
 interface CraftContainerProps {
   background?: string
@@ -49,26 +51,21 @@ const CraftContainerSettings = () => {
     <div className="space-y-3 p-4">
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Background</label>
-        <input
-          type="color"
-          value={props.background || '#transparent'}
-          onChange={(e) => setProp((p: CraftContainerProps) => (p.background = e.target.value))}
-          className="w-full h-9 rounded cursor-pointer"
+        <ColorField
+          value={props.background && props.background !== 'transparent' ? props.background : ''}
+          allowClear
+          onChange={(hex) => setProp((p: CraftContainerProps) => (p.background = hex || 'transparent'))}
         />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Padding (px)</label>
-        <input
-          type="range"
+        <Slider
           min={0}
           max={80}
           value={props.padding ?? 0}
-          onChange={(e) =>
-            setProp((p: CraftContainerProps) => (p.padding = parseInt(e.target.value)))
-          }
-          className="w-full"
+          onChange={(v) => setProp((p: CraftContainerProps) => (p.padding = v))}
+          tooltip={{ formatter: (v) => `${v}px` }}
         />
-        <span className="text-xs text-slate-500">{props.padding ?? 0}px</span>
       </div>
     </div>
   )

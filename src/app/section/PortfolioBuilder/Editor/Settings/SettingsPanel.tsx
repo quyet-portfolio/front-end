@@ -5,6 +5,7 @@
 'use client'
 
 import { useEditor } from '@craftjs/core'
+import Button from 'antd/es/button'
 
 export const SettingsPanel = () => {
   const { selected, actions } = useEditor((state, query) => {
@@ -46,7 +47,11 @@ export const SettingsPanel = () => {
           <p className="text-sm font-semibold text-white">{selected.displayName}</p>
         </div>
         {selected.isDeletable && selected.id && (
-          <button
+          <Button
+            size="small"
+            type="text"
+            danger
+            title="Delete element"
             onClick={() => {
               try {
                 actions.delete(selected.id)
@@ -54,11 +59,9 @@ export const SettingsPanel = () => {
                 console.error('Delete failed:', e, 'nodeId:', selected.id)
               }
             }}
-            className="text-xs text-red-400 hover:text-red-300 hover:bg-red-900/20 px-2 py-1 rounded transition-colors"
-            title="Delete element"
           >
             Delete
-          </button>
+          </Button>
         )}
       </div>
 

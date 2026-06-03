@@ -7,6 +7,8 @@
 
 import { useNode, Element } from '@craftjs/core'
 import { CraftContainer } from '../shared/CraftContainer'
+import Select from 'antd/es/select'
+import Slider from 'antd/es/slider'
 
 export interface ColumnsLayoutProps {
   columns?: 2 | 3
@@ -55,28 +57,26 @@ const ColumnsSettings = () => {
     <div className="space-y-3 p-4">
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Columns</label>
-        <select
-          className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-sm text-white"
+        <Select
+          size="small"
+          className="w-full"
           value={props.columns ?? 2}
-          onChange={(e) =>
-            setProp((p: ColumnsLayoutProps) => (p.columns = parseInt(e.target.value) as 2 | 3))
-          }
-        >
-          <option value={2}>2 Columns</option>
-          <option value={3}>3 Columns</option>
-        </select>
+          onChange={(v) => setProp((p: ColumnsLayoutProps) => (p.columns = v as 2 | 3))}
+          options={[
+            { value: 2, label: '2 Columns' },
+            { value: 3, label: '3 Columns' },
+          ]}
+        />
       </div>
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Gap (px)</label>
-        <input
-          type="range"
+        <Slider
           min={0}
           max={64}
           value={props.gap ?? 16}
-          onChange={(e) => setProp((p: ColumnsLayoutProps) => (p.gap = parseInt(e.target.value)))}
-          className="w-full"
+          onChange={(v) => setProp((p: ColumnsLayoutProps) => (p.gap = v))}
+          tooltip={{ formatter: (v) => `${v}px` }}
         />
-        <span className="text-xs text-slate-500">{props.gap ?? 16}px</span>
       </div>
     </div>
   )
