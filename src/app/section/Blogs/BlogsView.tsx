@@ -3,74 +3,98 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import Button from 'antd/es/button'
-import { useRouter } from 'next/navigation'
-import { useState, useMemo } from 'react'
-import Navbar from '@/src/layouts/navbar'
-import { navItems } from '../../data/helper'
+import { useEffect, useMemo, useState } from 'react'
+import BlogsHeader from './components/BlogsHeader'
 import BlogHeading from './BlogsHeading'
 import { useBlogs } from '@/src/hooks/useBlogs'
-import { useAuth } from '@/src/contexts/AuthContext'
+import { blogApi, GetBlogsParams } from '@/src/lib/api/blog'
 import { stripHtml } from '@/src/utils/stringUtils'
 
+const PAGE_SIZE = 9
+
 const BlogsView = () => {
-  const router = useRouter()
-  const { blogs, loading, error } = useBlogs()
-  const { isAuthenticated } = useAuth()
+  const [search, setSearch] = useState<string>('')
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
+  const [page, setPage] = useState<number>(1)
+  const [categories, setCategories] = useState<string[]>([])
 
-  // Derive unique categories from blog data
-  const categories = useMemo<string[]>(() => {
-    const cats = blogs.map((b) => b.category).filter(Boolean) as string[]
-    return ['All', ...Array.from(new Set(cats))]
-  }, [blogs])
+  // Build server-side query params (category 'All' / empty search are omitted)
+  const params = useMemo<GetBlogsParams>(() => {
+    const next: GetBlogsParams = { page, limit: PAGE_SIZE }
+    if (search) next.search = search
+    if (selectedCategory !== 'All') next.category = selectedCategory
+    return next
+  }, [page, search, selectedCategory])
 
-  const filteredBlogs = useMemo(
-    () => (selectedCategory === 'All' ? blogs : blogs.filter((b) => b.category === selectedCategory)),
-    [blogs, selectedCategory],
-  )
+  const { blogs, pagination, loading, error } = useBlogs(params)
+
+  // Categories are fetched once, independent of search/pagination
+  useEffect(() => {
+    blogApi
+      .getCategories()
+      .then((data) => setCategories(data.categories))
+      .catch(() => setCategories([]))
+  }, [])
+
+  const categoryTabs = useMemo<string[]>(() => ['All', ...categories], [categories])
+
+  const handleSearch = (value: string) => {
+    setSearch(value)
+    setPage(1)
+  }
+
+  const handleSelectCategory = (cat: string) => {
+    setSelectedCategory(cat)
+    setPage(1)
+  }
+
+  const hasActiveFilter = search !== '' || selectedCategory !== 'All'
 
   return (
-    <div>
-      <Navbar navItems={navItems} isShowLoginButton={true} />
-      <div className="relative my-16 z-10 flex flex-col items-center justify-center gap-4 px-4">
-        <BlogHeading />
+    <div className="h-full my-6 z-10 flex flex-col items-center justify-center gap-6">
+      <BlogsHeader defaultValue={search} onSearch={handleSearch} />
 
-        {loading ? (
-          <div className="text-white">Loading blogs...</div>
-        ) : error ? (
-          <div className="text-red-500">Error loading blogs: {error}</div>
-        ) : (
-          <div className="w-full max-w-7xl">
-            {/* Toolbar: category filter + create button */}
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-              {/* Category tabs */}
-              <div className="flex flex-wrap gap-2">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-all duration-200
-                      ${selectedCategory === cat
-                        ? 'bg-primary border-primary text-white'
-                        : 'bg-transparent border-blue-950 text-white-100 hover:border-blue-500 hover:text-white'
-                      }`}
-                  >
-                    {cat}
-                  </button>
-                ))}
-              </div>
-              {isAuthenticated && (
-                <Button type="primary" onClick={() => router.push('/blogs/create')}>
-                  Create Blog
-                </Button>
-              )}
+      <BlogHeading />
+
+      <div className="w-full">
+        {/* Toolbar: category filter */}
+        <div className="flex flex-wrap items-center gap-2 mb-6">
+          {categoryTabs.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => handleSelectCategory(cat)}
+              className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-all duration-200
+                ${
+                  selectedCategory === cat
+                    ? 'bg-primary border-primary text-white'
+                    : 'bg-transparent border-blue-950 text-white-100 hover:border-blue-500 hover:text-white'
+                }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+          {/* Active search summary */}
+          {search && (
+            <div className="mb-4 text-sm text-white-200">
+              Showing results for <span className="font-semibold text-white">&quot;{search}&quot;</span>
+              {pagination ? ` — ${pagination.totalBlogs} found` : ''}
             </div>
+          )}
 
-            {filteredBlogs.length === 0 ? (
-              <div className="text-white text-center py-20">No blogs in this category yet.</div>
-            ) : (
+          {loading ? (
+            <div className="text-white text-center py-20">Loading blogs...</div>
+          ) : error ? (
+            <div className="text-red-500 text-center py-20">Error loading blogs: {error}</div>
+          ) : blogs.length === 0 ? (
+            <div className="text-white text-center py-20">
+              {hasActiveFilter ? 'No blogs match your filters.' : 'No blogs published yet.'}
+            </div>
+          ) : (
+            <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredBlogs.map((blog) => (
+                {blogs.map((blog) => (
                   <Link href={`/blogs/${blog.slug}`} key={blog._id} className="flex">
                     <div className="flex flex-col w-full rounded-md border-4 border-blue-950 bg-black-100 overflow-hidden shadow-lg transition-transform duration-200 hover:scale-[1.02] hover:border-blue-600 cursor-pointer">
                       {/* Thumbnail */}
@@ -97,18 +121,42 @@ const BlogsView = () => {
 
                         {/* Footer pinned to bottom */}
                         <div className="flex justify-between items-center pt-3 border-t border-gray-800 mt-auto">
-                          <span className="text-xs font-semibold text-white-100">By: {blog.author?.username || 'Unknown'}</span>
-                          <span className="text-xs text-gray-500">{new Date(blog.createdAt).toLocaleDateString()}</span>
+                          <span className="text-xs font-semibold text-white-100">
+                            By: {blog.author?.username || 'Unknown'}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {new Date(blog.createdAt).toLocaleDateString()}
+                          </span>
                         </div>
                       </div>
                     </div>
                   </Link>
                 ))}
               </div>
-            )}
-          </div>
-        )}
-      </div>
+
+              {/* Pagination */}
+              {pagination && pagination.totalPages > 1 && (
+                <div className="flex items-center justify-center gap-4 mt-10">
+                  <Button
+                    disabled={!pagination.hasPrevPage}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm text-white-100">
+                    Page {pagination.currentPage} of {pagination.totalPages}
+                  </span>
+                  <Button
+                    disabled={!pagination.hasNextPage}
+                    onClick={() => setPage((p) => p + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
     </div>
   )
 }

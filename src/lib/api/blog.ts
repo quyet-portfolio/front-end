@@ -31,10 +31,20 @@ export interface GetBlogsParams {
   search?: string
 }
 
+export interface CategoriesResponse {
+  categories: string[]
+}
+
 export const blogApi = {
   // Get all published blogs with filters
   getBlogs: async (params?: GetBlogsParams): Promise<BlogsResponse> => {
     const response = await axios.get<BlogsResponse>('/blogs', { params })
+    return response.data
+  },
+
+  // Get distinct categories of published blogs
+  getCategories: async (): Promise<CategoriesResponse> => {
+    const response = await axios.get<CategoriesResponse>('/blogs/categories')
     return response.data
   },
 

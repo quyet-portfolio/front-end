@@ -30,6 +30,18 @@ const processQueue = (error: any = null) => {
   failedQueue = []
 }
 
+// Xóa auth state và báo cho app (AuthContext) qua event — KHÔNG hard redirect.
+// ProtectedRoute sẽ tự quyết định trang hiện tại có cần đẩy sang /login hay không,
+// nên các trang public (home, blogs...) không bị đá đi khi token cũ không hợp lệ.
+const forceLogout = () => {
+  localStorage.removeItem('accessToken')
+  localStorage.removeItem('refreshToken')
+  localStorage.removeItem('user')
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event('auth:logout'))
+  }
+}
+
 // Request interceptor - Add token to every request
 axiosInstance.interceptors.request.use(
   (config) => {
@@ -51,76 +63,68 @@ axiosInstance.interceptors.response.use(
   },
   async (error: AxiosError) => {
     const originalRequest: any = error.config
+    const isUnauthorized = error.response?.status === 401
 
-    // Nếu là 401 và code là TOKEN_EXPIRED
-    if (error.response?.status === 401 && (error.response?.data as any)?.code === 'TOKEN_EXPIRED' && !originalRequest._retry) {
-      if (isRefreshing) {
-        // Đang refresh, thêm vào queue
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject })
-        })
-          .then(() => {
-            return axiosInstance(originalRequest)
-          })
-          .catch((err) => {
-            return Promise.reject(err)
-          })
-      }
-
-      originalRequest._retry = true
-      isRefreshing = true
-
-      const refreshToken = localStorage.getItem('refreshToken')
-
-      if (!refreshToken) {
-        // Không có refresh token → Logout
-        isRefreshing = false
-        localStorage.clear()
-        window.location.href = '/login'
-        return Promise.reject(error)
-      }
-
-      try {
-        // Call refresh token API
-        const response = await axios.post(`${API_URL}/auth/refresh-token`, {
-          refreshToken,
-        })
-
-        const { accessToken, refreshToken: newRefreshToken } = response.data
-
-        // Lưu token mới
-        localStorage.setItem('accessToken', accessToken)
-        if (newRefreshToken) {
-          localStorage.setItem('refreshToken', newRefreshToken)
-        }
-
-        // Update header cho request ban đầu
-        if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`
-        }
-
-        // Process queue
-        processQueue()
-        isRefreshing = false
-
-        // Retry request ban đầu
-        return axiosInstance(originalRequest)
-      } catch (refreshError) {
-        // Refresh token cũng fail → Logout
-        processQueue(refreshError)
-        isRefreshing = false
-        localStorage.clear()
-        window.location.href = '/login'
-        return Promise.reject(refreshError)
-      }
+    // Chỉ xử lý 401. Bỏ qua nếu:
+    // - không có config (lỗi network/timeout)
+    // - request này đã thử refresh rồi (_retry) → tránh loop vô hạn
+    // - request chủ động opt-out refresh (skipAuthRefresh), vd login/register
+    if (!isUnauthorized || !originalRequest || originalRequest._retry || originalRequest.skipAuthRefresh) {
+      return Promise.reject(error)
     }
 
-    // Các lỗi khác
-    if (error.response?.status === 401) {
-      localStorage.clear()
-      window.location.href = '/login'
+    const refreshToken = localStorage.getItem('refreshToken')
+
+    // Không có refresh token → đăng xuất im lặng (không hard redirect)
+    if (!refreshToken) {
+      forceLogout()
+      return Promise.reject(error)
     }
-    return Promise.reject(error)
+
+    // Đang refresh → xếp request vào queue, retry sau khi có token mới
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        failedQueue.push({ resolve, reject })
+      })
+        .then(() => axiosInstance(originalRequest))
+        .catch((err) => Promise.reject(err))
+    }
+
+    originalRequest._retry = true
+    isRefreshing = true
+
+    try {
+      // Thử refresh với MỌI loại 401 (hết hạn hoặc token không hợp lệ),
+      // miễn là còn refresh token hợp lệ — không chỉ riêng TOKEN_EXPIRED.
+      const response = await axios.post(`${API_URL}/auth/refresh-token`, {
+        refreshToken,
+      })
+
+      const { accessToken, refreshToken: newRefreshToken } = response.data
+
+      // Lưu token mới
+      localStorage.setItem('accessToken', accessToken)
+      if (newRefreshToken) {
+        localStorage.setItem('refreshToken', newRefreshToken)
+      }
+
+      // Update header cho request ban đầu
+      if (originalRequest.headers) {
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`
+      }
+
+      processQueue()
+      isRefreshing = false
+
+      // Retry request ban đầu (request interceptor sẽ tự gắn token mới)
+      return axiosInstance(originalRequest)
+    } catch (refreshError) {
+      // Refresh cũng fail → đăng xuất im lặng (không hard redirect)
+      processQueue(refreshError)
+      isRefreshing = false
+      forceLogout()
+      return Promise.reject(refreshError)
+    }
   },
 )
 
