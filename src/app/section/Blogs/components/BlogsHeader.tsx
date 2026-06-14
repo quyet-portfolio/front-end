@@ -51,7 +51,7 @@ const BlogsHeader = ({ defaultValue = '', onSearch }: BlogsHeaderProps) => {
       <div className="w-[65%] md:w-[36%]">
         <Input
           value={value}
-          placeholder="Search articles by title, content or excerpt ..."
+          placeholder="Search ..."
           size="large"
           allowClear
           onChange={handleChange}
@@ -61,10 +61,6 @@ const BlogsHeader = ({ defaultValue = '', onSearch }: BlogsHeaderProps) => {
       </div>
 
       <div className="flex items-center gap-2 md:gap-6">
-        <Tooltip title="Create new blog" trigger={'hover'}>
-          <PlusCircleOutlined style={{ fontSize: '32px' }} onClick={handleCreate} />
-        </Tooltip>
-
         {isAuthenticated ? (
           <Dropdown
             menu={{
@@ -100,7 +96,7 @@ const BlogsHeader = ({ defaultValue = '', onSearch }: BlogsHeaderProps) => {
           </Dropdown>
         ) : (
           <Tooltip title="Login">
-            <Button variant="outlined" color="default" onClick={() => router.push('/login')}>
+            <Button size='large' variant="outlined" color="default" onClick={() => router.push('/login')}>
               <LoginOutlined />
             </Button>
           </Tooltip>

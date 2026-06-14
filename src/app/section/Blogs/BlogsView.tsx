@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import Button from 'antd/es/button'
+import { motion } from 'framer-motion'
 import { useEffect, useMemo, useState } from 'react'
 import BlogsHeader from './components/BlogsHeader'
 import BlogHeading from './BlogsHeading'
@@ -54,7 +55,7 @@ const BlogsView = () => {
     <div className="h-full my-6 z-10 flex flex-col items-center justify-center gap-6">
       <BlogsHeader defaultValue={search} onSearch={handleSearch} />
 
-      <BlogHeading />
+      {search === '' && <BlogHeading />}
 
       <div className="w-full">
         {/* Toolbar: category filter */}
@@ -75,88 +76,92 @@ const BlogsView = () => {
           ))}
         </div>
 
-          {/* Active search summary */}
-          {search && (
-            <div className="mb-4 text-sm text-white-200">
-              Showing results for <span className="font-semibold text-white">&quot;{search}&quot;</span>
-              {pagination ? ` — ${pagination.totalBlogs} found` : ''}
-            </div>
-          )}
+        {/* Active search summary */}
+        {search && (
+          <div className="mb-4 text-sm text-white-200">
+            Showing results for <span className="font-semibold text-white">&quot;{search}&quot;</span>
+            {pagination ? ` — ${pagination.totalBlogs} found` : ''}
+          </div>
+        )}
 
-          {loading ? (
-            <div className="text-white text-center py-20">Loading blogs...</div>
-          ) : error ? (
-            <div className="text-red-500 text-center py-20">Error loading blogs: {error}</div>
-          ) : blogs.length === 0 ? (
-            <div className="text-white text-center py-20">
-              {hasActiveFilter ? 'No blogs match your filters.' : 'No blogs published yet.'}
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {blogs.map((blog) => (
-                  <Link href={`/blogs/${blog.slug}`} key={blog._id} className="flex">
-                    <div className="flex flex-col w-full rounded-md border-4 border-blue-950 bg-black-100 overflow-hidden shadow-lg transition-transform duration-200 hover:scale-[1.02] hover:border-blue-600 cursor-pointer">
-                      {/* Thumbnail */}
-                      <div className="relative w-full h-48 flex-shrink-0">
-                        <Image
-                          fill
-                          className="object-cover"
-                          src={blog.featuredImage || '/images/next-js-a-react-js-framework.jpg'}
-                          alt={blog.title}
-                        />
-                        {blog.category && (
-                          <span className="absolute top-3 left-3 bg-[#6366F1] text-white text-[10px] font-bold uppercase px-2 py-1 rounded-full">
-                            {blog.category}
-                          </span>
-                        )}
-                      </div>
+        {loading ? (
+          <div className="text-white text-center py-20">Loading blogs...</div>
+        ) : error ? (
+          <div className="text-red-500 text-center py-20">Error loading blogs: {error}</div>
+        ) : blogs.length === 0 ? (
+          <div className="text-white text-center py-20">
+            {hasActiveFilter ? 'No blogs match your filters.' : 'No blogs published yet.'}
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {blogs.map((blog) => (
+                <Link href={`/blogs/${blog.slug}`} key={blog._id} className="flex">
+                  <motion.div
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="group relative flex flex-col w-full rounded-xl overflow-hidden cursor-pointer
+                      bg-gradient-to-br from-[#0d1433] to-[#0a0f24]
+                      border border-white/5 hover:border-indigo-500/60
+                      shadow-sm hover:shadow-indigo-900/30 hover:shadow-lg
+                      transition-all duration-300"
+                  >
+                    {/* Decorative accent line */}
+                    <div className="absolute bottom-0 left-0 z-10 h-[3px] w-0 group-hover:w-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-300 rounded-b-xl" />
 
-                      {/* Body */}
-                      <div className="flex flex-col flex-1 px-5 py-4 gap-2">
-                        <h3 className="font-bold text-base text-white leading-snug line-clamp-2">{blog.title}</h3>
-                        <p className="text-white-200 text-sm leading-relaxed line-clamp-3 flex-1">
-                          {stripHtml(blog.excerpt || blog.content)}
-                        </p>
+                    {/* Thumbnail */}
+                    <div className="relative w-full h-48 flex-shrink-0">
+                      <Image
+                        fill
+                        className="object-cover"
+                        src={blog.featuredImage || '/images/next-js-a-react-js-framework.jpg'}
+                        alt={blog.title}
+                      />
+                      {blog.category && (
+                        <span className="absolute top-3 left-3 bg-[#6366F1] text-white text-[10px] font-bold uppercase px-2 py-1 rounded-full">
+                          {blog.category}
+                        </span>
+                      )}
+                    </div>
 
-                        {/* Footer pinned to bottom */}
-                        <div className="flex justify-between items-center pt-3 border-t border-gray-800 mt-auto">
-                          <span className="text-xs font-semibold text-white-100">
-                            By: {blog.author?.username || 'Unknown'}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {new Date(blog.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
+                    {/* Body */}
+                    <div className="flex flex-col flex-1 px-5 py-4 gap-2">
+                      <h3 className="font-bold text-base text-white leading-snug line-clamp-2">{blog.title}</h3>
+                      <p className="text-white-200 text-sm leading-relaxed line-clamp-3 flex-1">
+                        {stripHtml(blog.excerpt || blog.content)}
+                      </p>
+
+                      {/* Footer pinned to bottom */}
+                      <div className="flex justify-between items-center pt-3 border-t border-gray-800 mt-auto">
+                        <span className="text-xs font-semibold text-white-100">
+                          By: {blog.author?.username || 'Unknown'}
+                        </span>
+                        <span className="text-xs text-gray-500">{new Date(blog.createdAt).toLocaleDateString()}</span>
                       </div>
                     </div>
-                  </Link>
-                ))}
-              </div>
+                  </motion.div>
+                </Link>
+              ))}
+            </div>
 
-              {/* Pagination */}
-              {pagination && pagination.totalPages > 1 && (
-                <div className="flex items-center justify-center gap-4 mt-10">
-                  <Button
-                    disabled={!pagination.hasPrevPage}
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  >
-                    Previous
-                  </Button>
-                  <span className="text-sm text-white-100">
-                    Page {pagination.currentPage} of {pagination.totalPages}
-                  </span>
-                  <Button
-                    disabled={!pagination.hasNextPage}
-                    onClick={() => setPage((p) => p + 1)}
-                  >
-                    Next
-                  </Button>
-                </div>
-              )}
-            </>
-          )}
-        </div>
+            {/* Pagination */}
+            {pagination && pagination.totalPages > 1 && (
+              <div className="flex items-center justify-center gap-4 mt-10">
+                <Button disabled={!pagination.hasPrevPage} onClick={() => setPage((p) => Math.max(1, p - 1))}>
+                  Previous
+                </Button>
+                <span className="text-sm text-white-100">
+                  Page {pagination.currentPage} of {pagination.totalPages}
+                </span>
+                <Button disabled={!pagination.hasNextPage} onClick={() => setPage((p) => p + 1)}>
+                  Next
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   )
 }
