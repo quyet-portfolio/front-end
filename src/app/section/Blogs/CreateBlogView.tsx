@@ -112,22 +112,24 @@ const CreateBlogView = () => {
             <Input placeholder="https://example.com/image.jpg" />
           </Form.Item>
 
-          <Form.Item
-            name="content"
-            rules={[
-              { required: true, message: 'Please input content!' },
-              { min: 10, message: 'Content must be at least 10 characters long' },
-            ]}
-          >
-            <Collapse
-              defaultActiveKey={['content']}
-              items={[{
-                key: 'content',
-                label: 'Content',
-                children: <DynamicBlogEditor />,
-              }]}
-            />
-          </Form.Item>
+          <Collapse
+            defaultActiveKey={['content']}
+            items={[{
+              key: 'content',
+              label: 'Content',
+              children: (
+                <Form.Item
+                  name="content"
+                  rules={[
+                    { required: true, message: 'Please input content!' },
+                    { min: 10, message: 'Content must be at least 10 characters long' },
+                  ]}
+                >
+                  <DynamicBlogEditor />
+                </Form.Item>
+              ),
+            }]}
+          />
 
           <Form.Item
             label="Published"

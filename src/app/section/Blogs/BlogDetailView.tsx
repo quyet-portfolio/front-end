@@ -11,6 +11,7 @@ import Spin from 'antd/es/spin'
 import Breadcrumb from 'antd/es/breadcrumb'
 import DOMPurify from 'isomorphic-dompurify'
 import { blogApi } from '@/src/lib/api/blog'
+import { recoverEscapedHtml } from '@/src/utils/htmlContent'
 import { Blog } from '@/src/lib/types'
 import { useAuth } from '@/src/contexts/AuthContext'
 import { useMessageApi } from '@/src/contexts/MessageContext'
@@ -195,7 +196,7 @@ const BlogDetailView = () => {
           {/* Content — prose renders CKEditor HTML beautifully */}
           <div
             className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-a:text-blue-400 prose-img:rounded-md pb-10"
-            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.content) }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(recoverEscapedHtml(blog.content)) }}
           />
         </div>
       </div>

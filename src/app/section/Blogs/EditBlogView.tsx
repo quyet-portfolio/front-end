@@ -15,6 +15,7 @@ import { useRouter, useParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { useMessageApi } from '@/src/contexts/MessageContext'
 import { blogApi, UpdateBlogData } from '@/src/lib/api/blog'
+import { recoverEscapedHtml } from '@/src/utils/htmlContent'
 import { Blog } from '@/src/lib/types'
 
 // Dynamic import: avoid SSR crash for CKEditor
@@ -46,7 +47,9 @@ const EditBlogView = () => {
         const res = await blogApi.getBlogBySlug(slug)
         const fetchedBlog = res.blog
         setBlog(fetchedBlog)
-        setContent(fetchedBlog.content)
+        // Recover legacy entity-escaped content so the editor shows real HTML
+        // (and re-saving then persists the corrected markup).
+        setContent(recoverEscapedHtml(fetchedBlog.content))
         form.setFieldsValue({
           title: fetchedBlog.title,
           category: fetchedBlog.category,

@@ -10,6 +10,7 @@ import BlogHeading from './BlogsHeading'
 import { useBlogs } from '@/src/hooks/useBlogs'
 import { blogApi, GetBlogsParams } from '@/src/lib/api/blog'
 import { stripHtml } from '@/src/utils/stringUtils'
+import { recoverEscapedHtml } from '@/src/utils/htmlContent'
 
 const PAGE_SIZE = 9
 
@@ -128,8 +129,8 @@ const BlogsView = () => {
                     {/* Body */}
                     <div className="flex flex-col flex-1 px-5 py-4 gap-2">
                       <h3 className="font-bold text-base text-white leading-snug line-clamp-2">{blog.title}</h3>
-                      <p className="text-white-200 text-sm leading-relaxed line-clamp-3 flex-1">
-                        {stripHtml(blog.excerpt || blog.content)}
+                      <p className="text-white-200 text-sm leading-relaxed line-clamp-1 flex-1">
+                        {stripHtml(recoverEscapedHtml(blog.excerpt || blog.content))}
                       </p>
 
                       {/* Footer pinned to bottom */}

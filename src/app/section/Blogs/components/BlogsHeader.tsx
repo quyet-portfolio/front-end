@@ -62,7 +62,11 @@ const BlogsHeader = ({ defaultValue = '', onSearch }: BlogsHeaderProps) => {
 
       <div className="flex items-center gap-2 md:gap-6">
         {isAuthenticated ? (
-          <Dropdown
+          <>
+            <Tooltip title="Create new blog" trigger={'hover'}>
+              <PlusCircleOutlined style={{ fontSize: '32px' }} onClick={handleCreate} />
+            </Tooltip>
+            <Dropdown
             menu={{
               items: [
                 {
@@ -94,6 +98,7 @@ const BlogsHeader = ({ defaultValue = '', onSearch }: BlogsHeaderProps) => {
               icon={<UserOutlined />}
             />
           </Dropdown>
+          </>
         ) : (
           <Tooltip title="Login">
             <Button size='large' variant="outlined" color="default" onClick={() => router.push('/login')}>

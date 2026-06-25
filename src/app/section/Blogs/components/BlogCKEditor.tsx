@@ -89,11 +89,16 @@ const CODE_BLOCK_LANGUAGES = [
 ]
 
 const BlogCKEditor: React.FC<BlogCKEditorProps> = ({ value = '', onChange }) => {
+  // CKEditor owns its content after mount; capture only the initial value so we
+  // never call setData() on every change (which would fight source-editing mode
+  // and reset the caret). `onChange` keeps the parent form in sync.
+  const [initialData] = React.useState(value)
+
   return (
     <div className="blog-editor-wrapper text-black">
       <CKEditor
         editor={ClassicEditor}
-        data={value}
+        data={initialData}
         config={{
           licenseKey: 'GPL',
           plugins: [
@@ -141,6 +146,20 @@ const BlogCKEditor: React.FC<BlogCKEditorProps> = ({ value = '', onChange }) => 
           if (onChange) {
             onChange(data)
           }
+        }}
+        onReady={(editor) => {
+          // CKEditor does not emit a model `change` event while the user edits
+          // raw HTML in source-editing mode (data only syncs to the model when
+          // leaving that mode). Without this, HTML pasted in source mode is lost
+          // on submit. Delegate the source textarea's input events to keep
+          // `onChange` in sync live.
+          const root = editor.ui.view.element
+          root?.addEventListener('input', (event) => {
+            const target = event.target as HTMLElement | null
+            if (target instanceof HTMLTextAreaElement && target.closest('.ck-source-editing-area')) {
+              onChange?.(target.value)
+            }
+          })
         }}
       />
     </div>
