@@ -189,6 +189,7 @@ const GoldView = () => {
         columns={columns}
         loading={loading}
         rowKey={(record) => record._id}
+        scroll={{ x: 'max-content' }}
         summary={() => {
           return (
             <>

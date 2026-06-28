@@ -92,11 +92,11 @@ const BlogDetailView = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 max-w-4xl mb-16 mt-6 text-white">
+    <div className="container mx-auto px-0 sm:px-4 max-w-4xl mb-16 mt-6 text-white">
 
-      {/* Breadcrumb */}
+      {/* Breadcrumb — single line with ellipsis on overflow */}
       <Breadcrumb
-        className="!mb-10 text-white-100 w-full"
+        className="!mb-6 sm:!mb-10 text-white-100 w-full px-4 sm:px-0 [&_ol]:flex-nowrap [&_li]:whitespace-nowrap [&_.ant-breadcrumb-separator]:!mx-1.5"
         items={[
           {
             href: '/',
@@ -110,13 +110,13 @@ const BlogDetailView = () => {
             ? [{ title: <span className="text-blue-400 text-[16px] font-medium">{blog.category}</span> }]
             : []),
           {
-            title: <span className="text-gray-500 max-w-full truncate inline-block align-bottom text-[16px] font-medium">{blog.title}</span>,
+            title: <span className="text-gray-500 max-w-[140px] sm:max-w-[320px] truncate inline-block align-bottom text-[16px] font-medium">{blog.title}</span>,
           },
         ]}
       />
 
       {/* Card wrapper */}
-      <div className="rounded-lg border border-blue-950 bg-black-100 shadow-xl overflow-hidden">
+      <div className="rounded-none sm:rounded-lg border-x-0 border-y sm:border bg-black-100 shadow-xl overflow-hidden border-blue-950">
         {/* Featured Image Banner */}
         <div className="relative w-full h-[380px]">
           <Image
@@ -137,7 +137,7 @@ const BlogDetailView = () => {
           </div>
         </div>
 
-        <div className="px-6 md:px-10 py-6">
+        <div className="px-0 md:px-10 py-6">
           {/* Meta row */}
           <div className="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-gray-800 mb-6">
             {/* Author + date */}

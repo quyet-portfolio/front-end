@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useState } from 'react'
 
@@ -42,8 +43,8 @@ export default function BlogHeading() {
   const handleNext = () => setActiveIndex(nextIndex)
 
   return (
-    <div className="relative w-full flex items-center justify-center overflow-hidden py-10">
-      <div className="flex items-end justify-center w-[90%] relative h-[400px]">
+    <div className="relative w-full flex items-center justify-center overflow-hidden py-6 sm:py-10">
+      <div className="flex items-end justify-center w-[90%] relative h-[300px] sm:h-[400px]">
         {/* Left Card */}
         <motion.div
           key={posts[prevIndex].id}
@@ -52,24 +53,10 @@ export default function BlogHeading() {
           animate={{ x: '-26%', opacity: 1, scale: 0.8 }}
           exit={{ x: '-36%', opacity: 0 }}
           transition={{ duration: 0.4, type: 'spring' }}
-          className="absolute left-0 w-1/3 h-[350px] cursor-pointer rounded-xl overflow-hidden shadow-lg z-20 opacity-70"
+          className="absolute left-0 w-1/3 h-[230px] sm:h-[350px] cursor-pointer rounded-xl overflow-hidden shadow-lg z-10 opacity-60 sm:opacity-70"
         >
           <Card post={posts[prevIndex]} small />
         </motion.div>
-
-        {/* Center Card */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={posts[activeIndex].id}
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            transition={{ duration: 0.4, type: 'spring' }}
-            className="absolute w-[60%] h-[400px] rounded-2xl overflow-hidden shadow-xl cursor-pointer z-20"
-          >
-            <Card post={posts[activeIndex]} />
-          </motion.div>
-        </AnimatePresence>
 
         {/* Right Card */}
         <motion.div
@@ -79,10 +66,24 @@ export default function BlogHeading() {
           animate={{ x: '26%', opacity: 1, scale: 0.8 }}
           exit={{ x: '36%', opacity: 0 }}
           transition={{ duration: 0.4, type: 'spring' }}
-          className="absolute right-0 w-1/3 h-[350px] cursor-pointer rounded-xl overflow-hidden shadow-lg z-10"
+          className="absolute right-0 w-1/3 h-[230px] sm:h-[350px] cursor-pointer rounded-xl overflow-hidden shadow-lg z-10 opacity-60 sm:opacity-100"
         >
           <Card post={posts[nextIndex]} small textAlign="right" />
         </motion.div>
+
+        {/* Center Card — rendered last so it sits above both side cards */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={posts[activeIndex].id}
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ duration: 0.4, type: 'spring' }}
+            className="absolute w-[75%] sm:w-[60%] h-[280px] sm:h-[400px] rounded-2xl overflow-hidden shadow-xl cursor-pointer z-20"
+          >
+            <Card post={posts[activeIndex]} />
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   )
@@ -99,20 +100,25 @@ function Card({
 }) {
   return (
     <div className="relative w-full h-full">
-      <img src={post.image} alt={post.title} className="absolute inset-0 w-full h-full object-cover" />
-      {/* <Image
+      <Image
         src={post.image}
         alt={post.title}
         fill
         className="absolute inset-0 w-full h-full object-cover"
         sizes="(max-width: 768px) 100vw, 33vw"
-        priority
-      /> */}
+        priority={true}
+      />
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-      <div className={`absolute bottom-4 right-4 text-white ${textAlign === 'right' ? 'text-right' : 'left-4'}`}>
-        <h2 className={`font-bold ${small ? 'text-lg' : 'text-2xl'}`}>{post.title}</h2>
-        {!small && <p className="text-sm mt-1">{post.desc}</p>}
-        <p className="text-xs mt-2 opacity-80">By {post.author}</p>
+      <div
+        className={`absolute bottom-3 right-3 sm:bottom-4 sm:right-4 text-white ${
+          small ? 'hidden sm:block' : ''
+        } ${textAlign === 'right' ? 'text-right left-3 sm:left-4' : 'left-3 sm:left-4'}`}
+      >
+        <h2 className={`font-bold line-clamp-2 ${small ? 'text-sm sm:text-lg' : 'text-lg sm:text-2xl'}`}>
+          {post.title}
+        </h2>
+        {!small && <p className="text-xs sm:text-sm mt-1 line-clamp-2">{post.desc}</p>}
+        <p className="text-[10px] sm:text-xs mt-1.5 sm:mt-2 opacity-80">By {post.author}</p>
       </div>
     </div>
   )
