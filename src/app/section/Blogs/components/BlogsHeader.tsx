@@ -15,11 +15,9 @@ import { useAuth } from '@/src/contexts/AuthContext'
 
 interface BlogsHeaderProps {
   defaultValue?: string
-  onSearch: (value: string) => void
+  onSearch?: (value: string) => void
 }
 
-// Blogs header — mirrors the Notes header layout for a consistent UX:
-// hamburger (left) + centered search bar + action icons / account (right).
 const BlogsHeader = ({ defaultValue = '', onSearch }: BlogsHeaderProps) => {
   const router = useRouter()
   const { isAuthenticated, logout, user } = useAuth()
@@ -27,13 +25,21 @@ const BlogsHeader = ({ defaultValue = '', onSearch }: BlogsHeaderProps) => {
   const [value, setValue] = useState<string>(defaultValue)
   const [isOpenPopupAuthen, setOpenPopupAuthen] = useState(false)
 
-  const triggerSearch = () => onSearch(value.trim())
+  const handleSearch = (next: string) => {
+    if (onSearch) {
+      onSearch(next)
+      return
+    }
+    router.push(next ? `/blogs?search=${encodeURIComponent(next)}` : '/blogs')
+  }
+
+  const triggerSearch = () => handleSearch(value.trim())
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const next = e.target.value
     setValue(next)
-    // Reset immediately when the field is cleared
-    if (next === '') onSearch('')
+    // Reset immediately when the field is cleared (list page only)
+    if (next === '' && onSearch) onSearch('')
   }
 
   const handleCreate = () => {
@@ -53,7 +59,6 @@ const BlogsHeader = ({ defaultValue = '', onSearch }: BlogsHeaderProps) => {
           value={value}
           placeholder="Search ..."
           size="large"
-          allowClear
           onChange={handleChange}
           onPressEnter={triggerSearch}
           suffix={<SearchOutlined className="cursor-pointer" onClick={triggerSearch} />}

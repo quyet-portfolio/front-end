@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Button from 'antd/es/button'
 import { motion } from 'framer-motion'
 import { useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import BlogsHeader from './components/BlogsHeader'
 import BlogHeading from './BlogsHeading'
 import { useBlogs } from '@/src/hooks/useBlogs'
@@ -15,7 +16,9 @@ import { recoverEscapedHtml } from '@/src/utils/htmlContent'
 const PAGE_SIZE = 9
 
 const BlogsView = () => {
-  const [search, setSearch] = useState<string>('')
+  const searchParams = useSearchParams()
+
+  const [search, setSearch] = useState<string>(searchParams.get('search') || '')
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
   const [page, setPage] = useState<number>(1)
   const [categories, setCategories] = useState<string[]>([])

@@ -1,10 +1,14 @@
 'use client'
 
-import React from 'react'
+import React, { Suspense } from 'react'
 import BlogsView from '../../section/Blogs/BlogsView'
 
 const BlogPage = () => {
-  return <BlogsView />
+  return (
+    <Suspense>
+      <BlogsView />
+    </Suspense>
+  )
 }
 
 export default BlogPage
