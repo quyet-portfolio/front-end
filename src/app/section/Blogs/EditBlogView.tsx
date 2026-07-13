@@ -7,6 +7,7 @@ import Collapse from 'antd/es/collapse'
 import Form from 'antd/es/form'
 import Input from 'antd/es/input'
 import TextArea from 'antd/es/input/TextArea'
+import Modal from 'antd/es/modal'
 import Select from 'antd/es/select'
 import Spin from 'antd/es/spin'
 import Switch from 'antd/es/switch'
@@ -17,6 +18,9 @@ import { useMessageApi } from '@/src/contexts/MessageContext'
 import { blogApi, UpdateBlogData } from '@/src/lib/api/blog'
 import { recoverEscapedHtml } from '@/src/utils/htmlContent'
 import { Blog } from '@/src/lib/types'
+
+// Số bài tối đa được ghim lên BlogHeading (khớp với backend)
+const MAX_FEATURED = 3
 
 // Dynamic import: avoid SSR crash for CKEditor
 const DynamicBlogEditor = dynamic(() => import('./components/BlogCKEditor'), {
@@ -36,6 +40,8 @@ const EditBlogView = () => {
   const [blog, setBlog] = useState<Blog | null>(null)
   // Track CKEditor content separately since it's not a native form element
   const [content, setContent] = useState<string>('')
+  // Số bài featured KHÁC bài đang sửa — để cảnh báo khi đã đủ MAX_FEATURED
+  const [otherFeaturedCount, setOtherFeaturedCount] = useState(0)
 
   // Fetch blog by id (via slug stored in URL), then pre-fill the form
   useEffect(() => {
@@ -57,7 +63,12 @@ const EditBlogView = () => {
           tags: fetchedBlog.tags,
           featuredImage: fetchedBlog.featuredImage,
           isPublished: fetchedBlog.isPublished,
+          isFeatured: fetchedBlog.isFeatured ?? false,
         })
+
+        // Đếm số bài featured khác bài đang sửa để biết khi nào slot đã đầy
+        const featured = await blogApi.getFeaturedBlogs()
+        setOtherFeaturedCount(featured.blogs.filter((b) => b._id !== fetchedBlog._id).length)
       } catch (err: any) {
         if (messageApi) messageApi.error('Blog not found')
         router.push('/blogs')
@@ -68,6 +79,20 @@ const EditBlogView = () => {
 
     fetchBlog()
   }, [slug])
+
+  // Khi bật ghim lúc đã đủ 3 bài khác: cảnh báo sẽ thay thế bài cũ nhất
+  const handleFeaturedChange = (checked: boolean) => {
+    if (!checked || otherFeaturedCount < MAX_FEATURED) return
+
+    Modal.confirm({
+      title: 'Trang blog đã có đủ 3 bài nổi bật',
+      content:
+        'Ghim bài này lên trang chủ sẽ thay thế bài được ghim sớm nhất trong 3 bài hiện tại. Bạn có muốn tiếp tục?',
+      okText: 'Tiếp tục',
+      cancelText: 'Huỷ',
+      onCancel: () => form.setFieldValue('isFeatured', false),
+    })
+  }
 
   const onFinish = async (values: UpdateBlogData) => {
     if (!blog) return
@@ -168,6 +193,15 @@ const EditBlogView = () => {
 
           <Form.Item label="Published" name="isPublished" valuePropName="checked">
             <Switch checkedChildren="Yes" unCheckedChildren="Draft" />
+          </Form.Item>
+
+          <Form.Item
+            label="Nổi bật trên trang chủ"
+            name="isFeatured"
+            valuePropName="checked"
+            extra="Bật để hiển thị bài này trên carousel đầu trang blog (tối đa 3 bài)."
+          >
+            <Switch checkedChildren="On" unCheckedChildren="Off" onChange={handleFeaturedChange} />
           </Form.Item>
         </Form>
       </Card>

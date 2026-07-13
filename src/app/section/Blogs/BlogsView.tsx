@@ -28,6 +28,9 @@ const BlogsView = () => {
     const next: GetBlogsParams = { page, limit: PAGE_SIZE }
     if (search) next.search = search
     if (selectedCategory !== 'All') next.category = selectedCategory
+    // Ở chế độ xem mặc định (đang hiển thị BlogHeading), ẩn các bài featured
+    // khỏi grid để tránh trùng lặp. Khi tìm kiếm thì vẫn tìm được chúng.
+    if (!search) next.excludeFeatured = true
     return next
   }, [page, search, selectedCategory])
 

@@ -24,6 +24,8 @@ export interface Blog {
   category: string;
   featuredImage: string;
   isPublished: boolean;
+  isFeatured?: boolean;
+  featuredAt?: string;
   publishedAt: string;
   views: number;
   likes: string[];

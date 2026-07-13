@@ -3,39 +3,40 @@
 import { Button, Form, Input } from 'antd'
 import { MagicCard } from '@/src/components/ui/MagicCard'
 import { useState } from 'react'
-import { useAuth } from '@/src/contexts/AuthContext'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { authApi } from '@/src/lib/api/auth'
 import { useMessageApi } from '@/src/contexts/MessageContext'
-import { EMAIL_REGEX, PASSWORD_REGEX } from '@/src/lib/constants'
+import { PASSWORD_REGEX } from '@/src/lib/constants'
 
-const LoginView = () => {
-  const { login } = useAuth()
+const ResetPasswordView = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const token = searchParams.get('token') || ''
   const [form] = Form.useForm()
 
   const messageApi = useMessageApi()
 
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: { newPassword: string; confirmPassword: string }) => {
+    if (!token) {
+      messageApi?.error('Missing or invalid reset token')
+      return
+    }
+
     setLoading(true)
 
     try {
-      const data = await authApi.login(values)
-      login(data.accessToken, data.refreshToken, data.user)
-      // Điều hướng sau login: redirect param > quay lại trang trước > mặc định về home
-      const redirect = searchParams.get('redirect')
-      if (redirect) {
-        router.replace(redirect)
-      } else if (typeof window !== 'undefined' && window.history.length > 1) {
-        router.back()
-      } else {
-        router.replace('/')
-      }
+      await authApi.resetPassword({
+        token,
+        newPassword: values.newPassword,
+        confirmPassword: values.confirmPassword,
+      })
+      messageApi?.success('Password reset successfully. Please log in.')
+      // redirect=/ vì trang này thường mở từ link email (không có history để back())
+      router.replace('/login?redirect=/')
     } catch (err: any) {
-      messageApi?.error(err.response?.data?.message || 'Login failed')
+      messageApi?.error(err.response?.data?.message || 'Failed to reset password')
     } finally {
       setLoading(false)
     }
@@ -56,23 +57,11 @@ const LoginView = () => {
       >
         <div className="flex flex-col gap-6 w-[90%] lg:w-[70%] mx-auto h-full">
           <div className="mx-auto mb-10">
-            <h1 className="text-start text-xl md:text-4xl font-bold">Log in</h1>
+            <h1 className="text-start text-xl md:text-4xl font-bold">Reset password</h1>
           </div>
           <Form form={form} onFinish={handleSubmit} className="w-full flex flex-col gap-2">
             <Form.Item
-              name="email"
-              rules={[
-                { required: true, message: 'This field is required' },
-                {
-                  pattern: EMAIL_REGEX,
-                  message: 'Invalid email address!',
-                },
-              ]}
-            >
-              <Input maxLength={191} placeholder="Email address" size="large" />
-            </Form.Item>
-            <Form.Item
-              name="password"
+              name="newPassword"
               rules={[
                 { required: true, message: 'This field is required' },
                 {
@@ -81,19 +70,31 @@ const LoginView = () => {
                 },
               ]}
             >
-              <Input.Password placeholder="Password" size="large" />
+              <Input.Password placeholder="New password" size="large" />
             </Form.Item>
-            <div className="flex justify-end -mt-2 mb-1">
-              <Button variant="text" color="default" size="small" onClick={() => router.replace('/forgot-password')}>
-                Forgot password?
-              </Button>
-            </div>
+            <Form.Item
+              name="confirmPassword"
+              dependencies={['newPassword']}
+              rules={[
+                { required: true, message: 'This field is required' },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue('newPassword') === value) {
+                      return Promise.resolve()
+                    }
+                    return Promise.reject(new Error('Passwords do not match'))
+                  },
+                }),
+              ]}
+            >
+              <Input.Password placeholder="Confirm new password" size="large" />
+            </Form.Item>
             <div className="flex flex-col gap-2">
               <Button size="large" className="w-full" htmlType="submit" loading={loading}>
-                Log in
+                Reset password
               </Button>
-              <Button className="w-full" variant="text" color="default" onClick={() => router.push('/register')}>
-                New to Notes? Create an account
+              <Button className="w-full" variant="text" color="default" onClick={() => router.replace('/login?redirect=/')}>
+                Back to log in
               </Button>
             </div>
           </Form>
@@ -103,4 +104,4 @@ const LoginView = () => {
   )
 }
 
-export default LoginView
+export default ResetPasswordView

@@ -1,75 +1,93 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { blogApi } from '@/src/lib/api/blog'
+import { stripHtml } from '@/src/utils/stringUtils'
+import { recoverEscapedHtml } from '@/src/utils/htmlContent'
 
-const posts = [
-  {
-    id: 1,
-    title: 'Khám phá React 18',
-    desc: 'Những tính năng mới trong React 18 giúp tối ưu hiệu suất.',
-    author: 'Nguyễn Văn A',
-    image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200',
-  },
-  {
-    id: 2,
-    title: 'TailwindCSS cho developer',
-    desc: 'Cách áp dụng Tailwind để xây dựng UI nhanh chóng.',
-    author: 'Trần Thị B',
-    image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200',
-  },
-  {
-    id: 3,
-    title: 'Framer Motion Animation',
-    desc: 'Tạo animation siêu mượt trong React.',
-    author: 'Lê Văn C',
-    image: 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=1200',
-  },
-]
+// Post đã chuẩn hoá cho carousel (map từ Blog featured)
+interface HeadingPost {
+  id: string
+  title: string
+  desc: string
+  author: string
+  slug: string
+  image: string
+}
+
+const FALLBACK_IMAGE = '/images/next-js-a-react-js-framework.jpg'
 
 export default function BlogHeading() {
+  const [posts, setPosts] = useState<HeadingPost[]>([])
   const [activeIndex, setActiveIndex] = useState(0)
 
-  const prevIndex = (activeIndex - 1 + posts.length) % posts.length
-  const nextIndex = (activeIndex + 1) % posts.length
+  useEffect(() => {
+    blogApi
+      .getFeaturedBlogs()
+      .then((data) => {
+        const mapped: HeadingPost[] = data.blogs.map((blog) => ({
+          id: blog._id,
+          title: blog.title,
+          desc: stripHtml(recoverEscapedHtml(blog.excerpt || blog.content)),
+          author: blog.author?.username || 'Unknown',
+          slug: blog.slug,
+          image: blog.featuredImage || FALLBACK_IMAGE,
+        }))
+        setPosts(mapped)
+        setActiveIndex(0)
+      })
+      .catch(() => setPosts([]))
+  }, [])
 
-  const handlePrev = () => {
-    if (activeIndex > 0) {
-      setActiveIndex(prevIndex)
-    }
-  }
-  
+  // Không có bài featured nào — ẩn hoàn toàn carousel
+  if (posts.length === 0) return null
+
+  const count = posts.length
+  const prevIndex = (activeIndex - 1 + count) % count
+  const nextIndex = (activeIndex + 1) % count
+
+  // Chỉ hiện side card khi đủ item để không trùng với center card
+  const showRight = count >= 2
+  const showLeft = count >= 3
+
+  const handlePrev = () => setActiveIndex(prevIndex)
   const handleNext = () => setActiveIndex(nextIndex)
 
   return (
     <div className="relative w-full flex items-center justify-center overflow-hidden py-6 sm:py-10">
       <div className="flex items-end justify-center w-[90%] relative h-[300px] sm:h-[400px]">
         {/* Left Card */}
-        <motion.div
-          key={posts[prevIndex].id}
-          onClick={handlePrev}
-          initial={{ x: '-36%', opacity: 0 }}
-          animate={{ x: '-26%', opacity: 1, scale: 0.8 }}
-          exit={{ x: '-36%', opacity: 0 }}
-          transition={{ duration: 0.4, type: 'spring' }}
-          className="absolute left-0 w-1/3 h-[230px] sm:h-[350px] cursor-pointer rounded-xl overflow-hidden shadow-lg z-10 opacity-60 sm:opacity-70"
-        >
-          <Card post={posts[prevIndex]} small />
-        </motion.div>
+        {showLeft && (
+          <motion.div
+            key={posts[prevIndex].id}
+            onClick={handlePrev}
+            initial={{ x: '-36%', opacity: 0 }}
+            animate={{ x: '-26%', opacity: 1, scale: 0.8 }}
+            exit={{ x: '-36%', opacity: 0 }}
+            transition={{ duration: 0.4, type: 'spring' }}
+            className="absolute left-0 w-1/3 h-[230px] sm:h-[350px] cursor-pointer rounded-xl overflow-hidden shadow-lg z-10 opacity-60 sm:opacity-70"
+          >
+            <Card post={posts[prevIndex]} small />
+          </motion.div>
+        )}
 
         {/* Right Card */}
-        <motion.div
-          key={posts[nextIndex].id}
-          onClick={handleNext}
-          initial={{ x: '36%', opacity: 0 }}
-          animate={{ x: '26%', opacity: 1, scale: 0.8 }}
-          exit={{ x: '36%', opacity: 0 }}
-          transition={{ duration: 0.4, type: 'spring' }}
-          className="absolute right-0 w-1/3 h-[230px] sm:h-[350px] cursor-pointer rounded-xl overflow-hidden shadow-lg z-10 opacity-60 sm:opacity-100"
-        >
-          <Card post={posts[nextIndex]} small textAlign="right" />
-        </motion.div>
+        {showRight && (
+          <motion.div
+            key={posts[nextIndex].id}
+            onClick={handleNext}
+            initial={{ x: '36%', opacity: 0 }}
+            animate={{ x: '26%', opacity: 1, scale: 0.8 }}
+            exit={{ x: '36%', opacity: 0 }}
+            transition={{ duration: 0.4, type: 'spring' }}
+            className="absolute right-0 w-1/3 h-[230px] sm:h-[350px] cursor-pointer rounded-xl overflow-hidden shadow-lg z-10 opacity-60 sm:opacity-100"
+          >
+            <Card post={posts[nextIndex]} small textAlign="right" />
+          </motion.div>
+        )}
 
         {/* Center Card — rendered last so it sits above both side cards */}
         <AnimatePresence mode="wait">
@@ -94,7 +112,7 @@ function Card({
   small,
   textAlign,
 }: {
-  post: (typeof posts)[0]
+  post: HeadingPost
   small?: boolean
   textAlign?: 'left' | 'center' | 'right'
 }) {
@@ -114,9 +132,15 @@ function Card({
           small ? 'hidden sm:block' : ''
         } ${textAlign === 'right' ? 'text-right left-3 sm:left-4' : 'left-3 sm:left-4'}`}
       >
-        <h2 className={`font-bold line-clamp-2 ${small ? 'text-sm sm:text-lg' : 'text-lg sm:text-2xl'}`}>
-          {post.title}
-        </h2>
+        <Link
+          href={`/blogs/${post.slug}`}
+          onClick={(e) => e.stopPropagation()}
+          className="hover:underline"
+        >
+          <h2 className={`font-bold line-clamp-2 ${small ? 'text-sm sm:text-lg' : 'text-lg sm:text-2xl'}`}>
+            {post.title}
+          </h2>
+        </Link>
         {!small && <p className="text-xs sm:text-sm mt-1 line-clamp-2">{post.desc}</p>}
         <p className="text-[10px] sm:text-xs mt-1.5 sm:mt-2 opacity-80">By {post.author}</p>
       </div>

@@ -4,11 +4,12 @@ import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { HeartOutlined, HeartFilled, HomeOutlined, EditOutlined } from '@ant-design/icons'
+import { HeartOutlined, HeartFilled, HomeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import Button from 'antd/es/button'
 import Tag from 'antd/es/tag'
 import Spin from 'antd/es/spin'
 import Breadcrumb from 'antd/es/breadcrumb'
+import Popconfirm from 'antd/es/popconfirm'
 import DOMPurify from 'isomorphic-dompurify'
 import { blogApi } from '@/src/lib/api/blog'
 import { recoverEscapedHtml } from '@/src/utils/htmlContent'
@@ -26,6 +27,7 @@ const BlogDetailView = () => {
   const [error, setError] = useState<string | null>(null)
   const [likesCount, setLikesCount] = useState<number>(0)
   const [isLiked, setIsLiked] = useState<boolean>(false)
+  const [deleting, setDeleting] = useState<boolean>(false)
 
   const { isAuthenticated, user } = useAuth()
   const messageApi = useMessageApi()
@@ -71,6 +73,25 @@ const BlogDetailView = () => {
       }
     }
   }
+
+  const handleDelete = async () => {
+    if (!blog) return
+
+    try {
+      setDeleting(true)
+      await blogApi.deleteBlog(blog._id)
+      if (messageApi) messageApi.success('Blog deleted successfully')
+      router.push('/blogs')
+    } catch (err: any) {
+      if (messageApi) {
+        messageApi.error(err.response?.data?.message || 'Failed to delete blog')
+      }
+      setDeleting(false)
+    }
+  }
+
+  // Author hoặc admin mới được sửa/xoá bài
+  const canManage = !!user && !!blog && (user._id === blog.author._id || user.role === 'admin')
 
   if (loading) {
     return (
@@ -168,16 +189,30 @@ const BlogDetailView = () => {
               >
                 {likesCount} {likesCount === 1 ? 'Like' : 'Likes'}
               </Button>
-              {/* Show Edit button only for author or admin */}
-              {user && (user._id === blog.author._id || user.role === 'admin') && (
-                <Button
-                  type="default"
-                  size="small"
-                  icon={<EditOutlined />}
-                  onClick={() => router.push(`/blogs/edit/${blog.slug}`)}
-                >
-                  Edit
-                </Button>
+              {/* Edit & Delete chỉ hiện cho author hoặc admin */}
+              {canManage && (
+                <>
+                  <Button
+                    type="default"
+                    size="small"
+                    icon={<EditOutlined />}
+                    onClick={() => router.push(`/blogs/edit/${blog.slug}`)}
+                  >
+                    Edit
+                  </Button>
+                  <Popconfirm
+                    title="Xoá bài viết này?"
+                    description="Hành động này không thể hoàn tác."
+                    okText="Xoá"
+                    cancelText="Huỷ"
+                    okButtonProps={{ danger: true, loading: deleting }}
+                    onConfirm={handleDelete}
+                  >
+                    <Button danger type="default" size="small" icon={<DeleteOutlined />} loading={deleting}>
+                      Delete
+                    </Button>
+                  </Popconfirm>
+                </>
               )}
             </div>
           </div>

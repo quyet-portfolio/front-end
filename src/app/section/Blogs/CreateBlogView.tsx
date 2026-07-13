@@ -1,11 +1,12 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Button from 'antd/es/button'
 import Card from 'antd/es/card'
 import Collapse from 'antd/es/collapse'
 import Form from 'antd/es/form'
 import Input from 'antd/es/input'
+import Modal from 'antd/es/modal'
 import Select from 'antd/es/select'
 import Switch from 'antd/es/switch'
 import { ArrowLeftOutlined } from '@ant-design/icons'
@@ -15,6 +16,9 @@ import { useMessageApi } from '@/src/contexts/MessageContext'
 import { blogApi, CreateBlogData } from '@/src/lib/api/blog'
 
 import TextArea from 'antd/es/input/TextArea'
+
+// Số bài tối đa được ghim lên BlogHeading (khớp với backend)
+const MAX_FEATURED = 3
 
 // Dynamic import with SSR false for CKEditor to avoid Next.js document/window errors
 const DynamicBlogEditor = dynamic(() => import('./components/BlogCKEditor'), {
@@ -27,6 +31,29 @@ const CreateBlogView = () => {
   const [form] = Form.useForm()
   const messageApi = useMessageApi()
   const [loading, setLoading] = useState(false)
+  // Số bài đang được ghim — để cảnh báo khi đã đủ MAX_FEATURED
+  const [featuredCount, setFeaturedCount] = useState(0)
+
+  useEffect(() => {
+    blogApi
+      .getFeaturedBlogs()
+      .then((data) => setFeaturedCount(data.blogs.length))
+      .catch(() => setFeaturedCount(0))
+  }, [])
+
+  // Khi bật ghim lúc đã đủ 3 bài: cảnh báo sẽ thay thế bài cũ nhất
+  const handleFeaturedChange = (checked: boolean) => {
+    if (!checked || featuredCount < MAX_FEATURED) return
+
+    Modal.confirm({
+      title: 'Trang blog đã có đủ 3 bài nổi bật',
+      content:
+        'Ghim bài này lên trang chủ sẽ thay thế bài được ghim sớm nhất trong 3 bài hiện tại. Bạn có muốn tiếp tục?',
+      okText: 'Tiếp tục',
+      cancelText: 'Huỷ',
+      onCancel: () => form.setFieldValue('isFeatured', false),
+    })
+  }
 
   const onFinish = async (values: CreateBlogData) => {
     try {
@@ -62,6 +89,7 @@ const CreateBlogView = () => {
           onFinish={onFinish}
           initialValues={{
             isPublished: true,
+            isFeatured: false,
             tags: [],
           }}
         >
@@ -137,6 +165,15 @@ const CreateBlogView = () => {
             valuePropName="checked"
           >
             <Switch checkedChildren="Yes" unCheckedChildren="Draft" />
+          </Form.Item>
+
+          <Form.Item
+            label="Nổi bật trên trang chủ"
+            name="isFeatured"
+            valuePropName="checked"
+            extra="Bật để hiển thị bài này trên carousel đầu trang blog (tối đa 3 bài)."
+          >
+            <Switch checkedChildren="On" unCheckedChildren="Off" onChange={handleFeaturedChange} />
           </Form.Item>
         </Form>
       </Card>

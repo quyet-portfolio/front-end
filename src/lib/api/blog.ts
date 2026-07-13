@@ -10,6 +10,7 @@ export interface CreateBlogData {
   tags?: string[]
   featuredImage?: string
   isPublished?: boolean
+  isFeatured?: boolean
 }
 
 export interface UpdateBlogData {
@@ -20,6 +21,7 @@ export interface UpdateBlogData {
   tags?: string[]
   featuredImage?: string
   isPublished?: boolean
+  isFeatured?: boolean
 }
 
 export interface GetBlogsParams {
@@ -29,6 +31,7 @@ export interface GetBlogsParams {
   tag?: string
   author?: string
   search?: string
+  excludeFeatured?: boolean
 }
 
 export interface CategoriesResponse {
@@ -45,6 +48,12 @@ export const blogApi = {
   // Get distinct categories of published blogs
   getCategories: async (): Promise<CategoriesResponse> => {
     const response = await axios.get<CategoriesResponse>('/blogs/categories')
+    return response.data
+  },
+
+  // Get featured blogs shown on the BlogHeading carousel (max 3)
+  getFeaturedBlogs: async (): Promise<{ blogs: Blog[] }> => {
+    const response = await axios.get<{ blogs: Blog[] }>('/blogs/featured')
     return response.data
   },
 
