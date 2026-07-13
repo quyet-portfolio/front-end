@@ -1,6 +1,7 @@
 'use client'
 
 import { Button, Form, Input } from 'antd'
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google'
 import { MagicCard } from '@/src/components/ui/MagicCard'
 import { useState } from 'react'
 import { useAuth } from '@/src/contexts/AuthContext'
@@ -19,23 +20,45 @@ const LoginView = () => {
 
   const [loading, setLoading] = useState(false)
 
+  const redirectAfterLogin = () => {
+    const redirect = searchParams.get('redirect')
+    if (redirect) {
+      router.replace(redirect)
+    } else if (typeof window !== 'undefined' && window.history.length > 1) {
+      router.back()
+    } else {
+      router.replace('/')
+    }
+  }
+
   const handleSubmit = async (values: any) => {
     setLoading(true)
 
     try {
       const data = await authApi.login(values)
       login(data.accessToken, data.refreshToken, data.user)
-      // Điều hướng sau login: redirect param > quay lại trang trước > mặc định về home
-      const redirect = searchParams.get('redirect')
-      if (redirect) {
-        router.replace(redirect)
-      } else if (typeof window !== 'undefined' && window.history.length > 1) {
-        router.back()
-      } else {
-        router.replace('/')
-      }
+      redirectAfterLogin()
     } catch (err: any) {
       messageApi?.error(err.response?.data?.message || 'Login failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+    const credential = credentialResponse.credential
+    if (!credential) {
+      messageApi?.error('Google login failed')
+      return
+    }
+
+    setLoading(true)
+    try {
+      const data = await authApi.googleLogin(credential)
+      login(data.accessToken, data.refreshToken, data.user)
+      redirectAfterLogin()
+    } catch (err: any) {
+      messageApi?.error(err.response?.data?.message || 'Google login failed')
     } finally {
       setLoading(false)
     }
@@ -97,6 +120,19 @@ const LoginView = () => {
               </Button>
             </div>
           </Form>
+
+          <div className="flex items-center gap-3 text-xs text-neutral-400">
+            <span className="h-px flex-1 bg-slate-700" />
+            OR
+            <span className="h-px flex-1 bg-slate-700" />
+          </div>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => messageApi?.error('Google login failed')}
+              theme="filled_black"
+              shape="pill"
+              width="100%"
+            />
         </div>
       </MagicCard>
     </div>

@@ -47,6 +47,12 @@ export const authApi = {
     return response.data
   },
 
+  // Login/Register with Google (ID token credential from Google Identity Services)
+  googleLogin: async (credential: string): Promise<AuthResponse> => {
+    const response = await axios.post<AuthResponse>('/auth/google', { credential })
+    return response.data
+  },
+
   // Refresh token
   refreshToken: async (refreshToken: string): Promise<AuthResponse> => {
     const response = await axios.post<AuthResponse>('/auth/refresh-token', {
