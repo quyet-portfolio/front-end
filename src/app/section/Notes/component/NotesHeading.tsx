@@ -71,9 +71,14 @@ const NotesHeading = () => {
                   key: '1',
                   label: (
                     <div className="flex gap-2 items-center cursor-default py-1">
-                      <Avatar style={{ backgroundColor: '#6366F1' }} size={'large'} icon={<UserOutlined />} />
+                      <Avatar
+                        src={user?.avatar || undefined}
+                        style={{ backgroundColor: '#6366F1' }}
+                        size={'large'}
+                        icon={<UserOutlined />}
+                      />
                       <div className="flex flex-col gap-1">
-                        <div className="font-semibold">{user?.username}</div>
+                        <div className="font-semibold">{user?.name || user?.username}</div>
                         <div className="font-normal">{user?.email}</div>
                       </div>
                     </div>
@@ -93,7 +98,7 @@ const NotesHeading = () => {
             placement="bottom"
             trigger={['click']}
           >
-            <Avatar className='cursor-pointer' style={{ backgroundColor: '#6366F1' }} size={'large'} icon={<UserOutlined />} />
+            <Avatar className='cursor-pointer' src={user?.avatar || undefined} style={{ backgroundColor: '#6366F1' }} size={'large'} icon={<UserOutlined />} />
           </Dropdown>
         ) : (
           <Tooltip title="Login">

@@ -126,13 +126,15 @@ const LoginView = () => {
             OR
             <span className="h-px flex-1 bg-slate-700" />
           </div>
+          <div className="flex justify-center">
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={() => messageApi?.error('Google login failed')}
               theme="filled_black"
               shape="pill"
-              width="100%"
+              width="300px"
             />
+          </div>
         </div>
       </MagicCard>
     </div>
