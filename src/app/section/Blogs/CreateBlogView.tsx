@@ -16,6 +16,7 @@ import dynamic from 'next/dynamic'
 import { useMessageApi } from '@/src/contexts/MessageContext'
 import { blogApi, CreateBlogData } from '@/src/lib/api/blog'
 import { BlogContentFormat } from '@/src/lib/types'
+import { SLUG_PATTERN, slugify } from '@/src/utils/slug'
 import CategorySelect from './components/CategorySelect'
 
 import TextArea from 'antd/es/input/TextArea'
@@ -44,6 +45,14 @@ const CreateBlogView = () => {
   const [featuredCount, setFeaturedCount] = useState(0)
   // Định dạng nội dung — chọn lúc tạo bài; đổi format sẽ xoá nội dung để tránh trộn lẫn
   const [contentFormat, setContentFormat] = useState<BlogContentFormat>('html')
+  // Slug tự sinh theo title cho tới khi người dùng tự chỉnh
+  const [isSlugEdited, setIsSlugEdited] = useState(false)
+
+  // Keep the slug in sync with the title until the user edits it manually
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (isSlugEdited) return
+    form.setFieldValue('slug', slugify(e.target.value))
+  }
 
   const handleFormatChange = (val: BlogContentFormat) => {
     if (val === contentFormat) return
@@ -63,11 +72,11 @@ const CreateBlogView = () => {
     if (!checked || featuredCount < MAX_FEATURED) return
 
     Modal.confirm({
-      title: 'Trang blog đã có đủ 3 bài nổi bật',
+      title: 'The Blog Page Already Has 3 Featured Posts',
       content:
-        'Ghim bài này lên trang chủ sẽ thay thế bài được ghim sớm nhất trong 3 bài hiện tại. Bạn có muốn tiếp tục?',
-      okText: 'Tiếp tục',
-      cancelText: 'Huỷ',
+        'Featuring this post on the homepage will replace the oldest of the 3 currently featured posts. Do you want to continue?',
+      okText: 'Continue',
+      cancelText: 'Cancel',
       onCancel: () => form.setFieldValue('isFeatured', false),
     })
   }
@@ -119,7 +128,35 @@ const CreateBlogView = () => {
               { max: 200, message: 'Title must not exceed 200 characters' },
             ]}
           >
-            <Input placeholder="Enter blog title" size="large" showCount maxLength={191} />
+            <Input
+              placeholder="Enter blog title"
+              size="large"
+              showCount
+              maxLength={191}
+              onChange={handleTitleChange}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Slug"
+            name="slug"
+            extra="Used in the post URL, e.g. /blogs/my-first-post"
+            rules={[
+              { required: true, message: 'Please input slug!' },
+              { min: 3, message: 'Slug must be at least 3 characters' },
+              { max: 200, message: 'Slug must not exceed 200 characters' },
+              {
+                pattern: SLUG_PATTERN,
+                message: 'Slug may only contain lowercase letters, numbers and hyphens',
+              },
+            ]}
+          >
+            <Input
+              placeholder="my-first-post"
+              size="large"
+              maxLength={200}
+              onChange={() => setIsSlugEdited(true)}
+            />
           </Form.Item>
 
           <Form.Item
@@ -158,8 +195,8 @@ const CreateBlogView = () => {
           </Form.Item>
 
           <Form.Item
-            label="Định dạng nội dung"
-            extra="Rich text (CKEditor) cho bài thường; Markdown cho bài coding (code block hiển thị chuẩn, có syntax highlight)."
+            label="Content format"
+            extra="Rich text (CKEditor) for regular posts; Markdown for coding posts (code blocks render properly with syntax highlighting)."
           >
             <Segmented
               value={contentFormat}
@@ -199,10 +236,10 @@ const CreateBlogView = () => {
           </Form.Item>
 
           <Form.Item
-            label="Nổi bật trên trang chủ"
+            label="Feature on homepage"
             name="isFeatured"
             valuePropName="checked"
-            extra="Bật để hiển thị bài này trên carousel đầu trang blog (tối đa 3 bài)."
+            extra="Turn on to show this post in the carousel at the top of the blog page (up to 3 posts)."
           >
             <Switch checkedChildren="On" unCheckedChildren="Off" onChange={handleFeaturedChange} />
           </Form.Item>

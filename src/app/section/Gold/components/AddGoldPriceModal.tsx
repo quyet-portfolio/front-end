@@ -61,13 +61,13 @@ const AddGoldPriceModal = ({
         sellPrice: values.sellPrice,
         source: 'manual',
       })
-      messageApi?.success(res.message || 'Cập nhật giá vàng thành công')
+      messageApi?.success(res.message || 'Gold price updated successfully')
       onSuccess()
       onClose()
     } catch (err: any) {
       const apiErrors = err.response?.data?.errors
       const errorMsg =
-        (Array.isArray(apiErrors) && apiErrors[0]?.msg) || err.response?.data?.message || 'Có lỗi xảy ra'
+        (Array.isArray(apiErrors) && apiErrors[0]?.msg) || err.response?.data?.message || 'Something went wrong'
       messageApi?.error(errorMsg)
     } finally {
       setLoading(false)
@@ -75,19 +75,19 @@ const AddGoldPriceModal = ({
   }
 
   return (
-    <Modal title="Cập nhật giá vàng hôm nay" open={open} onCancel={onClose} footer={null} destroyOnClose>
+    <Modal title="Update Today's Gold Price" open={open} onCancel={onClose} footer={null} destroyOnClose>
       <Form form={form} layout="vertical" onFinish={handleSubmit} requiredMark={false}>
         <Form.Item
-          label="Giá mua"
+          label="Buy price"
           name="buyPrice"
-          tooltip="Đơn vị: ngàn VND/chỉ — 5 chữ số. VD: 14780 = 14,78 triệu/chỉ"
+          tooltip="Unit: thousand VND per chỉ — 5 digits. E.g. 14780 = 14.78 million per chỉ"
           rules={[
-            { required: true, message: 'Vui lòng nhập giá mua' },
+            { required: true, message: 'Please enter the buy price' },
             {
               type: 'number',
               min: PRICE_MIN,
               max: PRICE_MAX,
-              message: `Giá mua phải nằm trong khoảng ${formatThousand(PRICE_MIN)} – ${formatThousand(PRICE_MAX)}`,
+              message: `Buy price must be between ${formatThousand(PRICE_MIN)} and ${formatThousand(PRICE_MAX)}`,
             },
           ]}
         >
@@ -103,16 +103,16 @@ const AddGoldPriceModal = ({
         </Form.Item>
 
         <Form.Item
-          label="Giá bán"
+          label="Sell price"
           name="sellPrice"
-          tooltip="Đơn vị: ngàn VND/chỉ — 5 chữ số. VD: 14950 = 14,95 triệu/chỉ"
+          tooltip="Unit: thousand VND per chỉ — 5 digits. E.g. 14950 = 14.95 million per chỉ"
           rules={[
-            { required: true, message: 'Vui lòng nhập giá bán' },
+            { required: true, message: 'Please enter the sell price' },
             {
               type: 'number',
               min: PRICE_MIN,
               max: PRICE_MAX,
-              message: `Giá bán phải nằm trong khoảng ${formatThousand(PRICE_MIN)} – ${formatThousand(PRICE_MAX)}`,
+              message: `Sell price must be between ${formatThousand(PRICE_MIN)} and ${formatThousand(PRICE_MAX)}`,
             },
           ]}
         >
@@ -129,10 +129,10 @@ const AddGoldPriceModal = ({
 
         <div className="flex justify-end gap-2 mt-6">
           <Button onClick={onClose} disabled={loading}>
-            Hủy
+            Cancel
           </Button>
           <Button type="primary" htmlType="submit" loading={loading}>
-            Lưu
+            Save
           </Button>
         </div>
       </Form>

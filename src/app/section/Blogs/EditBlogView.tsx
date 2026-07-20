@@ -19,6 +19,7 @@ import { useMessageApi } from '@/src/contexts/MessageContext'
 import { blogApi, UpdateBlogData } from '@/src/lib/api/blog'
 import { recoverEscapedHtml } from '@/src/utils/htmlContent'
 import { Blog, BlogContentFormat } from '@/src/lib/types'
+import { SLUG_PATTERN } from '@/src/utils/slug'
 import CategorySelect from './components/CategorySelect'
 
 // Số bài tối đa được ghim lên BlogHeading (khớp với backend)
@@ -70,6 +71,7 @@ const EditBlogView = () => {
         setContent(format === 'markdown' ? fetchedBlog.content : recoverEscapedHtml(fetchedBlog.content))
         form.setFieldsValue({
           title: fetchedBlog.title,
+          slug: fetchedBlog.slug,
           category: fetchedBlog.category,
           excerpt: fetchedBlog.excerpt,
           tags: fetchedBlog.tags,
@@ -97,11 +99,11 @@ const EditBlogView = () => {
     if (!checked || otherFeaturedCount < MAX_FEATURED) return
 
     Modal.confirm({
-      title: 'Trang blog đã có đủ 3 bài nổi bật',
+      title: 'The Blog Page Already Has 3 Featured Posts',
       content:
-        'Ghim bài này lên trang chủ sẽ thay thế bài được ghim sớm nhất trong 3 bài hiện tại. Bạn có muốn tiếp tục?',
-      okText: 'Tiếp tục',
-      cancelText: 'Huỷ',
+        'Featuring this post on the homepage will replace the oldest of the 3 currently featured posts. Do you want to continue?',
+      okText: 'Continue',
+      cancelText: 'Cancel',
       onCancel: () => form.setFieldValue('isFeatured', false),
     })
   }
@@ -110,9 +112,10 @@ const EditBlogView = () => {
     if (!blog) return
     try {
       setLoading(true)
-      await blogApi.updateBlog(blog._id, { ...values, content, contentFormat })
+      const res = await blogApi.updateBlog(blog._id, { ...values, content, contentFormat })
       if (messageApi) messageApi.success('Blog updated successfully!')
-      router.push(`/blogs/${blog.slug}`)
+      // Dùng slug trả về từ server — slug có thể vừa bị đổi trong lần lưu này
+      router.push(`/blogs/${res.blog.slug}`)
     } catch (error: any) {
       if (messageApi) {
         messageApi.error(error.response?.data?.message || 'Failed to update blog')
@@ -156,6 +159,23 @@ const EditBlogView = () => {
             ]}
           >
             <Input placeholder="Enter blog title" size="large" showCount maxLength={191} />
+          </Form.Item>
+
+          <Form.Item
+            label="Slug"
+            name="slug"
+            extra="Used in the post URL. Changing it breaks existing links to this post."
+            rules={[
+              { required: true, message: 'Please input slug!' },
+              { min: 3, message: 'Slug must be at least 3 characters' },
+              { max: 200, message: 'Slug must not exceed 200 characters' },
+              {
+                pattern: SLUG_PATTERN,
+                message: 'Slug may only contain lowercase letters, numbers and hyphens',
+              },
+            ]}
+          >
+            <Input placeholder="my-first-post" size="large" maxLength={200} />
           </Form.Item>
 
           <Form.Item
@@ -218,10 +238,10 @@ const EditBlogView = () => {
           </Form.Item>
 
           <Form.Item
-            label="Nổi bật trên trang chủ"
+            label="Feature on homepage"
             name="isFeatured"
             valuePropName="checked"
-            extra="Bật để hiển thị bài này trên carousel đầu trang blog (tối đa 3 bài)."
+            extra="Turn on to show this post in the carousel at the top of the blog page (up to 3 posts)."
           >
             <Switch checkedChildren="On" unCheckedChildren="Off" onChange={handleFeaturedChange} />
           </Form.Item>

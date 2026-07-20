@@ -34,17 +34,17 @@ const SocialPostView = () => {
 
   const handleGenerate = async () => {
     if (!topic.trim()) {
-      messageApi?.error('Vui lòng nhập chủ đề')
+      messageApi?.error('Please enter a topic')
       return
     }
 
     try {
       setLoading(true)
       await socialApi.generatePost({ topic })
-      messageApi?.success('Tạo bài đăng thành công! Vui lòng review.')
+      messageApi?.success('Post created successfully! Please review it.')
       fetchPosts() // Refresh list
     } catch (err: any) {
-      messageApi?.error(err.response?.data?.message || 'Có lỗi xảy ra khi tạo bài đăng')
+      messageApi?.error(err.response?.data?.message || 'Something went wrong while creating the post')
     } finally {
       setLoading(false)
     }
@@ -59,11 +59,11 @@ const SocialPostView = () => {
         image: editForm.image,
         platform: editForm.platform,
       })
-      messageApi?.success('Đã lưu chỉnh sửa!')
+      messageApi?.success('Changes saved!')
       setIsEditModalOpen(false)
       fetchPosts()
     } catch (err: any) {
-      messageApi?.error(err.response?.data?.message || 'Lỗi khi lưu')
+      messageApi?.error(err.response?.data?.message || 'Failed to save changes')
     }
   }
 
@@ -83,11 +83,11 @@ const SocialPostView = () => {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'pending_review':
-        return 'Chờ review'
+        return 'Pending review'
       case 'approved':
-        return 'Đã duyệt'
+        return 'Approved'
       case 'posted':
-        return 'Đã đăng'
+        return 'Published'
       default:
         return status
     }
@@ -115,7 +115,7 @@ const SocialPostView = () => {
       {loading && (
         <div className="flex flex-col items-center py-10">
           <Spin size="large" />
-          <p className="mt-4 text-gray-500">AI creating caption và image...</p>
+          <p className="mt-4 text-gray-500">AI is creating caption and image...</p>
         </div>
       )}
 

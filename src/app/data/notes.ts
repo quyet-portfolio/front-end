@@ -23,7 +23,7 @@ export const dataNotes: Folder[] = [
       {
         id: 11,
         title: 'Hello',
-        content: ['Xin chào'],
+        content: ['A greeting used when you meet someone'],
       },
     ],
   },
@@ -36,7 +36,7 @@ export const dataNotes: Folder[] = [
       {
         id: 11,
         title: 'Hello',
-        content: ['Xin chào'],
+        content: ['A greeting used when you meet someone'],
       },
     ],
   },
@@ -49,7 +49,7 @@ export const dataNotes: Folder[] = [
       {
         id: 11,
         title: 'Hello',
-        content: ['Xin chào'],
+        content: ['A greeting used when you meet someone'],
       },
     ],
   },

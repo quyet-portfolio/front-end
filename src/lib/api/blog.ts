@@ -4,6 +4,7 @@ import { Blog, BlogContentFormat, BlogsResponse } from '../types'
 
 export interface CreateBlogData {
   title: string
+  slug: string
   content: string
   contentFormat?: BlogContentFormat
   excerpt?: string
@@ -16,6 +17,7 @@ export interface CreateBlogData {
 
 export interface UpdateBlogData {
   title?: string
+  slug?: string
   content?: string
   contentFormat?: BlogContentFormat
   excerpt?: string

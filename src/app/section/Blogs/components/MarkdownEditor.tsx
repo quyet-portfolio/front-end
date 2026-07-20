@@ -9,9 +9,9 @@ interface MarkdownEditorProps {
   onChange?: (value: string) => void
 }
 
-const PLACEHOLDER = `# Tiêu đề
+const PLACEHOLDER = `# Title
 
-Nội dung bằng **Markdown**. Hỗ trợ ảnh, bảng, danh sách...
+Write your content in **Markdown**. Images, tables and lists are supported...
 
 \`\`\`tsx
 export default function Hello() {
@@ -51,7 +51,7 @@ const MarkdownEditor = ({ value = '', onChange }: MarkdownEditorProps) => {
               {value.trim().length > 0 ? (
                 <MarkdownContent content={value} className="pb-0" />
               ) : (
-                <p className="text-gray-500">Chưa có nội dung để xem trước.</p>
+                <p className="text-gray-500">Nothing to preview yet.</p>
               )}
             </div>
           ),

@@ -209,10 +209,10 @@ const BlogDetailView = () => {
                     Edit
                   </Button>
                   <Popconfirm
-                    title="Xoá bài viết này?"
-                    description="Hành động này không thể hoàn tác."
-                    okText="Xoá"
-                    cancelText="Huỷ"
+                    title="Delete This Blog?"
+                    description="This action cannot be undone."
+                    okText="Delete"
+                    cancelText="Cancel"
                     okButtonProps={{ danger: true, loading: deleting }}
                     onConfirm={handleDelete}
                   >

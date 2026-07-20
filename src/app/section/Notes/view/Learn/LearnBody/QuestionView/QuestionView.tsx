@@ -40,7 +40,7 @@ const QuestionView = ({ question, onSubmit }: QuestionViewProps) => {
       return (
         <Card className="p-4">
           <div className="text-center text-gray-500">
-            Không xác định được phase học
+            Could not determine the learning phase
           </div>
         </Card>
       )

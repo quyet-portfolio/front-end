@@ -179,11 +179,11 @@ const ImportTagsModal = ({ open, onClose, onSuccess, flashcardId, currentTagCoun
 
   const downloadSampleCSV = () => {
     const csvContent = `term,definition,related
-Hello,Xin chao,Greeting
-Goodbye,Tam biet,Farewell
-Thank you,Cam on,Polite expression
-Computer,May tinh,Electronic device
-Book,Sach,Reading material`
+Hello,A common greeting,Greeting
+Goodbye,A parting phrase,Farewell
+Thank you,An expression of gratitude,Polite expression
+Computer,An electronic computing device,Electronic device
+Book,A written or printed work,Reading material`
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
     const link = document.createElement('a')
@@ -195,11 +195,11 @@ Book,Sach,Reading material`
   const downloadSampleJSON = () => {
     const jsonContent = JSON.stringify(
       [
-        { term: 'Hello', definition: 'Xin chao', related: 'Greeting' },
-        { term: 'Goodbye', definition: 'Tam biet', related: 'Farewell' },
-        { term: 'Thank you', definition: 'Cam on', related: 'Polite expression' },
-        { term: 'Computer', definition: 'May tinh', related: 'Electronic device' },
-        { term: 'Book', definition: 'Sach', related: 'Reading material' },
+        { term: 'Hello', definition: 'A common greeting', related: 'Greeting' },
+        { term: 'Goodbye', definition: 'A parting phrase', related: 'Farewell' },
+        { term: 'Thank you', definition: 'An expression of gratitude', related: 'Polite expression' },
+        { term: 'Computer', definition: 'An electronic computing device', related: 'Electronic device' },
+        { term: 'Book', definition: 'A written or printed work', related: 'Reading material' },
       ],
       null,
       2,
@@ -308,7 +308,7 @@ Book,Sach,Reading material`
         <Space direction="vertical" style={{ width: '100%' }} size="large">
           <Alert
             message="Instructions"
-            description="File must have columns: 'term', 'definition', and 'related' (optional). You can also use Vietnamese column names: 'tu', 'dinh nghia', 'lien quan'."
+            description="File must have columns: 'term', 'definition', and 'related' (optional). You can also use Vietnamese column names: 'từ', 'định nghĩa', 'liên quan'."
             type="info"
             showIcon
           />
@@ -326,9 +326,9 @@ Book,Sach,Reading material`
             <Title level={5}>CSV Example:</Title>
             <pre style={{ margin: 0, fontSize: 12 }}>
               {`term,definition,related
-Hello,Xin chao,Greeting
-Goodbye,Tam biet,Farewell
-Computer,May tinh,Electronic device`}
+Hello,A common greeting,Greeting
+Goodbye,A parting phrase,Farewell
+Computer,An electronic computing device,Electronic device`}
             </pre>
           </div>
 
@@ -338,12 +338,12 @@ Computer,May tinh,Electronic device`}
               {`[
   {
     "term": "Hello",
-    "definition": "Xin chao",
+    "definition": "A common greeting",
     "related": "Greeting"
   },
   {
     "term": "Goodbye",
-    "definition": "Tam biet"
+    "definition": "A parting phrase"
   }
 ]`}
             </pre>

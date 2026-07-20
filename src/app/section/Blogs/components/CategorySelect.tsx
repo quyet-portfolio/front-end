@@ -65,9 +65,9 @@ const CategorySelect = ({ value, onChange }: CategorySelectProps) => {
       setCreatedInSession(data.category)
       setNewName('')
       onChange?.(data.category.name)
-      messageApi?.success('Đã tạo category mới')
+      messageApi?.success('New category created')
     } catch (error: any) {
-      messageApi?.error(error.response?.data?.message || 'Không tạo được category')
+      messageApi?.error(error.response?.data?.message || 'Failed to create category')
     } finally {
       setCreating(false)
     }
@@ -75,11 +75,11 @@ const CategorySelect = ({ value, onChange }: CategorySelectProps) => {
 
   const handleDelete = (category: Category) => {
     Modal.confirm({
-      title: `Xoá category "${category.name}"?`,
-      content: 'Các bài blog đang dùng category này sẽ được chuyển sang "Other".',
-      okText: 'Xoá',
+      title: `Delete Category "${category.name}"?`,
+      content: 'Blogs using this category will be moved to "Other".',
+      okText: 'Delete',
       okButtonProps: { danger: true },
-      cancelText: 'Huỷ',
+      cancelText: 'Cancel',
       onOk: async () => {
         try {
           const data = await categoryApi.deleteCategory(category._id)
@@ -88,10 +88,12 @@ const CategorySelect = ({ value, onChange }: CategorySelectProps) => {
           if (createdInSession?._id === category._id) setCreatedInSession(null)
           if (value === category.name) onChange?.('')
           messageApi?.success(
-            data.movedBlogs > 0 ? `Đã xoá, ${data.movedBlogs} bài chuyển sang "Other"` : 'Đã xoá category'
+            data.movedBlogs > 0
+              ? `Category deleted, ${data.movedBlogs} blogs moved to "Other"`
+              : 'Category deleted'
           )
         } catch (error: any) {
-          messageApi?.error(error.response?.data?.message || 'Không xoá được category')
+          messageApi?.error(error.response?.data?.message || 'Failed to delete category')
         }
       },
     })

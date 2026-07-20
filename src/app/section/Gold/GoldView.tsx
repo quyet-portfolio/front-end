@@ -23,10 +23,10 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 const { Option } = Select
 
 const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
-  { value: 7, label: '7 ngày' },
-  { value: 30, label: '30 ngày' },
-  { value: 60, label: '60 ngày' },
-  { value: 365, label: '1 năm' },
+  { value: 7, label: '7 days' },
+  { value: 30, label: '30 days' },
+  { value: 60, label: '60 days' },
+  { value: 365, label: '1 year' },
 ]
 
 export function formatDate(dateString: string) {
@@ -79,13 +79,13 @@ const GoldView = () => {
           .map((item) => formatDate(item?.createdAt)),
         datasets: [
           {
-            label: 'Giá mua',
+            label: 'Buy price',
             data: goldPriceListRes.map((item) => item?.buyPrice),
             borderColor: 'rgb(75, 192, 192)',
             backgroundColor: 'rgba(75, 192, 192, 0.2)',
           },
           {
-            label: 'Giá bán',
+            label: 'Sell price',
             data: goldPriceListRes.map((item) => item?.sellPrice),
             borderColor: 'rgb(255, 99, 132)',
             backgroundColor: 'rgba(255, 99, 132, 0.2)',
@@ -112,18 +112,18 @@ const GoldView = () => {
 
   const columns: ColumnsType<InvestmentsResponseData> = [
     {
-      title: 'Ngày mua',
+      title: 'Purchase date',
       dataIndex: 'date',
       key: 'date',
       render: (_, record) => <div>{formatDate(record?.date)}</div>,
     },
     {
-      title: 'Số chỉ vàng',
+      title: 'Gold amount (chỉ)',
       dataIndex: 'goldGram',
       key: 'goldGram',
     },
     {
-      title: 'Số tiền / Giá mua (VND)',
+      title: 'Amount / Buy price (VND)',
       key: 'amount',
       render: (_, record) => (
         <div>
@@ -132,15 +132,15 @@ const GoldView = () => {
       ),
     },
     {
-      title: 'Giá mua hiện tại',
+      title: 'Current buy price',
       render: () => <div>--</div>,
     },
     {
-      title: 'Giá bán hiện tại',
+      title: 'Current sell price',
       render: () => <div>--</div>,
     },
     {
-      title: 'Lãi/Lỗ (VND)',
+      title: 'Profit/Loss (VND)',
       render: (_, record, index) =>
         index === 0 ? <div>{formatPrice(dataGold?.profit || 0)}</div> : '--',
     },
@@ -154,7 +154,7 @@ const GoldView = () => {
       },
       title: {
         display: true,
-        text: `Lịch sử giá vàng (${TIME_RANGE_OPTIONS.find((o) => o.value === selectedDays)?.label})`,
+        text: `Gold Price History (${TIME_RANGE_OPTIONS.find((o) => o.value === selectedDays)?.label})`,
       },
     },
   }
@@ -163,24 +163,24 @@ const GoldView = () => {
     <div className="mt-10 flex flex-col gap-10">
       <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-gray-700 bg-black-100 p-4">
         <div className="flex flex-col gap-1">
-          <div className="text-sm text-gray-400">Giá vàng hôm nay</div>
+          <div className="text-sm text-gray-400">Today&apos;s gold price</div>
           {dataGold?.price ? (
             <>
               <div className="text-lg font-semibold">
-                Mua <span className="text-emerald-400">{formatPrice(dataGold.price.buyPrice)}</span>{' '}
-                / Bán <span className="text-rose-400">{formatPrice(dataGold.price.sellPrice)}</span>
+                Buy <span className="text-emerald-400">{formatPrice(dataGold.price.buyPrice)}</span>{' '}
+                / Sell <span className="text-rose-400">{formatPrice(dataGold.price.sellPrice)}</span>
               </div>
               <div className="text-xs text-gray-500">
-                Cập nhật: {new Date(dataGold.price.updatedAt).toLocaleString('vi-VN')} ·{' '}
-                Nguồn: {dataGold.price.source || '—'}
+                Updated: {new Date(dataGold.price.updatedAt).toLocaleString('vi-VN')} ·{' '}
+                Source: {dataGold.price.source || '—'}
               </div>
             </>
           ) : (
-            <div className="text-base text-gray-500">Chưa có dữ liệu giá vàng</div>
+            <div className="text-base text-gray-500">No gold price data yet</div>
           )}
         </div>
         <Button type="primary" onClick={() => setAddPriceModalOpen(true)} disabled={loading}>
-          Cập nhật giá vàng
+          Update Gold Price
         </Button>
       </div>
 
@@ -196,7 +196,7 @@ const GoldView = () => {
               {dataGold ? (
                 <Table.Summary.Row className="bg-black-100">
                   <Table.Summary.Cell index={0} className="text-[16px] font-semibold">
-                    Tổng
+                    Total
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={1}>
                     <div className="text-[16px] font-semibold">{formatPrice(dataGold?.totalGold)}</div>
@@ -227,7 +227,7 @@ const GoldView = () => {
       />
 
       <div className="flex items-center gap-4">
-        <span className="text-gray-600">Khoảng thời gian:</span>
+        <span className="text-gray-600">Time range:</span>
         <Select
           value={selectedDays}
           onChange={handleTimeRangeChange}
