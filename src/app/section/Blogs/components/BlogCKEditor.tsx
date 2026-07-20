@@ -128,7 +128,23 @@ const BlogCKEditor: React.FC<BlogCKEditorProps> = ({ value = '', onChange }) => 
             GeneralHtmlSupport,
           ],
           htmlSupport: {
-            allow: [{ name: /.*/, attributes: true, classes: true, styles: true }],
+            // Preserve rich markup on normal content elements, but never let raw
+            // elements (script/style/iframe/...) into the model: CKEditor renders
+            // them as unbreakable RawElements and downcasting formatting around
+            // them throws `view-writer-cannot-break-raw-element`. They are also an
+            // XSS surface. MediaEmbed/Image handle embeds/images natively without GHS.
+            allow: [
+              {
+                name: /^(p|h[1-6]|blockquote|pre|code|figure|figcaption|div|span|section|article|ul|ol|li|dl|dt|dd|table|thead|tbody|tfoot|tr|td|th|caption|a|img|strong|em|b|i|u|s|del|ins|sub|sup|br|hr|mark|small|abbr|kbd)$/,
+                attributes: true,
+                classes: true,
+                styles: true,
+              },
+            ],
+            disallow: [
+              { name: /^(script|style|iframe|object|embed|form|input|button|textarea|select|option|link|meta|base)$/ },
+              { attributes: /^on.*/i },
+            ],
           },
           toolbar: { items: TOOLBAR_ITEMS, shouldNotGroupWhenFull: true },
           codeBlock: {

@@ -1,10 +1,11 @@
 // src/lib/api/blog.ts
 import axios from '../axios'
-import { Blog, BlogsResponse } from '../types'
+import { Blog, BlogContentFormat, BlogsResponse } from '../types'
 
 export interface CreateBlogData {
   title: string
   content: string
+  contentFormat?: BlogContentFormat
   excerpt?: string
   category?: string
   tags?: string[]
@@ -16,6 +17,7 @@ export interface CreateBlogData {
 export interface UpdateBlogData {
   title?: string
   content?: string
+  contentFormat?: BlogContentFormat
   excerpt?: string
   category?: string
   tags?: string[]
@@ -34,20 +36,10 @@ export interface GetBlogsParams {
   excludeFeatured?: boolean
 }
 
-export interface CategoriesResponse {
-  categories: string[]
-}
-
 export const blogApi = {
   // Get all published blogs with filters
   getBlogs: async (params?: GetBlogsParams): Promise<BlogsResponse> => {
     const response = await axios.get<BlogsResponse>('/blogs', { params })
-    return response.data
-  },
-
-  // Get distinct categories of published blogs
-  getCategories: async (): Promise<CategoriesResponse> => {
-    const response = await axios.get<CategoriesResponse>('/blogs/categories')
     return response.data
   },
 

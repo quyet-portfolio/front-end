@@ -7,6 +7,7 @@ import Collapse from 'antd/es/collapse'
 import Form from 'antd/es/form'
 import Input from 'antd/es/input'
 import Modal from 'antd/es/modal'
+import Segmented from 'antd/es/segmented'
 import Select from 'antd/es/select'
 import Switch from 'antd/es/switch'
 import { ArrowLeftOutlined } from '@ant-design/icons'
@@ -14,6 +15,8 @@ import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { useMessageApi } from '@/src/contexts/MessageContext'
 import { blogApi, CreateBlogData } from '@/src/lib/api/blog'
+import { BlogContentFormat } from '@/src/lib/types'
+import CategorySelect from './components/CategorySelect'
 
 import TextArea from 'antd/es/input/TextArea'
 
@@ -26,6 +29,12 @@ const DynamicBlogEditor = dynamic(() => import('./components/BlogCKEditor'), {
   loading: () => <div className="p-4 text-center border-2 border-dashed">Loading Editor...</div>,
 })
 
+// Markdown editor (chỉ tải khi người dùng chọn định dạng Markdown)
+const DynamicMarkdownEditor = dynamic(() => import('./components/MarkdownEditor'), {
+  ssr: false,
+  loading: () => <div className="p-4 text-center border-2 border-dashed">Loading Editor...</div>,
+})
+
 const CreateBlogView = () => {
   const router = useRouter()
   const [form] = Form.useForm()
@@ -33,6 +42,14 @@ const CreateBlogView = () => {
   const [loading, setLoading] = useState(false)
   // Số bài đang được ghim — để cảnh báo khi đã đủ MAX_FEATURED
   const [featuredCount, setFeaturedCount] = useState(0)
+  // Định dạng nội dung — chọn lúc tạo bài; đổi format sẽ xoá nội dung để tránh trộn lẫn
+  const [contentFormat, setContentFormat] = useState<BlogContentFormat>('html')
+
+  const handleFormatChange = (val: BlogContentFormat) => {
+    if (val === contentFormat) return
+    setContentFormat(val)
+    form.setFieldValue('content', '')
+  }
 
   useEffect(() => {
     blogApi
@@ -58,7 +75,7 @@ const CreateBlogView = () => {
   const onFinish = async (values: CreateBlogData) => {
     try {
       setLoading(true)
-      await blogApi.createBlog(values)
+      await blogApi.createBlog({ ...values, contentFormat })
       if (messageApi) {
         messageApi.success('Blog created successfully!')
       }
@@ -108,9 +125,9 @@ const CreateBlogView = () => {
           <Form.Item
             label="Category"
             name="category"
-            rules={[{ required: true, message: 'Please input a category!' }]}
+            rules={[{ required: true, message: 'Please select a category!' }]}
           >
-            <Input placeholder="Enter category (e.g., Programming, Tech)" />
+            <CategorySelect />
           </Form.Item>
 
           <Form.Item
@@ -140,6 +157,20 @@ const CreateBlogView = () => {
             <Input placeholder="https://example.com/image.jpg" />
           </Form.Item>
 
+          <Form.Item
+            label="Định dạng nội dung"
+            extra="Rich text (CKEditor) cho bài thường; Markdown cho bài coding (code block hiển thị chuẩn, có syntax highlight)."
+          >
+            <Segmented
+              value={contentFormat}
+              onChange={(val) => handleFormatChange(val as BlogContentFormat)}
+              options={[
+                { label: 'Rich text', value: 'html' },
+                { label: 'Markdown', value: 'markdown' },
+              ]}
+            />
+          </Form.Item>
+
           <Collapse
             defaultActiveKey={['content']}
             items={[{
@@ -153,7 +184,7 @@ const CreateBlogView = () => {
                     { min: 10, message: 'Content must be at least 10 characters long' },
                   ]}
                 >
-                  <DynamicBlogEditor />
+                  {contentFormat === 'markdown' ? <DynamicMarkdownEditor /> : <DynamicBlogEditor />}
                 </Form.Item>
               ),
             }]}

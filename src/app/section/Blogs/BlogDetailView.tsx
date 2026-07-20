@@ -10,12 +10,20 @@ import Tag from 'antd/es/tag'
 import Spin from 'antd/es/spin'
 import Breadcrumb from 'antd/es/breadcrumb'
 import Popconfirm from 'antd/es/popconfirm'
+import dynamic from 'next/dynamic'
 import DOMPurify from 'isomorphic-dompurify'
 import { blogApi } from '@/src/lib/api/blog'
 import { recoverEscapedHtml } from '@/src/utils/htmlContent'
 import { Blog } from '@/src/lib/types'
 import { useAuth } from '@/src/contexts/AuthContext'
 import { useMessageApi } from '@/src/contexts/MessageContext'
+
+// Markdown renderer loaded on demand — only for blogs stored as markdown, so HTML
+// blogs (the majority) never pull the markdown bundle.
+const MarkdownContent = dynamic(() => import('./components/MarkdownContent'), {
+  ssr: false,
+  loading: () => <div className="text-gray-500">Loading content…</div>,
+})
 
 const BlogDetailView = () => {
   const params = useParams()
@@ -228,11 +236,16 @@ const BlogDetailView = () => {
             </div>
           )}
 
-          {/* Content — prose renders CKEditor HTML beautifully */}
-          <div
-            className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-a:text-blue-400 prose-img:rounded-md pb-10"
-            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(recoverEscapedHtml(blog.content)) }}
-          />
+          {/* Content — Markdown blogs render via MarkdownContent; HTML blogs keep the
+              sanitized CKEditor path (with legacy entity recovery). */}
+          {blog.contentFormat === 'markdown' ? (
+            <MarkdownContent content={blog.content} />
+          ) : (
+            <div
+              className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-a:text-blue-400 prose-img:rounded-md pb-10"
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(recoverEscapedHtml(blog.content)) }}
+            />
+          )}
         </div>
       </div>
     </div>

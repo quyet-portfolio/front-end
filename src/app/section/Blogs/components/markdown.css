@@ -1,0 +1,76 @@
+/* Code block wrapper (rendered by CodeBlock.tsx) */
+.markdown-body .code-block {
+  position: relative;
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #30363d;
+  background: #0d1117; /* matches highlight.js github-dark theme */
+}
+
+.markdown-body .code-block__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 0.4rem 0.75rem;
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+}
+
+.markdown-body .code-block__lang {
+  margin-right: auto;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #8b949e;
+  font-family: 'Fira Code', 'Cascadia Code', Consolas, monospace;
+}
+
+.markdown-body .code-block__copy {
+  font-size: 0.72rem;
+  color: #c9d1d9;
+  background: #21262d;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  padding: 0.15rem 0.6rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.markdown-body .code-block__copy:hover {
+  background: #30363d;
+}
+
+/* Reset Tailwind Typography defaults so highlight.js owns the code block */
+.markdown-body .code-block pre {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  overflow-x: auto;
+}
+
+.markdown-body .code-block pre code.hljs {
+  display: block;
+  padding: 1rem 1.25rem;
+  background: transparent;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  font-family: 'Fira Code', 'Cascadia Code', Consolas, 'Courier New', monospace;
+}
+
+/* Inline code */
+.markdown-body :not(pre) > code {
+  background: #2d2d2d;
+  color: #ce9178;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.85em;
+  font-family: 'Fira Code', 'Cascadia Code', Consolas, monospace;
+}
+
+/* Tailwind Typography adds `` quotes around inline code — remove them */
+.markdown-body :not(pre) > code::before,
+.markdown-body :not(pre) > code::after {
+  content: none;
+}

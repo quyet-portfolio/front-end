@@ -11,19 +11,27 @@ import Modal from 'antd/es/modal'
 import Select from 'antd/es/select'
 import Spin from 'antd/es/spin'
 import Switch from 'antd/es/switch'
+import Tag from 'antd/es/tag'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useRouter, useParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { useMessageApi } from '@/src/contexts/MessageContext'
 import { blogApi, UpdateBlogData } from '@/src/lib/api/blog'
 import { recoverEscapedHtml } from '@/src/utils/htmlContent'
-import { Blog } from '@/src/lib/types'
+import { Blog, BlogContentFormat } from '@/src/lib/types'
+import CategorySelect from './components/CategorySelect'
 
 // Số bài tối đa được ghim lên BlogHeading (khớp với backend)
 const MAX_FEATURED = 3
 
 // Dynamic import: avoid SSR crash for CKEditor
 const DynamicBlogEditor = dynamic(() => import('./components/BlogCKEditor'), {
+  ssr: false,
+  loading: () => <div className="p-4 text-center border-2 border-dashed">Loading Editor...</div>,
+})
+
+// Markdown editor (chỉ tải khi bài dùng định dạng Markdown)
+const DynamicMarkdownEditor = dynamic(() => import('./components/MarkdownEditor'), {
   ssr: false,
   loading: () => <div className="p-4 text-center border-2 border-dashed">Loading Editor...</div>,
 })
@@ -38,8 +46,10 @@ const EditBlogView = () => {
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
   const [blog, setBlog] = useState<Blog | null>(null)
-  // Track CKEditor content separately since it's not a native form element
+  // Track editor content separately since it's not a native form element
   const [content, setContent] = useState<string>('')
+  // Định dạng nội dung của bài — khóa theo bài, không đổi khi sửa
+  const [contentFormat, setContentFormat] = useState<BlogContentFormat>('html')
   // Số bài featured KHÁC bài đang sửa — để cảnh báo khi đã đủ MAX_FEATURED
   const [otherFeaturedCount, setOtherFeaturedCount] = useState(0)
 
@@ -53,9 +63,11 @@ const EditBlogView = () => {
         const res = await blogApi.getBlogBySlug(slug)
         const fetchedBlog = res.blog
         setBlog(fetchedBlog)
-        // Recover legacy entity-escaped content so the editor shows real HTML
-        // (and re-saving then persists the corrected markup).
-        setContent(recoverEscapedHtml(fetchedBlog.content))
+        const format: BlogContentFormat = fetchedBlog.contentFormat === 'markdown' ? 'markdown' : 'html'
+        setContentFormat(format)
+        // Markdown content is stored raw; only legacy HTML needs entity recovery
+        // (re-saving then persists the corrected markup).
+        setContent(format === 'markdown' ? fetchedBlog.content : recoverEscapedHtml(fetchedBlog.content))
         form.setFieldsValue({
           title: fetchedBlog.title,
           category: fetchedBlog.category,
@@ -98,7 +110,7 @@ const EditBlogView = () => {
     if (!blog) return
     try {
       setLoading(true)
-      await blogApi.updateBlog(blog._id, { ...values, content })
+      await blogApi.updateBlog(blog._id, { ...values, content, contentFormat })
       if (messageApi) messageApi.success('Blog updated successfully!')
       router.push(`/blogs/${blog.slug}`)
     } catch (error: any) {
@@ -149,9 +161,9 @@ const EditBlogView = () => {
           <Form.Item
             label="Category"
             name="category"
-            rules={[{ required: true, message: 'Please input a category!' }]}
+            rules={[{ required: true, message: 'Please select a category!' }]}
           >
-            <Input placeholder="Enter category (e.g., Programming, Tech)" />
+            <CategorySelect />
           </Form.Item>
 
           <Form.Item
@@ -175,18 +187,28 @@ const EditBlogView = () => {
             <Input placeholder="https://example.com/image.jpg" />
           </Form.Item>
 
-          <Form.Item label={null} required>
+          <Form.Item
+            label={
+              <span className="flex gap-2 items-center">
+                Content
+                <Tag color={contentFormat === 'markdown' ? 'purple' : 'blue'}>
+                  {contentFormat === 'markdown' ? 'Markdown' : 'Rich text'}
+                </Tag>
+              </span>
+            }
+            required
+          >
             <Collapse
               defaultActiveKey={['content']}
               items={[{
                 key: 'content',
                 label: 'Content',
-                children: (
-                  <DynamicBlogEditor
-                    value={content}
-                    onChange={(val) => setContent(val)}
-                  />
-                ),
+                children:
+                  contentFormat === 'markdown' ? (
+                    <DynamicMarkdownEditor value={content} onChange={(val) => setContent(val)} />
+                  ) : (
+                    <DynamicBlogEditor value={content} onChange={(val) => setContent(val)} />
+                  ),
               }]}
             />
           </Form.Item>

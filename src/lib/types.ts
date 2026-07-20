@@ -10,10 +10,14 @@ export interface User {
   updatedAt: string;
 }
 
+export type BlogContentFormat = 'html' | 'markdown';
+
 export interface Blog {
   _id: string;
   title: string;
   content: string;
+  // Định dạng nội dung — bài cũ không có field này coi như 'html'
+  contentFormat?: BlogContentFormat;
   excerpt: string;
   slug: string;
   author: {
@@ -32,6 +36,14 @@ export interface Blog {
   likes: string[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface Category {
+  _id: string;
+  name: string;
+  // Category mặc định của hệ thống — không cho sửa/xoá
+  isDefault: boolean;
+  createdBy?: string;
 }
 
 export interface PaginationResponse {

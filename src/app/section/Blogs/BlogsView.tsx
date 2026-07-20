@@ -9,7 +9,8 @@ import { useSearchParams } from 'next/navigation'
 import BlogsHeader from './components/BlogsHeader'
 import BlogHeading from './BlogsHeading'
 import { useBlogs } from '@/src/hooks/useBlogs'
-import { blogApi, GetBlogsParams } from '@/src/lib/api/blog'
+import { GetBlogsParams } from '@/src/lib/api/blog'
+import { categoryApi } from '@/src/lib/api/category'
 import { stripHtml } from '@/src/utils/stringUtils'
 import { recoverEscapedHtml } from '@/src/utils/htmlContent'
 
@@ -38,9 +39,9 @@ const BlogsView = () => {
 
   // Categories are fetched once, independent of search/pagination
   useEffect(() => {
-    blogApi
-      .getCategories()
-      .then((data) => setCategories(data.categories))
+    categoryApi
+      .getCategories({ inUse: true })
+      .then((data) => setCategories(data.categories.map((category) => category.name)))
       .catch(() => setCategories([]))
   }, [])
 
