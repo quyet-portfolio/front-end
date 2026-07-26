@@ -134,7 +134,7 @@ const EditBlogView = () => {
   }
 
   return (
-    <div className="p-6 mx-auto max-w-5xl container">
+    <div className="py-6 px-0 lg:px-6 mx-auto max-w-5xl container">
       <div className="flex justify-between items-center mb-6">
         <div className="flex gap-4 items-center">
           <Button icon={<ArrowLeftOutlined />} onClick={() => router.back()} />
@@ -143,12 +143,7 @@ const EditBlogView = () => {
       </div>
 
       <Card className="mb-24">
-        <Form
-          form={form}
-          layout="vertical"
-          requiredMark={false}
-          onFinish={onFinish}
-        >
+        <Form form={form} layout="vertical" requiredMark={false} onFinish={onFinish}>
           <Form.Item
             label="Title"
             name="title"
@@ -207,6 +202,16 @@ const EditBlogView = () => {
             <Input placeholder="https://example.com/image.jpg" />
           </Form.Item>
 
+          <div className="flex flex-col gap-4">
+            <Form.Item label="Published" name="isPublished" valuePropName="checked">
+              <Switch checkedChildren="Yes" unCheckedChildren="Draft" />
+            </Form.Item>
+
+            <Form.Item label="Feature on page" name="isFeatured" valuePropName="checked">
+              <Switch checkedChildren="On" unCheckedChildren="Off" onChange={handleFeaturedChange} />
+            </Form.Item>
+          </div>
+
           <Form.Item
             label={
               <span className="flex gap-2 items-center">
@@ -218,32 +223,11 @@ const EditBlogView = () => {
             }
             required
           >
-            <Collapse
-              defaultActiveKey={['content']}
-              items={[{
-                key: 'content',
-                label: 'Content',
-                children:
-                  contentFormat === 'markdown' ? (
-                    <DynamicMarkdownEditor value={content} onChange={(val) => setContent(val)} />
-                  ) : (
-                    <DynamicBlogEditor value={content} onChange={(val) => setContent(val)} />
-                  ),
-              }]}
-            />
-          </Form.Item>
-
-          <Form.Item label="Published" name="isPublished" valuePropName="checked">
-            <Switch checkedChildren="Yes" unCheckedChildren="Draft" />
-          </Form.Item>
-
-          <Form.Item
-            label="Feature on homepage"
-            name="isFeatured"
-            valuePropName="checked"
-            extra="Turn on to show this post in the carousel at the top of the blog page (up to 3 posts)."
-          >
-            <Switch checkedChildren="On" unCheckedChildren="Off" onChange={handleFeaturedChange} />
+            {contentFormat === 'markdown' ? (
+              <DynamicMarkdownEditor value={content} onChange={(val) => setContent(val)} />
+            ) : (
+              <DynamicBlogEditor value={content} onChange={(val) => setContent(val)} />
+            )}
           </Form.Item>
         </Form>
       </Card>

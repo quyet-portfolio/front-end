@@ -99,7 +99,7 @@ const CreateBlogView = () => {
   }
 
   return (
-    <div className="p-6 mx-auto max-w-5xl container">
+    <div className="py-6 px-0 lg:px-6 mx-auto max-w-5xl container">
       <div className="flex justify-between items-center mb-6">
         <div className="flex gap-4 items-center">
           <Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/blogs')} />
@@ -128,13 +128,7 @@ const CreateBlogView = () => {
               { max: 200, message: 'Title must not exceed 200 characters' },
             ]}
           >
-            <Input
-              placeholder="Enter blog title"
-              size="large"
-              showCount
-              maxLength={191}
-              onChange={handleTitleChange}
-            />
+            <Input placeholder="Enter blog title" size="large" showCount maxLength={191} onChange={handleTitleChange} />
           </Form.Item>
 
           <Form.Item
@@ -151,12 +145,7 @@ const CreateBlogView = () => {
               },
             ]}
           >
-            <Input
-              placeholder="my-first-post"
-              size="large"
-              maxLength={200}
-              onChange={() => setIsSlugEdited(true)}
-            />
+            <Input placeholder="my-first-post" size="large" maxLength={200} onChange={() => setIsSlugEdited(true)} />
           </Form.Item>
 
           <Form.Item
@@ -172,13 +161,15 @@ const CreateBlogView = () => {
             name="excerpt"
             rules={[{ max: 500, message: 'Excerpt must not exceed 500 characters' }]}
           >
-            <TextArea placeholder="Enter a short excerpt (Optional - will be auto-generated if empty)" rows={3} showCount maxLength={500} />
+            <TextArea
+              placeholder="Enter a short excerpt (Optional - will be auto-generated if empty)"
+              rows={3}
+              showCount
+              maxLength={500}
+            />
           </Form.Item>
 
-          <Form.Item
-            label="Tags"
-            name="tags"
-          >
+          <Form.Item label="Tags" name="tags">
             <Select
               mode="tags"
               style={{ width: '100%' }}
@@ -187,17 +178,21 @@ const CreateBlogView = () => {
             />
           </Form.Item>
 
-          <Form.Item
-            label="Featured Image URL"
-            name="featuredImage"
-          >
+          <Form.Item label="Featured Image URL" name="featuredImage">
             <Input placeholder="https://example.com/image.jpg" />
           </Form.Item>
 
-          <Form.Item
-            label="Content format"
-            extra="Rich text (CKEditor) for regular posts; Markdown for coding posts (code blocks render properly with syntax highlighting)."
-          >
+          <div className="flex justify-between">
+            <Form.Item label="Published" name="isPublished" valuePropName="checked">
+              <Switch checkedChildren="Yes" unCheckedChildren="Draft" />
+            </Form.Item>
+
+            <Form.Item label="Feature on page" name="isFeatured" valuePropName="checked">
+              <Switch checkedChildren="On" unCheckedChildren="Off" onChange={handleFeaturedChange} />
+            </Form.Item>
+          </div>
+
+          <Form.Item label="Content format">
             <Segmented
               value={contentFormat}
               onChange={(val) => handleFormatChange(val as BlogContentFormat)}
@@ -208,52 +203,27 @@ const CreateBlogView = () => {
             />
           </Form.Item>
 
-          <Collapse
-            defaultActiveKey={['content']}
-            items={[{
-              key: 'content',
-              label: 'Content',
-              children: (
-                <Form.Item
-                  name="content"
-                  rules={[
-                    { required: true, message: 'Please input content!' },
-                    { min: 10, message: 'Content must be at least 10 characters long' },
-                  ]}
-                >
-                  {contentFormat === 'markdown' ? <DynamicMarkdownEditor /> : <DynamicBlogEditor />}
-                </Form.Item>
-              ),
-            }]}
-          />
-
           <Form.Item
-            label="Published"
-            name="isPublished"
-            valuePropName="checked"
+            label="Content"
+            name="content"
+            rules={[
+              { required: true, message: 'Please input content!' },
+              { min: 10, message: 'Content must be at least 10 characters long' },
+            ]}
           >
-            <Switch checkedChildren="Yes" unCheckedChildren="Draft" />
-          </Form.Item>
-
-          <Form.Item
-            label="Feature on homepage"
-            name="isFeatured"
-            valuePropName="checked"
-            extra="Turn on to show this post in the carousel at the top of the blog page (up to 3 posts)."
-          >
-            <Switch checkedChildren="On" unCheckedChildren="Off" onChange={handleFeaturedChange} />
+            {contentFormat === 'markdown' ? <DynamicMarkdownEditor /> : <DynamicBlogEditor />}
           </Form.Item>
         </Form>
       </Card>
 
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-white/90 backdrop-blur-sm dark:bg-gray-900/90">
         <div className="mx-auto flex max-w-5xl justify-end gap-4 px-6 py-4">
-        <Button onClick={() => router.back()} size="large">
-          Cancel
-        </Button>
-        <Button type="primary" loading={loading} size="large" onClick={() => form.submit()}>
-          Publish Blog
-        </Button>
+          <Button onClick={() => router.back()} size="large">
+            Cancel
+          </Button>
+          <Button type="primary" loading={loading} size="large" onClick={() => form.submit()}>
+            Publish Blog
+          </Button>
         </div>
       </div>
     </div>
