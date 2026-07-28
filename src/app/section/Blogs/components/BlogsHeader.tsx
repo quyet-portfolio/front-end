@@ -1,6 +1,6 @@
 'use client'
 
-import { LoginOutlined, LogoutOutlined, PlusCircleOutlined, SearchOutlined, UserOutlined } from '@ant-design/icons'
+import { LoginOutlined, LogoutOutlined, PlusCircleOutlined, ProfileOutlined, SearchOutlined, UserOutlined } from '@ant-design/icons'
 import { Avatar, Button, Dropdown, Input, Modal, Tooltip } from 'antd'
 import { useRouter } from 'next/navigation'
 import { ChangeEvent, useState } from 'react'
@@ -42,6 +42,10 @@ const BlogsHeader = ({ defaultValue = '', onSearch }: BlogsHeaderProps) => {
       return
     }
     router.push('/blogs/create')
+  }
+
+  const handleToMyBlogs = () => {
+    router.push('/blogs/my-blogs')
   }
 
   return (
@@ -87,6 +91,11 @@ const BlogsHeader = ({ defaultValue = '', onSearch }: BlogsHeaderProps) => {
                   },
                   {
                     key: '2',
+                    label: <div onClick={handleToMyBlogs}>My blogs</div>,
+                    icon: <ProfileOutlined />,
+                  },
+                  {
+                    key: '3',
                     label: <div onClick={logout}>Log out</div>,
                     icon: <LogoutOutlined />,
                   },
