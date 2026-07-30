@@ -60,11 +60,14 @@ const MyBlogsView = () => {
     <div className="h-full flex flex-col items-center gap-6">
       <div className="w-full">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold text-white">My Blogs</h1>
-            <p className="text-sm text-white-200">
-              {pagination ? `${pagination.totalBlogs} blog${pagination.totalBlogs === 1 ? '' : 's'} total` : ' '}
-            </p>
+          <div className="flex gap-4 items-start">
+            <Button className='hidden md:block' icon={<ArrowLeftOutlined />} onClick={() => router.push('/blogs')} />
+            <div className="flex flex-col gap-1">
+              <h1 className="text-2xl font-bold text-white">My Blogs</h1>
+              <p className="text-sm text-white-200">
+                {pagination ? `${pagination.totalBlogs} blog${pagination.totalBlogs === 1 ? '' : 's'} total` : ' '}
+              </p>
+            </div>
           </div>
         </div>
 
