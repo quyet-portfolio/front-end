@@ -8,8 +8,7 @@ import { blogApi } from '@/src/lib/api/blog'
 import { stripHtml } from '@/src/utils/stringUtils'
 import { recoverEscapedHtml } from '@/src/utils/htmlContent'
 
-// Post đã chuẩn hoá cho carousel (map từ Blog featured)
-interface HeadingPost {
+type HeadingPost = {
   id: string
   title: string
   desc: string
@@ -18,7 +17,7 @@ interface HeadingPost {
   image: string
 }
 
-const FALLBACK_IMAGE = '/images/next-js-a-react-js-framework.jpg'
+export const FALLBACK_IMAGE_BLOG = 'https://cdn.shopify.com/s/files/1/0734/4986/5316/files/default-image-blogs.png?v=1785683364'
 
 export default function BlogHeading() {
   const [posts, setPosts] = useState<HeadingPost[]>([])
@@ -34,7 +33,7 @@ export default function BlogHeading() {
           desc: stripHtml(recoverEscapedHtml(blog.excerpt || blog.content)),
           author: blog.author?.username || 'Unknown',
           slug: blog.slug,
-          image: blog.featuredImage || FALLBACK_IMAGE,
+          image: blog.featuredImage || FALLBACK_IMAGE_BLOG,
         }))
         setPosts(mapped)
         setActiveIndex(0)
@@ -42,14 +41,12 @@ export default function BlogHeading() {
       .catch(() => setPosts([]))
   }, [])
 
-  // Không có bài featured nào — ẩn hoàn toàn carousel
   if (posts.length === 0) return null
 
   const count = posts.length
   const prevIndex = (activeIndex - 1 + count) % count
   const nextIndex = (activeIndex + 1) % count
 
-  // Chỉ hiện side card khi đủ item để không trùng với center card
   const showRight = count >= 2
   const showLeft = count >= 3
 

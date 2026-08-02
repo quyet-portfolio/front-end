@@ -7,7 +7,7 @@ import { motion } from 'framer-motion'
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import BlogsHeader from './components/BlogsHeader'
-import BlogHeading from './BlogsHeading'
+import BlogHeading, { FALLBACK_IMAGE_BLOG } from './BlogsHeading'
 import { useBlogs } from '@/src/hooks/useBlogs'
 import { GetBlogsParams } from '@/src/lib/api/blog'
 import { categoryApi } from '@/src/lib/api/category'
@@ -29,8 +29,6 @@ const BlogsView = () => {
     const next: GetBlogsParams = { page, limit: PAGE_SIZE }
     if (search) next.search = search
     if (selectedCategory !== 'All') next.category = selectedCategory
-    // Ở chế độ xem mặc định (đang hiển thị BlogHeading), ẩn các bài featured
-    // khỏi grid để tránh trùng lặp. Khi tìm kiếm thì vẫn tìm được chúng.
     if (!search) next.excludeFeatured = true
     return next
   }, [page, search, selectedCategory])
@@ -123,7 +121,7 @@ const BlogsView = () => {
                       <Image
                         fill
                         className="object-cover"
-                        src={blog.featuredImage || '/images/next-js-a-react-js-framework.jpg'}
+                        src={blog.featuredImage || FALLBACK_IMAGE_BLOG}
                         alt={blog.title}
                       />
                       {blog.category && (
