@@ -19,8 +19,6 @@ import { useAuth } from '@/src/contexts/AuthContext'
 import { useMessageApi } from '@/src/contexts/MessageContext'
 import { FALLBACK_IMAGE_BLOG } from './BlogsHeading'
 
-// Markdown renderer loaded on demand — only for blogs stored as markdown, so HTML
-// blogs (the majority) never pull the markdown bundle.
 const MarkdownContent = dynamic(() => import('./components/MarkdownContent'), {
   ssr: false,
   loading: () => <div className="text-gray-500">Loading content…</div>,

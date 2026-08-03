@@ -9,6 +9,7 @@ import { DeleteOutlined, EditOutlined, EyeOutlined, LikeOutlined } from '@ant-de
 import { Blog } from '@/src/lib/types'
 import { stripHtml } from '@/src/utils/stringUtils'
 import { recoverEscapedHtml } from '@/src/utils/htmlContent'
+import { FALLBACK_IMAGE_BLOG } from '../BlogsHeading'
 
 interface MyBlogCardProps {
   blog: Blog
@@ -28,7 +29,7 @@ const MyBlogCard = ({ blog, deleting, onDelete }: MyBlogCardProps) => {
         <Image
           fill
           className="object-cover"
-          src={blog.featuredImage || '/images/next-js-a-react-js-framework.jpg'}
+          src={blog.featuredImage || FALLBACK_IMAGE_BLOG}
           alt={blog.title}
         />
         <div className="absolute top-3 left-3 flex gap-2">

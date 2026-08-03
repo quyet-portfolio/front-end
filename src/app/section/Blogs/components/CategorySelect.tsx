@@ -14,8 +14,7 @@ import { useMessageApi } from '@/src/contexts/MessageContext'
 import { categoryApi } from '@/src/lib/api/category'
 import { Category } from '@/src/lib/types'
 
-interface CategorySelectProps {
-  // Do Form.Item của AntD truyền xuống
+type CategorySelectProps = {
   value?: string
   onChange?: (value: string) => void
 }
@@ -84,7 +83,7 @@ const CategorySelect = ({ value, onChange }: CategorySelectProps) => {
         try {
           const data = await categoryApi.deleteCategory(category._id)
           setCategories((prev) => prev.filter((item) => item._id !== category._id))
-          // Xoá category vừa tạo thì được tạo lại cái khác
+      
           if (createdInSession?._id === category._id) setCreatedInSession(null)
           if (value === category.name) onChange?.('')
           messageApi?.success(
@@ -181,7 +180,6 @@ const CategorySelect = ({ value, onChange }: CategorySelectProps) => {
               maxLength={50}
               disabled={!!createdInSession}
               onChange={(e) => setNewName(e.target.value)}
-              // Chặn phím lọt xuống Select (Enter/mũi tên/Backspace sẽ chọn hoặc xoá option)
               onKeyDown={(e) => e.stopPropagation()}
               onPressEnter={(e) => {
                 e.preventDefault()

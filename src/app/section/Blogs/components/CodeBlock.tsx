@@ -7,7 +7,6 @@ interface CodeBlockProps {
   children?: ReactNode
 }
 
-// Extract "language-xxx" → "xxx" from the child <code> element rendered by rehype-highlight
 const getLanguage = (children: ReactNode): string => {
   if (!isValidElement(children)) return ''
   const className = (children.props as { className?: string }).className || ''
@@ -15,9 +14,7 @@ const getLanguage = (children: ReactNode): string => {
   return match ? match[1] : ''
 }
 
-// Custom <pre> renderer for react-markdown: wraps the highlighted code block with a
-// toolbar (language label + copy button). Reads text from the live DOM on copy so it
-// works regardless of the nested highlight spans.
+
 const CodeBlock = ({ children }: CodeBlockProps) => {
   const preRef = useRef<HTMLPreElement>(null)
   const [copied, setCopied] = useState(false)

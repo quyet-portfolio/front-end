@@ -19,9 +19,6 @@ export default function Hello() {
 }
 \`\`\``
 
-// Lightweight Markdown editor: raw textarea + live preview reusing MarkdownContent,
-// so the preview matches exactly how the blog renders. Value/onChange are injected by
-// the parent AntD Form.Item, mirroring the CKEditor component contract.
 const MarkdownEditor = ({ value = '', onChange }: MarkdownEditorProps) => {
   const [tab, setTab] = useState('write')
 
