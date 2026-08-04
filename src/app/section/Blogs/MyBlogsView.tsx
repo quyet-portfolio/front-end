@@ -6,7 +6,7 @@ import Button from 'antd/es/button'
 import Empty from 'antd/es/empty'
 import Spin from 'antd/es/spin'
 import { ArrowLeftOutlined, PlusOutlined } from '@ant-design/icons'
-import MyBlogCard from './components/MyBlogCard'
+import BlogTimeline from './components/BlogTimeline'
 import { useMyBlogs } from './hook/useMyBlogs'
 import { blogApi } from '@/src/lib/api/blog'
 import { Blog } from '@/src/lib/types'
@@ -115,11 +115,13 @@ const MyBlogsView = () => {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {visibleBlogs.map((blog) => (
-                <MyBlogCard key={blog._id} blog={blog} deleting={deletingId === blog._id} onDelete={handleDelete} />
-              ))}
-            </div>
+            {/* Remount on page/status change so the tree replays its top-down reveal */}
+            <BlogTimeline
+              key={`${page}-${status}`}
+              blogs={visibleBlogs}
+              deletingId={deletingId}
+              onDelete={handleDelete}
+            />
 
             {pagination && pagination.totalPages > 1 && (
               <div className="flex items-center justify-center gap-4 mt-10">
