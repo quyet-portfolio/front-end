@@ -1,54 +1,76 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Button from 'antd/es/button'
 import Empty from 'antd/es/empty'
 import Spin from 'antd/es/spin'
 import { ArrowLeftOutlined, PlusOutlined } from '@ant-design/icons'
+import BlogStatusTabs from './components/BlogStatusTabs'
 import BlogTimeline from './components/BlogTimeline'
+import TimelineLoadMore from './components/TimelineLoadMore'
+import TimelineYearRail from './components/TimelineYearRail'
+import { MAX_AUTO_LOAD_ITEMS } from './constants/myBlogs'
+import { useActiveYear } from './hook/useActiveYear'
 import { useMyBlogs } from './hook/useMyBlogs'
+import { useMyBlogsArchive } from './hook/useMyBlogsArchive'
 import { blogApi } from '@/src/lib/api/blog'
-import { Blog } from '@/src/lib/types'
+import { BlogArchiveYear, BlogListItem, BlogStatusFilter } from '@/src/lib/types'
+import { useInfiniteScroll } from '@/src/hooks/useInfiniteScroll'
 import { useMessageApi } from '@/src/contexts/MessageContext'
-
-const PAGE_SIZE = 9
-
-type BlogStatusFilter = 'all' | 'published' | 'draft'
-
-const STATUS_TABS: Array<{ key: BlogStatusFilter; label: string }> = [
-  { key: 'all', label: 'All' },
-  { key: 'published', label: 'Published' },
-  { key: 'draft', label: 'Drafts' },
-]
 
 const MyBlogsView = () => {
   const router = useRouter()
   const messageApi = useMessageApi()
+  const sentinelRef = useRef<HTMLDivElement | null>(null)
 
-  const [page, setPage] = useState<number>(1)
   const [status, setStatus] = useState<BlogStatusFilter>('all')
+  const [anchor, setAnchor] = useState<BlogArchiveYear | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  const { blogs, pagination, loading, error, refetch } = useMyBlogs({ page, limit: PAGE_SIZE })
+  const { blogs, total, hasMore, loading, loadingMore, error, revealFromIndex, loadMore, reload, removeBlog } =
+    useMyBlogs({ status, before: anchor?.latestCreatedAt ?? null })
 
-  // Status filter is applied on the current page — the API returns all statuses
-  const visibleBlogs = useMemo<Blog[]>(() => {
-    if (status === 'all') return blogs
-    return blogs.filter((blog) => (status === 'published' ? blog.isPublished : !blog.isPublished))
-  }, [blogs, status])
+  const { years, refetchArchive } = useMyBlogsArchive(status)
+  const activeYear = useActiveYear(blogs.length)
 
-  const handleDelete = async (blog: Blog) => {
+  // Quá ngưỡng thì ngừng tự tải để DOM không phình vô hạn khi cuộn vu vơ
+  const autoLoad = blogs.length < MAX_AUTO_LOAD_ITEMS
+
+  useInfiniteScroll({
+    targetRef: sentinelRef,
+    hasMore,
+    isLoading: loading || loadingMore,
+    onLoadMore: loadMore,
+    enabled: autoLoad && !error,
+  })
+
+  const handleSelectYear = (year: BlogArchiveYear | null) => {
+    if (!year) {
+      setAnchor(null)
+      return
+    }
+    // Đã có trong DOM → chỉ cuộn tới, feed giữ nguyên vị trí và state.
+    // Feed sort giảm dần nên node đầu tiên của năm chính là ngày mới nhất năm đó.
+    const target = document.querySelector<HTMLElement>(`[data-year="${year.year}"]`)
+    if (target) {
+      target.scrollIntoView({ block: 'start' })
+      return
+    }
+    // Chưa tải → reset feed, neo tại bài mới nhất của năm đó
+    setAnchor(year)
+    window.scrollTo({ top: 0 })
+  }
+
+  const handleDelete = async (blog: BlogListItem) => {
     try {
       setDeletingId(blog._id)
       await blogApi.deleteBlog(blog._id)
+      // Xoá tại chỗ thay vì refetch — không nhảy scroll, không chạy lại animation
+      removeBlog(blog._id)
+      // Số bài theo năm trên rail phải khớp lại sau khi xoá
+      refetchArchive()
       if (messageApi) messageApi.success('Blog deleted successfully')
-      // Step back a page when the last item of a non-first page is removed
-      if (blogs.length === 1 && page > 1) {
-        setPage((prev) => prev - 1)
-        return
-      }
-      await refetch()
     } catch (err: any) {
       if (messageApi) messageApi.error(err.response?.data?.message || 'Failed to delete blog')
     } finally {
@@ -56,88 +78,93 @@ const MyBlogsView = () => {
     }
   }
 
+  const renderFeed = () => {
+    if (loading) {
+      return (
+        <div className="flex justify-center py-20">
+          <Spin size="large" />
+        </div>
+      )
+    }
+
+    if (error && blogs.length === 0) {
+      return (
+        <div className="flex flex-col items-center gap-4 py-20">
+          <p className="text-red-500">{error}</p>
+          <Button onClick={reload}>Try again</Button>
+        </div>
+      )
+    }
+
+    if (blogs.length === 0) {
+      return (
+        <div className="py-20">
+          <Empty
+            description={
+              <span className="text-white-200">
+                {status === 'all' ? 'You have not written any blog yet' : 'No blogs with this status'}
+              </span>
+            }
+          >
+            {status === 'all' && (
+              <Button type="primary" icon={<PlusOutlined />} onClick={() => router.push('/blogs/create')}>
+                Write your first blog
+              </Button>
+            )}
+          </Empty>
+        </div>
+      )
+    }
+
+    return (
+      <>
+        {/* Remount khi đổi tab / nhảy năm (feed mới, chạy lại reveal) nhưng KHÔNG
+            bao giờ remount khi append */}
+        <BlogTimeline
+          key={`${status}-${anchor?.year ?? 'latest'}`}
+          blogs={blogs}
+          revealFromIndex={revealFromIndex}
+          deletingId={deletingId}
+          onDelete={handleDelete}
+        />
+        <TimelineLoadMore
+          sentinelRef={sentinelRef}
+          hasMore={hasMore}
+          loadingMore={loadingMore}
+          error={error}
+          autoLoad={autoLoad}
+          onLoadMore={loadMore}
+        />
+      </>
+    )
+  }
+
   return (
     <div className="h-full flex flex-col items-center gap-6">
       <div className="w-full">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
           <div className="flex gap-4 items-start">
-            <Button className='hidden md:block' icon={<ArrowLeftOutlined />} onClick={() => router.push('/blogs')} />
+            <Button className="hidden md:block" icon={<ArrowLeftOutlined />} onClick={() => router.push('/blogs')} />
             <div className="flex flex-col gap-1">
               <h1 className="text-2xl font-bold text-white">My Blogs</h1>
               <p className="text-sm text-white-200">
-                {pagination ? `${pagination.totalBlogs} blog${pagination.totalBlogs === 1 ? '' : 's'} total` : ' '}
+                {total === null ? ' ' : `${total} blog${total === 1 ? '' : 's'} total`}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 mb-6">
-          {STATUS_TABS.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setStatus(tab.key)}
-              className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-all duration-200
-                ${
-                  status === tab.key
-                    ? 'bg-primary border-primary text-white'
-                    : 'bg-transparent border-blue-950 text-white-100 hover:border-blue-500 hover:text-white'
-                }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        <div className="flex flex-col gap-3 mb-6">
+          <BlogStatusTabs value={status} onChange={setStatus} />
+          <TimelineYearRail
+            years={years}
+            activeYear={activeYear}
+            anchorYear={anchor?.year ?? null}
+            onSelectYear={handleSelectYear}
+          />
         </div>
 
-        {loading ? (
-          <div className="flex justify-center py-20">
-            <Spin size="large" />
-          </div>
-        ) : error ? (
-          <div className="flex flex-col items-center gap-4 py-20">
-            <p className="text-red-500">{error}</p>
-            <Button onClick={refetch}>Try again</Button>
-          </div>
-        ) : visibleBlogs.length === 0 ? (
-          <div className="py-20">
-            <Empty
-              description={
-                <span className="text-white-200">
-                  {status === 'all' ? 'You have not written any blog yet' : 'No blogs with this status'}
-                </span>
-              }
-            >
-              {status === 'all' && (
-                <Button type="primary" icon={<PlusOutlined />} onClick={() => router.push('/blogs/create')}>
-                  Write your first blog
-                </Button>
-              )}
-            </Empty>
-          </div>
-        ) : (
-          <>
-            {/* Remount on page/status change so the tree replays its top-down reveal */}
-            <BlogTimeline
-              key={`${page}-${status}`}
-              blogs={visibleBlogs}
-              deletingId={deletingId}
-              onDelete={handleDelete}
-            />
-
-            {pagination && pagination.totalPages > 1 && (
-              <div className="flex items-center justify-center gap-4 mt-10">
-                <Button disabled={!pagination.hasPrevPage} onClick={() => setPage((p) => Math.max(1, p - 1))}>
-                  Previous
-                </Button>
-                <span className="text-sm text-white-100">
-                  Page {pagination.currentPage} of {pagination.totalPages}
-                </span>
-                <Button disabled={!pagination.hasNextPage} onClick={() => setPage((p) => p + 1)}>
-                  Next
-                </Button>
-              </div>
-            )}
-          </>
-        )}
+        {renderFeed()}
       </div>
     </div>
   )

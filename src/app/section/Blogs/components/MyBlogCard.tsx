@@ -6,15 +6,15 @@ import Button from 'antd/es/button'
 import Popconfirm from 'antd/es/popconfirm'
 import Tag from 'antd/es/tag'
 import { DeleteOutlined, EditOutlined, EyeOutlined, LikeOutlined } from '@ant-design/icons'
-import { Blog } from '@/src/lib/types'
+import { BlogListItem } from '@/src/lib/types'
 import { stripHtml } from '@/src/utils/stringUtils'
 import { recoverEscapedHtml } from '@/src/utils/htmlContent'
 import { FALLBACK_IMAGE_BLOG } from '../BlogsHeading'
 
 interface MyBlogCardProps {
-  blog: Blog
+  blog: BlogListItem
   deleting: boolean
-  onDelete: (blog: Blog) => void
+  onDelete: (blog: BlogListItem) => void
 }
 
 const MyBlogCard = ({ blog, deleting, onDelete }: MyBlogCardProps) => {
@@ -26,8 +26,13 @@ const MyBlogCard = ({ blog, deleting, onDelete }: MyBlogCardProps) => {
         shadow-sm hover:shadow-indigo-900/30 hover:shadow-lg transition-all duration-300"
     >
       <Link href={`/blogs/${blog.slug}`} className="relative w-full h-44 flex-shrink-0">
+        {/* sizes bắt buộc với ảnh `fill`: thiếu nó Next coi như 100vw và browser
+            chọn candidate lớn nhất, trong khi card chỉ chiếm ~40vw trên desktop */}
         <Image
           fill
+          sizes="(max-width: 768px) 92vw, (max-width: 1280px) 40vw, 480px"
+          quality={70}
+          loading="lazy"
           className="object-cover"
           src={blog.featuredImage || FALLBACK_IMAGE_BLOG}
           alt={blog.title}
@@ -57,7 +62,7 @@ const MyBlogCard = ({ blog, deleting, onDelete }: MyBlogCardProps) => {
         </Link>
 
         <p className="text-white-200 text-sm leading-relaxed line-clamp-2 flex-1">
-          {stripHtml(recoverEscapedHtml(blog.excerpt || blog.content))}
+          {stripHtml(recoverEscapedHtml(blog.excerpt || ''))}
         </p>
 
         <div className="flex justify-between items-center pt-3 border-t border-gray-800 mt-auto">

@@ -1,6 +1,13 @@
 // src/lib/api/blog.ts
 import axios from '../axios'
-import { Blog, BlogContentFormat, BlogsResponse } from '../types'
+import {
+  Blog,
+  BlogArchiveResponse,
+  BlogContentFormat,
+  BlogsResponse,
+  BlogStatusFilter,
+  MyBlogsResponse,
+} from '../types'
 
 export interface CreateBlogData {
   title: string
@@ -38,6 +45,21 @@ export interface GetBlogsParams {
   excludeFeatured?: boolean
 }
 
+export interface GetMyBlogsParams {
+  limit?: number
+  status?: BlogStatusFilter
+  // Trang kế tiếp khi cuộn
+  cursor?: string
+  // Neo feed tại một mốc thời gian (nhảy năm). Loại trừ với `cursor`.
+  before?: string
+}
+
+export interface GetMyBlogsArchiveParams {
+  status?: BlogStatusFilter
+  // Timezone của trình duyệt — server phải gom nhóm theo đúng lịch local của client
+  tz?: string
+}
+
 export const blogApi = {
   // Get all published blogs with filters
   getBlogs: async (params?: GetBlogsParams): Promise<BlogsResponse> => {
@@ -51,9 +73,15 @@ export const blogApi = {
     return response.data
   },
 
-  // Get current user's blogs
-  getMyBlogs: async (params?: { page?: number; limit?: number }): Promise<BlogsResponse> => {
-    const response = await axios.get<BlogsResponse>('/blogs/my', { params })
+  // Get current user's blogs — keyset pagination cho timeline infinite scroll
+  getMyBlogs: async (params?: GetMyBlogsParams): Promise<MyBlogsResponse> => {
+    const response = await axios.get<MyBlogsResponse>('/blogs/my', { params })
+    return response.data
+  },
+
+  // Số bài theo năm — nguồn dữ liệu cho rail nhảy năm của timeline
+  getMyBlogsArchive: async (params?: GetMyBlogsArchiveParams): Promise<BlogArchiveResponse> => {
+    const response = await axios.get<BlogArchiveResponse>('/blogs/my/archive', { params })
     return response.data
   },
 

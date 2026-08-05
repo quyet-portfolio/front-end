@@ -38,6 +38,41 @@ export interface Blog {
   updatedAt: string;
 }
 
+// Danh sách blog không trả về `content` (nặng, không dùng để render card).
+// Khai báo tường minh để compiler chỉ ra chỗ nào còn đọc nhầm field này.
+export type BlogListItem = Omit<Blog, 'content' | 'author'> & {
+  content?: string;
+  author?: Blog['author'];
+};
+
+export type BlogStatusFilter = 'all' | 'published' | 'draft';
+
+export interface MyBlogsPagination {
+  limit: number;
+  hasNextPage: boolean;
+  nextCursor: string | null;
+  // Chỉ có ở request khởi tạo feed (không kèm cursor)
+  totalBlogs?: number;
+}
+
+export interface MyBlogsResponse {
+  blogs: BlogListItem[];
+  pagination: MyBlogsPagination;
+}
+
+export interface BlogArchiveYear {
+  year: number;
+  count: number;
+  // Mốc thời gian bài mới nhất của năm — dùng làm tham số `before` khi nhảy năm
+  latestCreatedAt: string;
+}
+
+export interface BlogArchiveResponse {
+  timezone: string;
+  total: number;
+  years: BlogArchiveYear[];
+}
+
 export interface Category {
   _id: string;
   name: string;
