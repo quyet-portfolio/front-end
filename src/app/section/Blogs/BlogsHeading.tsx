@@ -3,8 +3,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
-import { blogApi } from '@/src/lib/api/blog'
+import { useMemo, useState } from 'react'
+import { useFeaturedBlogs } from '@/src/hooks/useFeaturedBlogs'
 import { stripHtml } from '@/src/utils/stringUtils'
 import { recoverEscapedHtml } from '@/src/utils/htmlContent'
 
@@ -20,32 +20,31 @@ type HeadingPost = {
 export const FALLBACK_IMAGE_BLOG = 'https://cdn.shopify.com/s/files/1/0734/4986/5316/files/default-image-blogs.png?v=1785683364'
 
 export default function BlogHeading() {
-  const [posts, setPosts] = useState<HeadingPost[]>([])
+  const { featuredBlogs } = useFeaturedBlogs()
   const [activeIndex, setActiveIndex] = useState(0)
 
-  useEffect(() => {
-    blogApi
-      .getFeaturedBlogs()
-      .then((data) => {
-        const mapped: HeadingPost[] = data.blogs.map((blog) => ({
-          id: blog._id,
-          title: blog.title,
-          desc: stripHtml(recoverEscapedHtml(blog.excerpt || blog.content)),
-          author: blog.author?.username || 'Unknown',
-          slug: blog.slug,
-          image: blog.featuredImage || FALLBACK_IMAGE_BLOG,
-        }))
-        setPosts(mapped)
-        setActiveIndex(0)
-      })
-      .catch(() => setPosts([]))
-  }, [])
+  const posts = useMemo<HeadingPost[]>(
+    () =>
+      featuredBlogs.map((blog) => ({
+        id: blog._id,
+        title: blog.title,
+        desc: stripHtml(recoverEscapedHtml(blog.excerpt || blog.content)),
+        author: blog.author?.username || 'Unknown',
+        slug: blog.slug,
+        image: blog.featuredImage || FALLBACK_IMAGE_BLOG,
+      })),
+    [featuredBlogs]
+  )
 
   if (posts.length === 0) return null
 
   const count = posts.length
-  const prevIndex = (activeIndex - 1 + count) % count
-  const nextIndex = (activeIndex + 1) % count
+  // Danh sách ghim có thể ngắn lại sau một lần refetch nền. Kẹp giá trị ngay lúc
+  // render thay vì đồng bộ bằng effect — nếu không posts[activeIndex] sẽ là
+  // undefined đúng ở lần render giữa hai lượt.
+  const safeIndex = activeIndex < count ? activeIndex : 0
+  const prevIndex = (safeIndex - 1 + count) % count
+  const nextIndex = (safeIndex + 1) % count
 
   const showRight = count >= 2
   const showLeft = count >= 3
@@ -89,14 +88,14 @@ export default function BlogHeading() {
         {/* Center Card — rendered last so it sits above both side cards */}
         <AnimatePresence mode="wait">
           <motion.div
-            key={posts[activeIndex].id}
+            key={posts[safeIndex].id}
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ duration: 0.4, type: 'spring' }}
             className="absolute w-[75%] sm:w-[60%] h-[280px] sm:h-[400px] rounded-2xl overflow-hidden shadow-xl cursor-pointer z-20"
           >
-            <Card post={posts[activeIndex]} />
+            <Card post={posts[safeIndex]} />
           </motion.div>
         </AnimatePresence>
       </div>

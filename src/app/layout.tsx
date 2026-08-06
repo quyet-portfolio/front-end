@@ -5,6 +5,7 @@ import './globals.css'
 import { ThemeProvider } from './provider'
 import { AuthProvider } from '../contexts/AuthContext'
 import { MessageProvider } from '../contexts/MessageContext'
+import { QueryProvider } from '../providers/QueryProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -27,7 +28,9 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <AntdRegistry>
             <MessageProvider>
-              <AuthProvider>{children}</AuthProvider>
+              <QueryProvider>
+                <AuthProvider>{children}</AuthProvider>
+              </QueryProvider>
             </MessageProvider>
           </AntdRegistry>
         </ThemeProvider>

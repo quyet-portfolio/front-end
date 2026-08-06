@@ -61,15 +61,17 @@ export interface GetMyBlogsArchiveParams {
 }
 
 export const blogApi = {
-  // Get all published blogs with filters
-  getBlogs: async (params?: GetBlogsParams): Promise<BlogsResponse> => {
-    const response = await axios.get<BlogsResponse>('/blogs', { params })
+  // Get all published blogs with filters.
+  // `signal` để react-query huỷ request cũ khi user đổi trang/bộ lọc liên tục —
+  // thiếu nó, response về trễ có thể ghi đè kết quả mới hơn.
+  getBlogs: async (params?: GetBlogsParams, signal?: AbortSignal): Promise<BlogsResponse> => {
+    const response = await axios.get<BlogsResponse>('/blogs', { params, signal })
     return response.data
   },
 
   // Get featured blogs shown on the BlogHeading carousel (max 3)
-  getFeaturedBlogs: async (): Promise<{ blogs: Blog[] }> => {
-    const response = await axios.get<{ blogs: Blog[] }>('/blogs/featured')
+  getFeaturedBlogs: async (signal?: AbortSignal): Promise<{ blogs: Blog[] }> => {
+    const response = await axios.get<{ blogs: Blog[] }>('/blogs/featured', { signal })
     return response.data
   },
 
@@ -86,8 +88,8 @@ export const blogApi = {
   },
 
   // Get single blog by slug
-  getBlogBySlug: async (slug: string): Promise<{ blog: Blog }> => {
-    const response = await axios.get<{ blog: Blog }>(`/blogs/${slug}`)
+  getBlogBySlug: async (slug: string, signal?: AbortSignal): Promise<{ blog: Blog }> => {
+    const response = await axios.get<{ blog: Blog }>(`/blogs/${slug}`, { signal })
     return response.data
   },
 

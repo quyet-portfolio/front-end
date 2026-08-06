@@ -13,8 +13,8 @@ export interface GetCategoriesParams {
 
 export const categoryApi = {
   // Get blog categories
-  getCategories: async (params?: GetCategoriesParams): Promise<CategoriesResponse> => {
-    const response = await axios.get<CategoriesResponse>('/blogs/categories', { params })
+  getCategories: async (params?: GetCategoriesParams, signal?: AbortSignal): Promise<CategoriesResponse> => {
+    const response = await axios.get<CategoriesResponse>('/blogs/categories', { params, signal })
     return response.data
   },
 

@@ -17,11 +17,13 @@ import { useMyBlogsArchive } from './hook/useMyBlogsArchive'
 import { blogApi } from '@/src/lib/api/blog'
 import { BlogArchiveYear, BlogListItem, BlogStatusFilter } from '@/src/lib/types'
 import { useInfiniteScroll } from '@/src/hooks/useInfiniteScroll'
+import { useInvalidateBlogs } from '@/src/hooks/useInvalidateBlogs'
 import { useMessageApi } from '@/src/contexts/MessageContext'
 
 const MyBlogsView = () => {
   const router = useRouter()
   const messageApi = useMessageApi()
+  const invalidateBlogs = useInvalidateBlogs()
   const sentinelRef = useRef<HTMLDivElement | null>(null)
 
   const [status, setStatus] = useState<BlogStatusFilter>('all')
@@ -70,6 +72,8 @@ const MyBlogsView = () => {
       removeBlog(blog._id)
       // Số bài theo năm trên rail phải khớp lại sau khi xoá
       refetchArchive()
+      // Danh sách công khai đang nằm trong cache react-query cũng phải bỏ đi
+      invalidateBlogs(blog.slug)
       if (messageApi) messageApi.success('Blog deleted successfully')
     } catch (err: any) {
       if (messageApi) messageApi.error(err.response?.data?.message || 'Failed to delete blog')

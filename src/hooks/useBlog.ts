@@ -1,32 +1,50 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { Blog } from '../lib/types';
-import { blogApi } from '../lib/api/blog';
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useCallback } from 'react'
+import { blogApi } from '../lib/api/blog'
+import { blogKeys } from '../lib/queryKeys'
+
+const detailQueryOptions = (slug: string) => ({
+  queryKey: blogKeys.detail(slug),
+  queryFn: ({ signal }: { signal: AbortSignal }) => blogApi.getBlogBySlug(slug, signal),
+})
 
 export const useBlog = (slug: string) => {
-  const [blog, setBlog] = useState<Blog | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const query = useQuery({
+    ...detailQueryOptions(slug),
+    enabled: !!slug,
+  })
 
-  const fetchBlog = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await blogApi.getBlogBySlug(slug);
-      setBlog(data.blog);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to fetch blog');
-    } finally {
-      setLoading(false);
-    }
-  };
+  return {
+    blog: query.data?.blog ?? null,
+    loading: query.isPending,
+    isFetching: query.isFetching,
+    error: query.isError ? getBlogErrorMessage(query.error) : null,
+    refetch: query.refetch,
+  }
+}
 
-  useEffect(() => {
-    if (slug) {
-      fetchBlog();
-    }
-  }, [slug]);
+/**
+ * Prefetch bài chi tiết.
+ *
+ * Cố tình gắn vào `pointerdown` chứ không phải `mouseenter`: endpoint chi tiết
+ * cộng `views` mỗi lần gọi (back-end/routes/blog.ts), nên prefetch theo hover sẽ
+ * thổi phồng lượt xem của những bài người dùng chỉ lướt qua. `pointerdown` bắn
+ * ngay trước `click` — vẫn tiết kiệm được quãng chờ chuyển route.
+ */
+export const usePrefetchBlog = () => {
+  const queryClient = useQueryClient()
+  return useCallback(
+    (slug: string) => {
+      if (!slug) return
+      queryClient.prefetchQuery(detailQueryOptions(slug))
+    },
+    [queryClient]
+  )
+}
 
-  return { blog, loading, error, refetch: fetchBlog };
-};
+function getBlogErrorMessage(error: unknown): string {
+  const message = (error as any)?.response?.data?.message
+  return typeof message === 'string' ? message : 'Blog not found'
+}

@@ -17,6 +17,7 @@ import { useRouter, useParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { useMessageApi } from '@/src/contexts/MessageContext'
 import { blogApi, UpdateBlogData } from '@/src/lib/api/blog'
+import { useInvalidateBlogs } from '@/src/hooks/useInvalidateBlogs'
 import { recoverEscapedHtml } from '@/src/utils/htmlContent'
 import { Blog, BlogContentFormat } from '@/src/lib/types'
 import { SLUG_PATTERN } from '@/src/utils/slug'
@@ -44,6 +45,7 @@ const EditBlogView = () => {
 
   const [form] = Form.useForm()
   const messageApi = useMessageApi()
+  const invalidateBlogs = useInvalidateBlogs()
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
   const [blog, setBlog] = useState<Blog | null>(null)
@@ -114,6 +116,9 @@ const EditBlogView = () => {
       setLoading(true)
       const res = await blogApi.updateBlog(blog._id, { ...values, content, contentFormat })
       if (messageApi) messageApi.success('Blog updated successfully!')
+      // Xoá cache của cả slug cũ lẫn slug mới, nếu không trang chi tiết sẽ dựng
+      // lại bản trước khi sửa từ cache
+      invalidateBlogs([blog.slug, res.blog.slug])
       // Dùng slug trả về từ server — slug có thể vừa bị đổi trong lần lưu này
       router.push(`/blogs/${res.blog.slug}`)
     } catch (error: any) {

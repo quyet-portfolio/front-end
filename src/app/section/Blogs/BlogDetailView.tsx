@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
@@ -12,9 +12,11 @@ import Breadcrumb from 'antd/es/breadcrumb'
 import Popconfirm from 'antd/es/popconfirm'
 import dynamic from 'next/dynamic'
 import DOMPurify from 'isomorphic-dompurify'
+import { useQueryClient } from '@tanstack/react-query'
 import { blogApi } from '@/src/lib/api/blog'
+import { blogKeys } from '@/src/lib/queryKeys'
+import { useBlog } from '@/src/hooks/useBlog'
 import { recoverEscapedHtml } from '@/src/utils/htmlContent'
-import { Blog } from '@/src/lib/types'
 import { useAuth } from '@/src/contexts/AuthContext'
 import { useMessageApi } from '@/src/contexts/MessageContext'
 import { FALLBACK_IMAGE_BLOG } from './BlogsHeading'
@@ -29,38 +31,33 @@ const BlogDetailView = () => {
   const router = useRouter()
   const slug = params.slug as string
 
-  const [blog, setBlog] = useState<Blog | null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
-  const [likesCount, setLikesCount] = useState<number>(0)
-  const [isLiked, setIsLiked] = useState<boolean>(false)
   const [deleting, setDeleting] = useState<boolean>(false)
+  // Kết quả like đè lên dữ liệu server cho tới khi rời trang. Cố tình KHÔNG
+  // invalidate query chi tiết: refetch sẽ cộng thêm một lượt view giả.
+  // Gắn kèm slug để override tự hết hiệu lực khi sang bài khác — không cần effect
+  // reset, thứ sẽ tạo thêm một lượt render thừa với dữ liệu sai.
+  const [likeOverride, setLikeOverride] = useState<{
+    slug: string
+    count: number
+    isLiked: boolean
+  } | null>(null)
 
   const { isAuthenticated, user } = useAuth()
   const messageApi = useMessageApi()
+  const queryClient = useQueryClient()
 
-  useEffect(() => {
-    if (!slug) return
+  // Bản cũ fetch lại mỗi khi object `user` đổi tham chiếu — mỗi lần như vậy là
+  // một lượt view bị đếm thừa. useQuery chỉ gọi một lần cho mỗi slug.
+  const { blog, loading, error } = useBlog(slug)
 
-    const fetchBlog = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        const response = await blogApi.getBlogBySlug(slug)
-        setBlog(response.blog)
-        setLikesCount(response.blog.likes.length)
-        if (user) {
-          setIsLiked(response.blog.likes.some((l: any) => l._id === user._id || l === user._id))
-        }
-      } catch (err: any) {
-        setError(err.response?.data?.message || 'Blog not found')
-      } finally {
-        setLoading(false)
-      }
-    }
+  const activeLikeOverride = likeOverride?.slug === slug ? likeOverride : null
 
-    fetchBlog()
-  }, [slug, user])
+  const likesCount = activeLikeOverride?.count ?? blog?.likes.length ?? 0
+  const isLiked = useMemo(() => {
+    if (activeLikeOverride) return activeLikeOverride.isLiked
+    if (!user || !blog) return false
+    return blog.likes.some((l: any) => l._id === user._id || l === user._id)
+  }, [activeLikeOverride, user, blog])
 
   const handleLike = async () => {
     if (!isAuthenticated) {
@@ -72,8 +69,7 @@ const BlogDetailView = () => {
 
     try {
       const res = await blogApi.likeBlog(blog._id)
-      setLikesCount(res.likesCount)
-      setIsLiked(res.isLiked)
+      setLikeOverride({ slug, count: res.likesCount, isLiked: res.isLiked })
     } catch (err: any) {
       if (messageApi) {
         messageApi.error(err.response?.data?.message || 'Action failed')
@@ -88,6 +84,11 @@ const BlogDetailView = () => {
       setDeleting(true)
       await blogApi.deleteBlog(blog._id)
       if (messageApi) messageApi.success('Blog deleted successfully')
+      // Dọn cache trước khi điều hướng, nếu không /blogs sẽ dựng lại danh sách
+      // cũ (còn nguyên bài vừa xoá) từ cache và hiển thị tức thì.
+      queryClient.removeQueries({ queryKey: blogKeys.detail(blog.slug) })
+      queryClient.invalidateQueries({ queryKey: blogKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: blogKeys.featured() })
       router.push('/blogs')
     } catch (err: any) {
       if (messageApi) {

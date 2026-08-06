@@ -15,6 +15,7 @@ import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { useMessageApi } from '@/src/contexts/MessageContext'
 import { blogApi, CreateBlogData } from '@/src/lib/api/blog'
+import { useInvalidateBlogs } from '@/src/hooks/useInvalidateBlogs'
 import { BlogContentFormat } from '@/src/lib/types'
 import { SLUG_PATTERN, slugify } from '@/src/utils/slug'
 import CategorySelect from './components/CategorySelect'
@@ -40,6 +41,7 @@ const CreateBlogView = () => {
   const router = useRouter()
   const [form] = Form.useForm()
   const messageApi = useMessageApi()
+  const invalidateBlogs = useInvalidateBlogs()
   const [loading, setLoading] = useState(false)
   // Số bài đang được ghim — để cảnh báo khi đã đủ MAX_FEATURED
   const [featuredCount, setFeaturedCount] = useState(0)
@@ -88,6 +90,7 @@ const CreateBlogView = () => {
       if (messageApi) {
         messageApi.success('Blog created successfully!')
       }
+      invalidateBlogs()
       router.push('/blogs')
     } catch (error: any) {
       if (messageApi) {

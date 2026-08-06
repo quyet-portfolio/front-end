@@ -4,17 +4,37 @@ import Image from 'next/image'
 import Link from 'next/link'
 import Button from 'antd/es/button'
 import { motion } from 'framer-motion'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import BlogsHeader from './components/BlogsHeader'
 import BlogHeading, { FALLBACK_IMAGE_BLOG } from './BlogsHeading'
-import { useBlogs } from '@/src/hooks/useBlogs'
+import { useBlogs, usePrefetchBlogs } from '@/src/hooks/useBlogs'
+import { usePrefetchBlog } from '@/src/hooks/useBlog'
+import { useBlogCategories } from '@/src/hooks/useBlogCategories'
 import { GetBlogsParams } from '@/src/lib/api/blog'
-import { categoryApi } from '@/src/lib/api/category'
 import { stripHtml } from '@/src/utils/stringUtils'
 import { recoverEscapedHtml } from '@/src/utils/htmlContent'
 
 const PAGE_SIZE = 9
+
+// Build server-side query params (category 'All' / empty search are omitted).
+// Tách khỏi component để prefetch dựng được params của trang/danh mục chưa chọn —
+// params phải khớp từng ký tự với lúc useQuery gọi, nếu không prefetch thành công cốc.
+const buildParams = ({
+  page,
+  search,
+  category,
+}: {
+  page: number
+  search: string
+  category: string
+}): GetBlogsParams => {
+  const next: GetBlogsParams = { page, limit: PAGE_SIZE }
+  if (search) next.search = search
+  if (category !== 'All') next.category = category
+  if (!search) next.excludeFeatured = true
+  return next
+}
 
 const BlogsView = () => {
   const searchParams = useSearchParams()
@@ -22,28 +42,44 @@ const BlogsView = () => {
   const [search, setSearch] = useState<string>(searchParams.get('search') || '')
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
   const [page, setPage] = useState<number>(1)
-  const [categories, setCategories] = useState<string[]>([])
 
-  // Build server-side query params (category 'All' / empty search are omitted)
-  const params = useMemo<GetBlogsParams>(() => {
-    const next: GetBlogsParams = { page, limit: PAGE_SIZE }
-    if (search) next.search = search
-    if (selectedCategory !== 'All') next.category = selectedCategory
-    if (!search) next.excludeFeatured = true
-    return next
-  }, [page, search, selectedCategory])
+  const listTopRef = useRef<HTMLDivElement>(null)
 
-  const { blogs, pagination, loading, error } = useBlogs(params)
+  const params = useMemo<GetBlogsParams>(
+    () => buildParams({ page, search, category: selectedCategory }),
+    [page, search, selectedCategory]
+  )
+
+  const { blogs, pagination, loading, error, isPlaceholderData } = useBlogs(params)
+  const prefetchBlogs = usePrefetchBlogs()
+  const prefetchBlog = usePrefetchBlog()
 
   // Categories are fetched once, independent of search/pagination
-  useEffect(() => {
-    categoryApi
-      .getCategories({ inUse: true })
-      .then((data) => setCategories(data.categories.map((category) => category.name)))
-      .catch(() => setCategories([]))
-  }, [])
+  const { categories } = useBlogCategories({ inUse: true })
 
-  const categoryTabs = useMemo<string[]>(() => ['All', ...categories], [categories])
+  const categoryTabs = useMemo<string[]>(
+    () => ['All', ...categories.map((category) => category.name)],
+    [categories]
+  )
+
+  // Hover là tín hiệu ý định rẻ tiền: kéo sẵn dữ liệu trước cả cú click.
+  // Trùng với prefetch tự động trong useBlogs cũng vô hại — react-query dedupe.
+  const prefetchPage = (target: number) => {
+    if (target < 1) return
+    prefetchBlogs(buildParams({ page: target, search, category: selectedCategory }))
+  }
+
+  const prefetchCategory = (category: string) => {
+    if (category === selectedCategory) return
+    prefetchBlogs(buildParams({ page: 1, search, category }))
+  }
+
+  // Danh sách cũ giờ không còn bị xoá khi đổi trang, nên phải tự đưa người dùng
+  // về đầu danh sách — nếu không họ sẽ đứng ở cuối trang mới và bỏ lỡ phần đầu.
+  const goToPage = (target: number) => {
+    setPage(target)
+    listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   const handleSearch = (value: string) => {
     setSearch(value)
@@ -63,12 +99,14 @@ const BlogsView = () => {
 
       {search === '' && <BlogHeading />}
 
-      <div className="w-full">
+      <div className="w-full" ref={listTopRef}>
         {/* Toolbar: category filter */}
         <div className="flex flex-wrap items-center gap-2 mb-6">
           {categoryTabs.map((cat) => (
             <button
               key={cat}
+              onMouseEnter={() => prefetchCategory(cat)}
+              onFocus={() => prefetchCategory(cat)}
               onClick={() => handleSelectCategory(cat)}
               className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-all duration-200
                 ${
@@ -90,9 +128,17 @@ const BlogsView = () => {
           </div>
         )}
 
+        {/* Lỗi khi đã có dữ liệu cũ trên màn hình: báo bằng banner và giữ nguyên
+            danh sách, thay vì đổi cả trang lấy một dòng chữ đỏ. */}
+        {error && blogs.length > 0 && (
+          <div className="mb-4 rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-2 text-sm text-red-300">
+            Could not load this page: {error}
+          </div>
+        )}
+
         {loading ? (
           <div className="text-white text-center py-20">Loading blogs...</div>
-        ) : error ? (
+        ) : error && blogs.length === 0 ? (
           <div className="text-red-500 text-center py-20">Error loading blogs: {error}</div>
         ) : blogs.length === 0 ? (
           <div className="text-white text-center py-20">
@@ -100,9 +146,21 @@ const BlogsView = () => {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Trang cũ được giữ lại và làm mờ trong lúc chờ trang mới — tránh
+                việc grid biến mất khiến layout nhảy và mất vị trí cuộn. */}
+            <div
+              className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 transition-opacity duration-200 ${
+                isPlaceholderData ? 'opacity-50 pointer-events-none' : 'opacity-100'
+              }`}
+              aria-busy={isPlaceholderData}
+            >
               {blogs.map((blog) => (
-                <Link href={`/blogs/${blog.slug}`} key={blog._id} className="flex">
+                <Link
+                  href={`/blogs/${blog.slug}`}
+                  key={blog._id}
+                  className="flex"
+                  onPointerDown={() => prefetchBlog(blog.slug)}
+                >
                   <motion.div
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -154,13 +212,23 @@ const BlogsView = () => {
             {/* Pagination */}
             {pagination && pagination.totalPages > 1 && (
               <div className="flex items-center justify-center gap-4 mt-10">
-                <Button disabled={!pagination.hasPrevPage} onClick={() => setPage((p) => Math.max(1, p - 1))}>
+                <Button
+                  disabled={!pagination.hasPrevPage}
+                  onMouseEnter={() => prefetchPage(page - 1)}
+                  onFocus={() => prefetchPage(page - 1)}
+                  onClick={() => goToPage(Math.max(1, page - 1))}
+                >
                   Previous
                 </Button>
                 <span className="text-sm text-white-100">
                   Page {pagination.currentPage} of {pagination.totalPages}
                 </span>
-                <Button disabled={!pagination.hasNextPage} onClick={() => setPage((p) => p + 1)}>
+                <Button
+                  disabled={!pagination.hasNextPage}
+                  onMouseEnter={() => prefetchPage(page + 1)}
+                  onFocus={() => prefetchPage(page + 1)}
+                  onClick={() => goToPage(page + 1)}
+                >
                   Next
                 </Button>
               </div>

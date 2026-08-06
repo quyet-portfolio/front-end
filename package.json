@@ -14,6 +14,7 @@
     "@ckeditor/ckeditor5-react": "^11.1.0",
     "@react-oauth/google": "^0.13.5",
     "@tailwindcss/typography": "^0.5.19",
+    "@tanstack/react-query": "^5.101.4",
     "antd": "^5.27.5",
     "axios": "^1.7.7",
     "chart.js": "^4.5.1",
