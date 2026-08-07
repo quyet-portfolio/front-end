@@ -4,9 +4,18 @@ import React, { useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-import { HeartOutlined, HeartFilled, HomeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import {
+  HeartOutlined,
+  HeartFilled,
+  HomeOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  ExpandOutlined,
+} from '@ant-design/icons'
 import Button from 'antd/es/button'
 import Tag from 'antd/es/tag'
+// Alias để không đụng tên với next/image — antd chỉ dùng cho lớp lightbox
+import AntImage from 'antd/es/image'
 import Spin from 'antd/es/spin'
 import Breadcrumb from 'antd/es/breadcrumb'
 import Popconfirm from 'antd/es/popconfirm'
@@ -20,6 +29,7 @@ import { recoverEscapedHtml } from '@/src/utils/htmlContent'
 import { useAuth } from '@/src/contexts/AuthContext'
 import { useMessageApi } from '@/src/contexts/MessageContext'
 import { FALLBACK_IMAGE_BLOG } from './BlogsHeading'
+import ScrollToTopButton from './components/ScrollToTopButton'
 
 const MarkdownContent = dynamic(() => import('./components/MarkdownContent'), {
   ssr: false,
@@ -32,6 +42,7 @@ const BlogDetailView = () => {
   const slug = params.slug as string
 
   const [deleting, setDeleting] = useState<boolean>(false)
+  const [previewOpen, setPreviewOpen] = useState<boolean>(false)
   // Kết quả like đè lên dữ liệu server cho tới khi rời trang. Cố tình KHÔNG
   // invalidate query chi tiết: refetch sẽ cộng thêm một lượt view giả.
   // Gắn kèm slug để override tự hết hiệu lực khi sang bài khác — không cần effect
@@ -101,6 +112,8 @@ const BlogDetailView = () => {
   // Author hoặc admin mới được sửa/xoá bài
   const canManage = !!user && !!blog && (user._id === blog.author._id || user.role === 'admin')
 
+  const coverImage = blog?.featuredImage || FALLBACK_IMAGE_BLOG
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[50vh]">
@@ -146,17 +159,34 @@ const BlogDetailView = () => {
 
       {/* Card wrapper */}
       <div className="rounded-none sm:rounded-lg border-x-0 border-y sm:border bg-black-100 shadow-xl overflow-hidden border-blue-950">
-        {/* Featured Image Banner */}
-        <div className="relative w-full h-[380px]">
+        {/* Featured Image Banner — click để mở lightbox xem ảnh cỡ lớn */}
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="View cover image in full size"
+          onClick={() => setPreviewOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              setPreviewOpen(true)
+            }
+          }}
+          className="group relative w-full h-[380px] cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-purple focus-visible:ring-inset"
+        >
           <Image
-            src={blog.featuredImage || FALLBACK_IMAGE_BLOG}
+            src={coverImage}
             alt={blog.title}
             fill
-            className="object-cover"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#000319] via-[#000319]/40 to-transparent" />
-          <div className="absolute bottom-6 left-6 z-10 pr-8">
+          {/* Gợi ý ảnh bấm được — chỉ hiện khi hover, không che tiêu đề */}
+          <span className="absolute top-4 right-4 z-10 flex items-center gap-1.5 rounded-full bg-black-100/80 px-3 py-1.5 text-xs font-medium text-white-100 opacity-0 backdrop-blur-md transition-opacity duration-300 group-hover:opacity-100">
+            <ExpandOutlined /> View full size
+          </span>
+          {/* Text đè lên ảnh: bỏ qua chuột để mọi cú click đều rơi vào banner */}
+          <div className="pointer-events-none absolute bottom-6 left-6 z-10 pr-8">
             {blog.category && (
               <Tag className="!mb-3 !px-3 !py-1 text-sm font-bold !bg-primary-100">
                 {blog.category.toUpperCase()}
@@ -248,6 +278,21 @@ const BlogDetailView = () => {
           )}
         </div>
       </div>
+
+      {/* Lightbox cho cover: chỉ mượn lớp preview của antd (zoom/xoay/phóng to),
+          phần banner vẫn do next/image render để giữ tối ưu ảnh + priority */}
+      <AntImage
+        src={coverImage}
+        alt={blog.title}
+        style={{ display: 'none' }}
+        preview={{
+          visible: previewOpen,
+          src: coverImage,
+          onVisibleChange: (value) => setPreviewOpen(value),
+        }}
+      />
+
+      <ScrollToTopButton />
     </div>
   )
 }
