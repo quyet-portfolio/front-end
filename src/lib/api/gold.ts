@@ -55,6 +55,20 @@ export interface AddGoldPriceResponse {
   data: GoldPrice
 }
 
+export interface AddInvestmentPayload {
+  /** ISO date string of the purchase day */
+  date: string
+  /** Gold amount, unit: chỉ */
+  goldGram: number
+  /** Buy price, unit: thousand VND per chỉ */
+  buyPrice: number
+}
+
+export interface AddInvestmentResponse {
+  message: string
+  data: InvestmentsResponseData
+}
+
 export const goldApi = {
   getDataGold: async (): Promise<GoldResponse> => {
     const response = await axios.get<GoldResponse>('/gold/refresh')
@@ -75,6 +89,11 @@ export const goldApi = {
 
   addGoldPrice: async (payload: AddGoldPricePayload): Promise<AddGoldPriceResponse> => {
     const response = await axios.post<AddGoldPriceResponse>('/gold/add-price', payload)
+    return response.data
+  },
+
+  addInvestment: async (payload: AddInvestmentPayload): Promise<AddInvestmentResponse> => {
+    const response = await axios.post<AddInvestmentResponse>('/investments/create', payload)
     return response.data
   },
 }

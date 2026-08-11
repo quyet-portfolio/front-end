@@ -6,6 +6,7 @@ import { ColumnsType } from 'antd/es/table'
 import { useEffect, useState } from 'react'
 import { Line } from 'react-chartjs-2'
 import AddGoldPriceModal from './components/AddGoldPriceModal'
+import AddInvestmentModal from './components/AddInvestmentModal'
 
 import {
   Chart as ChartJS,
@@ -50,6 +51,7 @@ const GoldView = () => {
   const [chartLoading, setChartLoading] = useState(false)
   const [selectedDays, setSelectedDays] = useState<TimeRange>(30)
   const [addPriceModalOpen, setAddPriceModalOpen] = useState<boolean>(false)
+  const [addInvestmentModalOpen, setAddInvestmentModalOpen] = useState<boolean>(false)
 
   const fetchGoldData = async () => {
     try {
@@ -179,9 +181,14 @@ const GoldView = () => {
             <div className="text-base text-gray-500">No gold price data yet</div>
           )}
         </div>
-        <Button type="primary" onClick={() => setAddPriceModalOpen(true)} disabled={loading}>
-          Update Gold Price
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={() => setAddPriceModalOpen(true)} disabled={loading}>
+            Update Gold Price
+          </Button>
+          <Button type="primary" onClick={() => setAddInvestmentModalOpen(true)} disabled={loading}>
+            Add Investment
+          </Button>
+        </div>
       </div>
 
       <Table
@@ -252,6 +259,13 @@ const GoldView = () => {
           fetchChartData(selectedDays)
         }}
         initialBuyPrice={dataGold?.price?.buyPrice}
+        initialSellPrice={dataGold?.price?.sellPrice}
+      />
+
+      <AddInvestmentModal
+        open={addInvestmentModalOpen}
+        onClose={() => setAddInvestmentModalOpen(false)}
+        onSuccess={fetchGoldData}
         initialSellPrice={dataGold?.price?.sellPrice}
       />
     </div>
