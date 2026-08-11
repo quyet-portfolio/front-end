@@ -125,7 +125,7 @@ const GoldView = () => {
       key: 'goldGram',
     },
     {
-      title: 'Amount / Buy price (VND)',
+      title: 'Cost / Purchase price (VND)',
       key: 'amount',
       render: (_, record) => (
         <div>
@@ -134,11 +134,13 @@ const GoldView = () => {
       ),
     },
     {
-      title: 'Current buy price',
+      // Shop's buyPrice — what we'd receive if we sold our gold back today
+      title: 'Current sell-back price',
       render: () => <div>--</div>,
     },
     {
-      title: 'Current sell price',
+      // Shop's sellPrice — what we'd pay to buy more gold today
+      title: 'Current buy-in price',
       render: () => <div>--</div>,
     },
     {
