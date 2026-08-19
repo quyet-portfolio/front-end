@@ -1,8 +1,13 @@
-'use client'
-
+import type { Metadata } from 'next'
 import MyBlogsView from '@/src/app/section/Blogs/MyBlogsView'
 import BlogsHeader from '@/src/app/section/Blogs/components/BlogsHeader'
 import ProtectedRoute from '@/src/components/ProtectedRoute'
+
+// Trang quản trị — xem chú thích ở /blogs/create.
+export const metadata: Metadata = {
+  title: 'My Blogs',
+  robots: { index: false, follow: false },
+}
 
 const MyBlogsPage = () => {
   return (

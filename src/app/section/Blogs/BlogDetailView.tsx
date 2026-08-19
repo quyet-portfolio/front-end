@@ -134,7 +134,10 @@ const BlogDetailView = () => {
   }
 
   return (
-    <div className="container mx-auto px-0 sm:px-4 max-w-4xl mb-16 mt-6 text-white">
+    // <article> thay cho <div> để crawler nhận ra đâu là khối nội dung chính.
+    // lang="vi" được khai báo ở page.tsx (wrapper do server render) — xem chú
+    // thích ở đó để biết vì sao không đặt tại đây.
+    <article className="container mx-auto px-0 sm:px-4 max-w-4xl mb-16 mt-6 text-white">
 
       {/* Breadcrumb — single line with ellipsis on overflow */}
       <Breadcrumb
@@ -293,7 +296,7 @@ const BlogDetailView = () => {
       />
 
       <ScrollToTopButton />
-    </div>
+    </article>
   )
 }
 
