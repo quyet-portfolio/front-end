@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo, useState } from 'react'
 import { useFeaturedBlogs } from '@/src/hooks/useFeaturedBlogs'
+import { Blog } from '@/src/lib/types'
 import { stripHtml } from '@/src/utils/stringUtils'
 import { recoverEscapedHtml } from '@/src/utils/htmlContent'
 
@@ -19,8 +20,8 @@ type HeadingPost = {
 
 export const FALLBACK_IMAGE_BLOG = 'https://cdn.shopify.com/s/files/1/0734/4986/5316/files/default-image-blogs.png?v=1785683364'
 
-export default function BlogHeading() {
-  const { featuredBlogs } = useFeaturedBlogs()
+export default function BlogHeading({ initialFeatured }: { initialFeatured?: { blogs: Blog[] } }) {
+  const { featuredBlogs } = useFeaturedBlogs(initialFeatured)
   const [activeIndex, setActiveIndex] = useState(0)
 
   const posts = useMemo<HeadingPost[]>(

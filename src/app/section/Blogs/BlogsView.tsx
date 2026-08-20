@@ -2,63 +2,79 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import Button from 'antd/es/button'
 import { motion } from 'framer-motion'
-import { useMemo, useRef, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useMemo, useRef } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import BlogsHeader from './components/BlogsHeader'
 import BlogHeading, { FALLBACK_IMAGE_BLOG } from './BlogsHeading'
 import { useBlogs, usePrefetchBlogs } from '@/src/hooks/useBlogs'
 import { usePrefetchBlog } from '@/src/hooks/useBlog'
 import { useBlogCategories } from '@/src/hooks/useBlogCategories'
 import { GetBlogsParams } from '@/src/lib/api/blog'
+import { CategoriesResponse } from '@/src/lib/api/category'
+import { Blog, BlogsResponse } from '@/src/lib/types'
 import { stripHtml } from '@/src/utils/stringUtils'
 import { recoverEscapedHtml } from '@/src/utils/htmlContent'
+import { BlogListState, DEFAULT_CATEGORY, buildHref, buildParams, parseBlogListState } from './utils/listParams'
 
-const PAGE_SIZE = 9
+// Kiểu dáng dùng chung cho tab category và nút chuyển trang — cả hai giờ đều là
+// thẻ <a> thật để crawler đi tiếp được, không còn là <button> chỉ đổi state.
+const PILL_BASE = 'px-4 py-1.5 rounded-full text-sm font-semibold border transition-all duration-200'
+const PILL_ACTIVE = 'bg-primary border-primary text-white'
+const PILL_IDLE = 'bg-transparent border-blue-950 text-white-100 hover:border-blue-500 hover:text-white'
+const PILL_DISABLED = 'bg-transparent border-blue-950/50 text-gray-600 cursor-not-allowed'
 
-// Build server-side query params (category 'All' / empty search are omitted).
-// Tách khỏi component để prefetch dựng được params của trang/danh mục chưa chọn —
-// params phải khớp từng ký tự với lúc useQuery gọi, nếu không prefetch thành công cốc.
-const buildParams = ({
-  page,
-  search,
-  category,
-}: {
-  page: number
-  search: string
-  category: string
-}): GetBlogsParams => {
-  const next: GetBlogsParams = { page, limit: PAGE_SIZE }
-  if (search) next.search = search
-  if (category !== 'All') next.category = category
-  if (!search) next.excludeFeatured = true
-  return next
+interface BlogsViewProps {
+  // Trang danh sách do server dựng sẵn, kèm chính trạng thái mà server đã dùng.
+  initialState?: BlogListState
+  initialBlogs?: BlogsResponse
+  initialCategories?: CategoriesResponse
+  initialFeatured?: { blogs: Blog[] }
 }
 
-const BlogsView = () => {
+const BlogsView = ({ initialState, initialBlogs, initialCategories, initialFeatured }: BlogsViewProps = {}) => {
+  const router = useRouter()
   const searchParams = useSearchParams()
 
-  const [search, setSearch] = useState<string>(searchParams.get('search') || '')
-  const [selectedCategory, setSelectedCategory] = useState<string>('All')
-  const [page, setPage] = useState<number>(1)
+  // Trạng thái danh sách đọc TỪ URL chứ không giữ trong useState. Trước đây trang
+  // 2 và các category không có địa chỉ riêng, nên crawler chỉ thấy được 9 bài đầu
+  // và những bài còn lại không có đường nào dẫn tới.
+  const { page, search, category: selectedCategory } = parseBlogListState({
+    page: searchParams.get('page'),
+    category: searchParams.get('category'),
+    search: searchParams.get('search'),
+  })
 
   const listTopRef = useRef<HTMLDivElement>(null)
 
+  // Deps là ba giá trị nguyên thuỷ chứ không phải `state`: object mới mỗi lần
+  // render sẽ làm useMemo vô nghĩa, kéo theo effect prefetch trong useBlogs chạy
+  // lại sau từng lần render.
   const params = useMemo<GetBlogsParams>(
     () => buildParams({ page, search, category: selectedCategory }),
-    [page, search, selectedCategory]
+    [page, search, selectedCategory],
   )
 
-  const { blogs, pagination, loading, error, isPlaceholderData } = useBlogs(params)
+  // URL đổi ngay khi bắt đầu điều hướng, còn props mới thì phải chờ RSC payload
+  // về. Trong khoảng đó `state` đã là trang 2 trong khi `initialBlogs` vẫn là dữ
+  // liệu trang 1 — dùng thẳng sẽ nhét dữ liệu trang 1 vào cache của trang 2.
+  const serverBlogs =
+    initialState &&
+    initialState.page === page &&
+    initialState.search === search &&
+    initialState.category === selectedCategory
+      ? initialBlogs
+      : undefined
+
+  const { blogs, pagination, loading, error, isPlaceholderData } = useBlogs(params, serverBlogs)
   const prefetchBlogs = usePrefetchBlogs()
   const prefetchBlog = usePrefetchBlog()
 
   // Categories are fetched once, independent of search/pagination
-  const { categories } = useBlogCategories({ inUse: true })
+  const { categories } = useBlogCategories({ inUse: true }, initialCategories)
 
   const categoryTabs = useMemo<string[]>(
-    () => ['All', ...categories.map((category) => category.name)],
+    () => [DEFAULT_CATEGORY, ...categories.map((category) => category.name)],
     [categories]
   )
 
@@ -76,19 +92,15 @@ const BlogsView = () => {
 
   // Danh sách cũ giờ không còn bị xoá khi đổi trang, nên phải tự đưa người dùng
   // về đầu danh sách — nếu không họ sẽ đứng ở cuối trang mới và bỏ lỡ phần đầu.
-  const goToPage = (target: number) => {
-    setPage(target)
+  // Link đi kèm scroll={false} để Next không nhảy lên đỉnh trang trước đã.
+  const scrollToListTop = () => {
     listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
+  // Ô tìm kiếm nằm trong BlogsHeader nên vẫn phải điều hướng bằng tay.
+  // push (không phải replace) để nút Back của trình duyệt quay lại được kết quả trước.
   const handleSearch = (value: string) => {
-    setSearch(value)
-    setPage(1)
-  }
-
-  const handleSelectCategory = (cat: string) => {
-    setSelectedCategory(cat)
-    setPage(1)
+    router.push(buildHref({ page: 1, search: value, category: selectedCategory }))
   }
 
   const hasActiveFilter = search !== '' || selectedCategory !== 'All'
@@ -97,26 +109,23 @@ const BlogsView = () => {
     <div className="h-full my-6 z-10 flex flex-col items-center justify-center gap-6">
       <BlogsHeader defaultValue={search} onSearch={handleSearch} />
 
-      {search === '' && <BlogHeading />}
+      {search === '' && <BlogHeading initialFeatured={initialFeatured} />}
 
       <div className="w-full" ref={listTopRef}>
         {/* Toolbar: category filter */}
         <div className="flex flex-wrap items-center gap-2 mb-6">
           {categoryTabs.map((cat) => (
-            <button
+            <Link
               key={cat}
+              href={buildHref({ page: 1, search, category: cat })}
+              scroll={false}
+              aria-current={selectedCategory === cat ? 'page' : undefined}
               onMouseEnter={() => prefetchCategory(cat)}
               onFocus={() => prefetchCategory(cat)}
-              onClick={() => handleSelectCategory(cat)}
-              className={`px-4 py-1.5 rounded-full text-sm font-semibold border transition-all duration-200
-                ${
-                  selectedCategory === cat
-                    ? 'bg-primary border-primary text-white'
-                    : 'bg-transparent border-blue-950 text-white-100 hover:border-blue-500 hover:text-white'
-                }`}
+              className={`${PILL_BASE} ${selectedCategory === cat ? PILL_ACTIVE : PILL_IDLE}`}
             >
               {cat}
-            </button>
+            </Link>
           ))}
         </div>
 
@@ -211,27 +220,41 @@ const BlogsView = () => {
 
             {/* Pagination */}
             {pagination && pagination.totalPages > 1 && (
-              <div className="flex items-center justify-center gap-4 mt-10">
-                <Button
-                  disabled={!pagination.hasPrevPage}
-                  onMouseEnter={() => prefetchPage(page - 1)}
-                  onFocus={() => prefetchPage(page - 1)}
-                  onClick={() => goToPage(Math.max(1, page - 1))}
-                >
-                  Previous
-                </Button>
+              <nav className="flex items-center justify-center gap-4 mt-10" aria-label="Blog pagination">
+                {pagination.hasPrevPage ? (
+                  <Link
+                    href={buildHref({ page: page - 1, search, category: selectedCategory })}
+                    scroll={false}
+                    rel="prev"
+                    onMouseEnter={() => prefetchPage(page - 1)}
+                    onFocus={() => prefetchPage(page - 1)}
+                    onClick={scrollToListTop}
+                    className={`${PILL_BASE} ${PILL_IDLE}`}
+                  >
+                    Previous
+                  </Link>
+                ) : (
+                  <span className={`${PILL_BASE} ${PILL_DISABLED}`}>Previous</span>
+                )}
                 <span className="text-sm text-white-100">
                   Page {pagination.currentPage} of {pagination.totalPages}
                 </span>
-                <Button
-                  disabled={!pagination.hasNextPage}
-                  onMouseEnter={() => prefetchPage(page + 1)}
-                  onFocus={() => prefetchPage(page + 1)}
-                  onClick={() => goToPage(page + 1)}
-                >
-                  Next
-                </Button>
-              </div>
+                {pagination.hasNextPage ? (
+                  <Link
+                    href={buildHref({ page: page + 1, search, category: selectedCategory })}
+                    scroll={false}
+                    rel="next"
+                    onMouseEnter={() => prefetchPage(page + 1)}
+                    onFocus={() => prefetchPage(page + 1)}
+                    onClick={scrollToListTop}
+                    className={`${PILL_BASE} ${PILL_IDLE}`}
+                  >
+                    Next
+                  </Link>
+                ) : (
+                  <span className={`${PILL_BASE} ${PILL_DISABLED}`}>Next</span>
+                )}
+              </nav>
             )}
           </>
         )}

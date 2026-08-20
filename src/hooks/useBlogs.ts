@@ -4,6 +4,7 @@ import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-quer
 import { useCallback, useEffect } from 'react'
 import { blogApi, GetBlogsParams } from '../lib/api/blog'
 import { blogKeys } from '../lib/queryKeys'
+import { BlogsResponse } from '../lib/types'
 
 const listQueryOptions = (params?: GetBlogsParams) => ({
   queryKey: blogKeys.list(params),
@@ -19,12 +20,16 @@ const listQueryOptions = (params?: GetBlogsParams) => ({
  * - Prefetch trang kế ngay sau khi trang hiện tại tải xong, nên lần bấm "Next"
  *   thường không phát sinh request nào cả.
  */
-export const useBlogs = (params?: GetBlogsParams) => {
+export const useBlogs = (params?: GetBlogsParams, initialData?: BlogsResponse) => {
   const queryClient = useQueryClient()
 
   const query = useQuery({
     ...listQueryOptions(params),
     placeholderData: keepPreviousData,
+    // Trang đầu do server dựng sẵn. Khác useBlog: danh sách không có tác dụng phụ
+    // nào (không đếm view) nên cứ để dữ liệu server "còn mới" — client khỏi gọi
+    // lại API ngay khi vừa mount.
+    initialData,
   })
 
   const currentPage = params?.page ?? 1

@@ -3,7 +3,7 @@
 import React, { useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, usePathname, useRouter } from 'next/navigation'
 import {
   HeartOutlined,
   HeartFilled,
@@ -28,18 +28,30 @@ import { useBlog } from '@/src/hooks/useBlog'
 import { recoverEscapedHtml } from '@/src/utils/htmlContent'
 import { useAuth } from '@/src/contexts/AuthContext'
 import { useMessageApi } from '@/src/contexts/MessageContext'
+import { Blog } from '@/src/lib/types'
 import { FALLBACK_IMAGE_BLOG } from './BlogsHeading'
 import ScrollToTopButton from './components/ScrollToTopButton'
 
-const MarkdownContent = dynamic(() => import('./components/MarkdownContent'), {
-  ssr: false,
-  loading: () => <div className="text-gray-500">Loading content…</div>,
-})
+// KHÔNG đặt ssr: false ở đây. Nội dung bài là thứ duy nhất crawler cần đọc —
+// tắt SSR thì HTML trả về chỉ còn một dòng "Loading content…".
+const MarkdownContent = dynamic(() => import('./components/MarkdownContent'))
 
-const BlogDetailView = () => {
+interface BlogDetailViewProps {
+  // Bài do server fetch sẵn. Không có (trang not-found dùng lại component này để
+  // tác giả xem bản nháp của mình) thì rơi về fetch phía client như cũ.
+  initialBlog?: Blog | null
+}
+
+const BlogDetailView = ({ initialBlog }: BlogDetailViewProps = {}) => {
   const params = useParams()
+  const pathname = usePathname()
   const router = useRouter()
-  const slug = params.slug as string
+
+  // not-found.tsx KHÔNG nhận params của segment động, mà đó lại là nơi component
+  // này chạy khi server không đọc được bài (bản nháp của chính tác giả luôn rơi
+  // vào nhánh đó vì request phía server ẩn danh). Thiếu fallback theo pathname thì
+  // slug rỗng → query không chạy → tác giả kẹt vĩnh viễn ở spinner.
+  const slug = (params?.slug as string) || pathname?.match(/^\/blogs\/([^/]+)$/)?.[1] || ''
 
   const [deleting, setDeleting] = useState<boolean>(false)
   const [previewOpen, setPreviewOpen] = useState<boolean>(false)
@@ -59,7 +71,7 @@ const BlogDetailView = () => {
 
   // Bản cũ fetch lại mỗi khi object `user` đổi tham chiếu — mỗi lần như vậy là
   // một lượt view bị đếm thừa. useQuery chỉ gọi một lần cho mỗi slug.
-  const { blog, loading, error } = useBlog(slug)
+  const { blog, loading, error } = useBlog(slug, initialBlog)
 
   const activeLikeOverride = likeOverride?.slug === slug ? likeOverride : null
 

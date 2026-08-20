@@ -1,4 +1,6 @@
-import { Blog, BlogListItem } from '../types'
+import { Blog, BlogListItem, BlogsResponse } from '../types'
+import { CategoriesResponse } from './category'
+import { GetBlogsParams } from './blog'
 
 const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api').replace(/\/+$/, '')
 
@@ -65,4 +67,61 @@ export async function getPublishedBlogsForSitemap(): Promise<BlogListItem[]> {
   }
 
   return blogs
+}
+
+/**
+ * Trang danh sách cho lần render đầu.
+ *
+ * Không có nó thì HTML server chỉ chứa dòng "Loading blogs..." — nghĩa là các link
+ * phân trang và tab category không tồn tại cho tới khi JS chạy, và crawler không
+ * có đường nào đi tới trang 2.
+ */
+export async function getBlogsForList(params: GetBlogsParams): Promise<BlogsResponse | null> {
+  const query = new URLSearchParams()
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') query.set(key, String(value))
+  })
+
+  try {
+    const res = await fetch(`${API_URL}/blogs?${query.toString()}`, {
+      next: { revalidate: DETAIL_REVALIDATE_SECONDS },
+    })
+    if (!res.ok) return null
+    return (await res.json()) as BlogsResponse
+  } catch {
+    // Client sẽ tự fetch lại — mất SSR ở lần này nhưng trang vẫn dùng được.
+    return null
+  }
+}
+
+/** Danh mục dùng cho tab lọc; cần ở server để tab là link thật trong HTML đầu tiên. */
+export async function getBlogCategories(): Promise<CategoriesResponse | null> {
+  try {
+    const res = await fetch(`${API_URL}/blogs/categories?inUse=true`, {
+      next: { revalidate: SITEMAP_REVALIDATE_SECONDS },
+    })
+    if (!res.ok) return null
+    return (await res.json()) as CategoriesResponse
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Ba bài được ghim lên carousel đầu trang.
+ *
+ * Danh sách chính loại chúng ra (`excludeFeatured=true`), nên carousel là đường
+ * link nội bộ DUY NHẤT trỏ tới các bài này. Fetch phía client thì HTML server
+ * không có link nào và crawler chỉ còn cách dựa vào sitemap.
+ */
+export async function getFeaturedBlogs(): Promise<{ blogs: Blog[] } | null> {
+  try {
+    const res = await fetch(`${API_URL}/blogs/featured`, {
+      next: { revalidate: DETAIL_REVALIDATE_SECONDS },
+    })
+    if (!res.ok) return null
+    return (await res.json()) as { blogs: Blog[] }
+  } catch {
+    return null
+  }
 }
