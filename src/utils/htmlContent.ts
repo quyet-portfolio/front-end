@@ -23,3 +23,16 @@ export function recoverEscapedHtml(content: string): string {
     .replace(/&#x27;/gi, "'")
     .replace(/&amp;/g, '&')
 }
+
+/**
+ * Hạ mọi <h1> trong nội dung bài xuống <h2>.
+ *
+ * Trang chi tiết đã có <h1> là tiêu đề bài ở banner; H1 thứ hai trong nội dung tạo
+ * hai gốc cho dàn heading, và ở nhiều bài cũ nội dung H1 còn khác hẳn tiêu đề.
+ * Chạy SAU khi sanitize để không phải tự lo phần markup độc hại.
+ */
+export function demoteContentHeadings(html: string): string {
+  if (!html) return html
+
+  return html.replace(/<h1(\s[^>]*)?>/gi, (_match, attrs) => `<h2${attrs ?? ''}>`).replace(/<\/h1>/gi, '</h2>')
+}

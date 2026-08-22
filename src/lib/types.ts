@@ -20,6 +20,8 @@ export interface Blog {
   contentFormat?: BlogContentFormat;
   excerpt: string;
   slug: string;
+  // Slug bài từng dùng — trang chi tiết dựa vào đây để 301 URL cũ về slug hiện tại
+  previousSlugs?: string[];
   author: {
     _id: string;
     username: string;

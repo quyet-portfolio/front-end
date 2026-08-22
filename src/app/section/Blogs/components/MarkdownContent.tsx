@@ -18,6 +18,12 @@ interface MarkdownContentProps {
 // content is safe to render without an extra sanitizer.
 const COMPONENTS: Components = {
   pre: CodeBlock,
+  // Trang chi tiết đã render <h1>{blog.title}</h1> ở banner. H1 trong nội dung tạo
+  // H1 kép, và ở nhiều bài nó còn KHÁC tiêu đề nên Google nhận hai chủ đề mâu
+  // thuẫn cho cùng một trang. Hạ xuống H2 để dàn heading còn đúng một gốc.
+  // `node` phải bị loại: react-markdown truyền nó vào props và React sẽ cảnh báo
+  // vì đó không phải thuộc tính DOM hợp lệ.
+  h1: ({ node, children, ...props }) => <h2 {...props}>{children}</h2>,
 }
 
 const MarkdownContent = ({ content, className }: MarkdownContentProps) => {

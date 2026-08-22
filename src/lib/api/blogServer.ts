@@ -125,3 +125,19 @@ export async function getFeaturedBlogs(): Promise<{ blogs: Blog[] } | null> {
     return null
   }
 }
+
+/** Bài liên quan ở cuối trang chi tiết — nguồn link nội bộ chính giữa các bài. */
+export async function getRelatedBlogs(slug: string): Promise<BlogListItem[]> {
+  try {
+    const res = await fetch(`${API_URL}/blogs/${encodeURIComponent(slug)}/related`, {
+      next: { revalidate: DETAIL_REVALIDATE_SECONDS },
+    })
+    if (!res.ok) return []
+
+    const data = (await res.json()) as { blogs?: BlogListItem[] }
+    return data.blogs ?? []
+  } catch {
+    // Block phụ ở cuối trang — hỏng thì ẩn đi, không kéo cả trang xuống theo.
+    return []
+  }
+}

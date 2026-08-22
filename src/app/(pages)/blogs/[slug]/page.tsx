@@ -1,9 +1,10 @@
 import React from 'react'
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import BlogDetailView from '../../../section/Blogs/BlogDetailView'
 import BlogsHeader from '../../../section/Blogs/components/BlogsHeader'
-import { getBlogForMetadata } from '@/src/lib/api/blogServer'
+import RelatedPosts from '../../../section/Blogs/components/RelatedPosts'
+import { getBlogForMetadata, getRelatedBlogs } from '@/src/lib/api/blogServer'
 import { buildBlogPostingJsonLd, buildBreadcrumbJsonLd, serializeJsonLd } from '@/src/lib/jsonLd'
 import { BLOG_LANG, BLOG_LOCALE, SITE_NAME, absoluteUrl } from '@/src/lib/site'
 import { toMetaDescription } from '@/src/utils/seo'
@@ -31,6 +32,10 @@ export async function generateMetadata({ params }: BlogDetailPageProps): Promise
   const description = toMetaDescription(blog.excerpt || blog.content)
   const publishedTime = blog.publishedAt || blog.createdAt
 
+  // Dựng lại canonical từ slug HIỆN TẠI của bài: URL được yêu cầu có thể là một
+  // slug cũ, và canonical trỏ về slug cũ thì việc đổi slug thành vô nghĩa.
+  const canonicalUrl = absoluteUrl(`/blogs/${blog.slug}`)
+
   return {
     // `absolute` để tiêu đề bài không bị nối thêm hậu tố thương hiệu — tiêu đề ở
     // đây đã dài tới 83 ký tự, thêm nữa là chắc chắn bị SERP cắt cụt.
@@ -38,12 +43,12 @@ export async function generateMetadata({ params }: BlogDetailPageProps): Promise
     description,
     keywords: blog.tags?.length ? blog.tags : undefined,
     authors: blog.author?.username ? [{ name: blog.author.username }] : undefined,
-    alternates: { canonical },
+    alternates: { canonical: canonicalUrl },
     openGraph: {
       type: 'article',
       title: blog.title,
       description,
-      url: canonical,
+      url: canonicalUrl,
       siteName: SITE_NAME,
       locale: BLOG_LOCALE,
       publishedTime,
@@ -75,8 +80,16 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
     notFound()
   }
 
-  const canonical = absoluteUrl(`/blogs/${slug}`)
+  // API tra được bài qua `previousSlugs`, nên URL này có thể là một slug đã nghỉ
+  // hưu. permanentRedirect (308) chứ không phải redirect (307): 307 giữ nguyên URL
+  // cũ trong index, chỉ 308/301 mới chuyển thứ hạng sang slug mới.
+  if (blog.slug !== slug) {
+    permanentRedirect(`/blogs/${blog.slug}`)
+  }
+
+  const canonical = absoluteUrl(`/blogs/${blog.slug}`)
   const description = toMetaDescription(blog.excerpt || blog.content)
+  const relatedBlogs = await getRelatedBlogs(blog.slug)
 
   return (
     <div className="my-6 z-10 flex flex-col gap-6">
@@ -98,6 +111,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
           sẽ không thấy tín hiệu ngôn ngữ nào. */}
       <div lang={BLOG_LANG}>
         <BlogDetailView initialBlog={blog} />
+        <RelatedPosts blogs={relatedBlogs} />
       </div>
     </div>
   )

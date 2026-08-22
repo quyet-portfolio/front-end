@@ -25,7 +25,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { blogApi } from '@/src/lib/api/blog'
 import { blogKeys } from '@/src/lib/queryKeys'
 import { useBlog } from '@/src/hooks/useBlog'
-import { recoverEscapedHtml } from '@/src/utils/htmlContent'
+import { demoteContentHeadings, recoverEscapedHtml } from '@/src/utils/htmlContent'
 import { useAuth } from '@/src/contexts/AuthContext'
 import { useMessageApi } from '@/src/contexts/MessageContext'
 import { Blog } from '@/src/lib/types'
@@ -288,7 +288,9 @@ const BlogDetailView = ({ initialBlog }: BlogDetailViewProps = {}) => {
           ) : (
             <div
               className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-a:text-blue-400 prose-img:rounded-md pb-10"
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(recoverEscapedHtml(blog.content)) }}
+              dangerouslySetInnerHTML={{
+                __html: demoteContentHeadings(DOMPurify.sanitize(recoverEscapedHtml(blog.content))),
+              }}
             />
           )}
         </div>
