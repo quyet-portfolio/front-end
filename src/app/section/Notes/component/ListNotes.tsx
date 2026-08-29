@@ -31,11 +31,11 @@ const FlashCardItem = ({ item, onClick }: { item: FlashCard; onClick: () => void
       <p className="text-base font-semibold text-white leading-snug line-clamp-2">
         {item.title}
       </p>
-      {/* Tag count */}
+      {/* Term count */}
       <div className="flex items-center gap-1.5">
         <BookOutlined className="text-indigo-400 text-xs" />
         <Tag color="geekblue" className="text-xs">
-          {item?.tags?.length} term{item?.tags?.length !== 1 ? 's' : ''}
+          {item?.terms?.length} term{item?.terms?.length !== 1 ? 's' : ''}
         </Tag>
       </div>
     </div>

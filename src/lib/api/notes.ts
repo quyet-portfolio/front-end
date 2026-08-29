@@ -1,16 +1,24 @@
 import axios from '../axios'
-import { AnswerResult, FlashCard, FlashCardsResponse, ITag, LearnQuestion, LearnSessionStats } from '@/src/app/section/Notes/types'
+import {
+  AnswerResult,
+  FlashCard,
+  FlashCardPaginationResponse,
+  FlashCardsResponse,
+  ITerm,
+  LearnQuestion,
+  LearnSessionStats,
+} from '@/src/app/section/Notes/types'
 
 export interface CreateFlashCardData {
   title: string
   description?: string
-  tags: ITag[]
+  terms: ITerm[]
 }
 
 export interface UpdateFlashCardData {
   title?: string
   description?: string
-  tags?: ITag[]
+  terms?: ITerm[]
 }
 
 export interface GetFlashCardsParams {
@@ -37,6 +45,32 @@ export interface ImportFlashCardData {
   description?: string
   fileContent: string
   fileType: 'csv' | 'json' | 'xlsx'
+}
+
+export type TermMatchMode = 'exact' | 'partial' | 'fuzzy'
+
+export interface SearchFlashCardsParams {
+  query: string
+  page?: number
+  limit?: number
+  searchIn?: 'all' | 'title' | 'term' | 'definition'
+}
+
+export interface SearchFlashCardsResponse {
+  query: string
+  searchIn: string
+  results: Array<FlashCard & { matchedTerms?: ITerm[]; totalMatchedTerms: number }>
+  pagination: FlashCardPaginationResponse
+  message: string
+}
+
+export interface SearchWithinFlashCardResponse {
+  flashcard: { _id: string; title: string; description?: string; totalTerms: number }
+  query: string
+  matchMode: TermMatchMode
+  matchedTerms: Array<ITerm & { index: number; matchScore: number }>
+  totalMatches: number
+  message: string
 }
 
 export const flashcardApi = {
@@ -79,52 +113,50 @@ export const flashcardApi = {
     return response.data
   },
 
-  // Add tag to flashcard
-  addTag: async (id: string, tag: ITag): Promise<{ message: string; flashcard: FlashCard }> => {
-    const response = await axios.post<{ message: string; flashcard: FlashCard }>(`/flashcards/${id}/tags`, tag)
+  // Add term to flashcard
+  addTerm: async (id: string, term: ITerm): Promise<{ message: string; flashcard: FlashCard }> => {
+    const response = await axios.post<{ message: string; flashcard: FlashCard }>(`/flashcards/${id}/terms`, term)
     return response.data
   },
 
-  // Update specific tag
-  updateTag: async (
+  // Update specific term
+  updateTerm: async (
     id: string,
-    tagIndex: number,
-    tag: Partial<ITag>,
+    termIndex: number,
+    term: Partial<ITerm>,
   ): Promise<{ message: string; flashcard: FlashCard }> => {
     const response = await axios.put<{ message: string; flashcard: FlashCard }>(
-      `/flashcards/${id}/tags/${tagIndex}`,
-      tag,
+      `/flashcards/${id}/terms/${termIndex}`,
+      term,
     )
     return response.data
   },
 
-  // Delete specific tag
-  deleteTag: async (id: string, tagIndex: number): Promise<{ message: string; flashcard: FlashCard }> => {
-    const response = await axios.delete<{ message: string; flashcard: FlashCard }>(`/flashcards/${id}/tags/${tagIndex}`)
+  // Delete specific term
+  deleteTerm: async (id: string, termIndex: number): Promise<{ message: string; flashcard: FlashCard }> => {
+    const response = await axios.delete<{ message: string; flashcard: FlashCard }>(`/flashcards/${id}/terms/${termIndex}`)
     return response.data
   },
 
-  // Search on list flashCards page
-  searchFlashcards: async (query: string, filters?: any) => {
-    const response = await axios.get('/api/flashcards/search', {
-      params: {
-        q: query,
-        page: 1,
-        limit: 20,
-        searchIn: 'all', // or 'title', 'term', 'definition'
-      },
+  // Global search across flashcards
+  searchFlashcards: async (params: SearchFlashCardsParams): Promise<SearchFlashCardsResponse> => {
+    const { query, ...rest } = params
+    const response = await axios.get<SearchFlashCardsResponse>('/flashcards/search', {
+      params: { q: query, searchIn: 'all', ...rest },
     })
     return response.data
   },
 
-  // Search on flashCard detail page
-  searchWithinFlashcard: async (flashcardId: string, query: string) => {
-    const response = await axios.get(`/api/flashcards/${flashcardId}/search`, {
-      params: {
-        q: query,
-        matchMode: 'partial', // 'exact', 'partial', 'fuzzy'
-      },
-    })
+  // Search within the terms of one flashcard
+  searchWithinFlashcard: async (
+    flashcardId: string,
+    query: string,
+    matchMode: TermMatchMode = 'partial',
+  ): Promise<SearchWithinFlashCardResponse> => {
+    const response = await axios.get<SearchWithinFlashCardResponse>(
+      `/flashcards/${flashcardId}/search`,
+      { params: { q: query, matchMode } },
+    )
     return response.data
   },
 
@@ -134,9 +166,9 @@ export const flashcardApi = {
     return response.data
   },
 
-  // Import tags into existing flashcard
-  importTags: async (flashcardId: string, data: Omit<ImportFlashCardData, 'title' | 'description'>): Promise<{ message: string; flashcard: FlashCard; importedCount: number; totalTags: number }> => {
-    const response = await axios.post<{ message: string; flashcard: FlashCard; importedCount: number; totalTags: number }>(`/flashcards/${flashcardId}/import-tags`, data)
+  // Import terms into existing flashcard
+  importTerms: async (flashcardId: string, data: Omit<ImportFlashCardData, 'title' | 'description'>): Promise<{ message: string; flashcard: FlashCard; importedCount: number; totalTerms: number }> => {
+    const response = await axios.post<{ message: string; flashcard: FlashCard; importedCount: number; totalTerms: number }>(`/flashcards/${flashcardId}/import-terms`, data)
     return response.data
   },
 }

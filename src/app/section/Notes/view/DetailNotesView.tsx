@@ -18,7 +18,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { FlipCard } from '../component/FlipCard'
 import { useLearnStore } from '../store'
 import { useMessageApi } from '@/src/contexts/MessageContext'
-import ImportTagsModal from '../component/ImportTagsModal'
+import ImportTermsModal from '../component/ImportTermsModal'
 import StudyActionsBar from '../component/StudyActionsBar'
 
 const NotesDetailView = () => {
@@ -54,7 +54,7 @@ const NotesDetailView = () => {
     if (!flashcard) return
     setIsFlipped(false)
     setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1 < flashcard.tags.length ? prev + 1 : 0))
+      setCurrentIndex((prev) => (prev + 1 < flashcard.terms.length ? prev + 1 : 0))
     }, 150)
   }, [flashcard])
 
@@ -62,7 +62,7 @@ const NotesDetailView = () => {
     if (!flashcard) return
     setIsFlipped(false)
     setTimeout(() => {
-      setCurrentIndex((prev) => (prev - 1 >= 0 ? prev - 1 : flashcard.tags.length - 1))
+      setCurrentIndex((prev) => (prev - 1 >= 0 ? prev - 1 : flashcard.terms.length - 1))
     }, 150)
   }, [flashcard])
 
@@ -103,9 +103,9 @@ const NotesDetailView = () => {
     return <div className="text-center p-8">FlashCard not found</div>
   }
 
-  const currentCard = flashcard?.tags?.[currentIndex]
-  const progressPercent = flashcard?.tags?.length
-    ? Math.round(((currentIndex + 1) / flashcard.tags.length) * 100)
+  const currentCard = flashcard?.terms?.[currentIndex]
+  const progressPercent = flashcard?.terms?.length
+    ? Math.round(((currentIndex + 1) / flashcard.terms.length) * 100)
     : 0
 
   const isOwner = user?._id === flashcard.createdBy._id
@@ -127,7 +127,7 @@ const NotesDetailView = () => {
         {isOwner && (
           <div className="flex gap-2">
             <Button icon={<UploadOutlined />} onClick={() => setIsImportModalOpen(true)}>
-              Import Tags
+              Import Terms
             </Button>
             <Button
               type="primary"
@@ -145,7 +145,7 @@ const NotesDetailView = () => {
         <Descriptions column={2} size="small">
           <Descriptions.Item label="Created By">{flashcard.createdBy.username}</Descriptions.Item>
           <Descriptions.Item label="Total Terms">
-            <Tag color="blue">{flashcard.tags.length}</Tag>
+            <Tag color="blue">{flashcard.terms.length}</Tag>
           </Descriptions.Item>
           <Descriptions.Item label="Created At">
             {new Date(flashcard.createdAt).toLocaleString()}
@@ -166,7 +166,7 @@ const NotesDetailView = () => {
             className="flex-1"
           />
           <span className="text-xs text-gray-400 whitespace-nowrap">
-            {currentIndex + 1} / {flashcard.tags.length}
+            {currentIndex + 1} / {flashcard.terms.length}
           </span>
         </div>
       </Card>
@@ -218,7 +218,7 @@ const NotesDetailView = () => {
             disabled={currentIndex === 0}
           />
           <span className="font-bold text-white w-16 text-center">
-            {currentIndex + 1} / {flashcard.tags.length}
+            {currentIndex + 1} / {flashcard.terms.length}
           </span>
           <Button
             type="text"
@@ -226,42 +226,43 @@ const NotesDetailView = () => {
             size="large"
             icon={<RightOutlined />}
             onClick={handleNext}
-            disabled={currentIndex === flashcard.tags.length - 1}
+            disabled={currentIndex === flashcard.terms.length - 1}
           />
         </div>
 
         <div className="w-10" />
       </div>
 
-      {/* Tags list */}
+      {/* Terms list */}
       <div className="flex gap-2 items-center mt-6 mb-4">
         <h2 className="text-xl font-bold">Terms</h2>
-        <Tag color="blue">{flashcard.tags.length}</Tag>
+        <Tag color="blue">{flashcard.terms.length}</Tag>
       </div>
       <div className="grid gap-3">
-        {flashcard.tags.map((tag, index) => (
+        {flashcard.terms.map((term, index) => (
           <Card key={index} className="shadow-sm" size="small">
             <div className="flex items-start gap-4">
               <div className="bg-indigo-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 text-sm">
                 {index + 1}
               </div>
               <div className="flex-1">
-                <h3 className="text-base font-semibold mb-1">{tag.term}</h3>
-                <p className="text-gray-400 text-sm">{tag.definition}</p>
+                <h3 className="text-base font-semibold mb-1">{term.term}</h3>
+                <p className="text-gray-400 text-sm">{term.definition}</p>
               </div>
             </div>
           </Card>
         ))}
       </div>
 
-      <ImportTagsModal
+      <ImportTermsModal
+        mode="append"
         open={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
         onSuccess={() => {
           window.location.reload()
         }}
         flashcardId={param.id as string}
-        currentTagCount={flashcard.tags.length}
+        currentTermCount={flashcard.terms.length}
       />
     </div>
   )

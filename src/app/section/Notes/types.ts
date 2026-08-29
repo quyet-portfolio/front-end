@@ -1,4 +1,4 @@
-export interface ITag {
+export interface ITerm {
   term: string;
   definition: string;
   related?: string;
@@ -8,7 +8,7 @@ export interface FlashCard {
   _id: string;
   title: string;
   description?: string;
-  tags: ITag[];
+  terms: ITerm[];
   createdBy: {
     _id: string;
     username: string;
@@ -51,7 +51,7 @@ export interface LearnProgress {
 }
 
 export interface LearnQuestion {
-  tagIndex: number;
+  termIndex: number;
   flashcardId: string; // For redirect after completion
   phase: LearnPhase;
   stepCount: number;

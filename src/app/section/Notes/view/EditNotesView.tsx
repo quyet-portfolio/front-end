@@ -1,13 +1,13 @@
 "use client"
 
-import { Button, Card, Form, Input, message, Space, Spin } from 'antd'
+import { Button, Card, Form, Input, Spin } from 'antd'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { flashcardApi } from '@/src/lib/api/notes'
 import { MinusCircleOutlined, PlusOutlined, UploadOutlined, ArrowLeftOutlined } from '@ant-design/icons'
 import { FlashCard } from '../types'
 import { useMessageApi } from '@/src/contexts/MessageContext'
-import ImportTagsModal from '../component/ImportTagsModal'
+import ImportTermsModal from '../component/ImportTermsModal'
 
 const { TextArea } = Input
 
@@ -30,7 +30,7 @@ const EditNotesView = () => {
         form.setFieldsValue({
           title: data.flashcard.title,
           description: data.flashcard.description,
-          tags: data.flashcard.tags,
+          terms: data.flashcard.terms,
         })
       } catch (error) {
         messageApi?.error('Failed to fetch flashcard')
@@ -74,7 +74,7 @@ const EditNotesView = () => {
     form.setFieldsValue({
       title: data.flashcard.title,
       description: data.flashcard.description,
-      tags: data.flashcard.tags,
+      terms: data.flashcard.terms,
     })
   }
 
@@ -86,7 +86,7 @@ const EditNotesView = () => {
           <h1 className="text-3xl font-bold">Edit FlashCard</h1>
         </div>
         <Button icon={<UploadOutlined />} onClick={() => setImportModalOpen(true)}>
-          Import Tags
+          Import Terms
         </Button>
       </div>
 
@@ -113,16 +113,16 @@ const EditNotesView = () => {
           </Form.Item>
 
           <div className="mb-4">
-            <h3 className="text-lg font-semibold mb-2">Tags</h3>
-            <p className="text-gray-500 text-sm mb-4">At least one tag is required</p>
+            <h3 className="text-lg font-semibold mb-2">Terms</h3>
+            <p className="text-gray-500 text-sm mb-4">At least one term is required</p>
           </div>
 
-          <Form.List name="tags">
+          <Form.List name="terms">
             {(fields, { add, remove }) => (
               <>
                 <Form.Item>
                   <Button type="dashed" onClick={() => add(undefined, 0)} block icon={<PlusOutlined />}>
-                    Add Tag
+                    Add Term
                   </Button>
                 </Form.Item>
 
@@ -184,12 +184,13 @@ const EditNotesView = () => {
         </div>
       </div>
 
-      <ImportTagsModal
+      <ImportTermsModal
+        mode="append"
         open={importModalOpen}
         onClose={() => setImportModalOpen(false)}
         onSuccess={handleImportSuccess}
         flashcardId={params.id as string}
-        currentTagCount={flashcard?.tags.length || 0}
+        currentTermCount={flashcard?.terms.length || 0}
       />
     </div>
   )

@@ -7,7 +7,7 @@ import SidebarMenu from '@/src/layouts/navbar/SidebarMenu'
 import { useAuth } from '@/src/contexts/AuthContext'
 import { useFlashCardsStore } from '../store'
 import { useState } from 'react'
-import ImportFlashcardsModal from './ImportFlashcardsModal'
+import ImportTermsModal from './ImportTermsModal'
 
 const NotesHeading = () => {
   const router = useRouter()
@@ -125,7 +125,8 @@ const NotesHeading = () => {
         Log in to create a note.
       </Modal>
 
-      <ImportFlashcardsModal
+      <ImportTermsModal
+        mode="create"
         open={importModalOpen}
         onClose={() => setImportModalOpen(false)}
         onSuccess={() => {

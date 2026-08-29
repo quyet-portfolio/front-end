@@ -3,10 +3,10 @@
 import { useMessageApi } from '@/src/contexts/MessageContext'
 import { flashcardApi } from '@/src/lib/api/notes'
 import { ArrowLeftOutlined, MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons'
-import { Button, Card, Form, Input, message, Space } from 'antd'
+import { Button, Card, Form, Input } from 'antd'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import ImportFlashcardsModal from '../component/ImportFlashcardsModal'
+import ImportTermsModal from '../component/ImportTermsModal'
 
 const { TextArea } = Input
 
@@ -57,7 +57,7 @@ const CreateNoteView = () => {
           requiredMark={false}
           onFinish={onFinish}
           initialValues={{
-            tags: [{ term: '', definition: '', related: '' }],
+            terms: [{ term: '', definition: '', related: '' }],
           }}
         >
           <Form.Item
@@ -81,16 +81,16 @@ const CreateNoteView = () => {
           </Form.Item>
 
           <div className="mb-4">
-            <h3 className="text-lg font-semibold mb-2">Tags</h3>
-            <p className="text-gray-500 text-sm mb-4">Add at least one tag (term and definition)</p>
+            <h3 className="text-lg font-semibold mb-2">Terms</h3>
+            <p className="text-gray-500 text-sm mb-4">Each term needs a word and its definition</p>
           </div>
 
-          <Form.List name="tags">
+          <Form.List name="terms">
             {(fields, { add, remove }) => (
               <div className="flex flex-col gap-4">
                 <Form.Item>
                   <Button type="dashed" onClick={() => add(undefined, 0)} block icon={<PlusOutlined />}>
-                    Add Tag
+                    Add Term
                   </Button>
                 </Form.Item>
 
@@ -132,16 +132,6 @@ const CreateNoteView = () => {
             )}
           </Form.List>
 
-          {/* <Form.Item className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-white/90 backdrop-blur-sm dark:bg-gray-900/90">
-            <Space className="mx-auto flex max-w-4xl justify-end gap-4 px-6 py-4">
-              <Button onClick={() => router.back()} size="large">
-                Cancel
-              </Button>
-              <Button type="primary" htmlType="submit" loading={loading} size="large">
-                Create FlashCard
-              </Button>
-            </Space>
-          </Form.Item> */}
         </Form>
       </Card>
 
@@ -156,7 +146,8 @@ const CreateNoteView = () => {
         </div>
       </div>
 
-      <ImportFlashcardsModal
+      <ImportTermsModal
+        mode="create"
         open={importModalOpen}
         onClose={() => setImportModalOpen(false)}
         onSuccess={handleImportSuccess}
