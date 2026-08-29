@@ -7,6 +7,7 @@ import {
   ITerm,
   LearnQuestion,
   LearnSessionStats,
+  MasterySummary,
 } from '@/src/app/section/Notes/types'
 
 export interface CreateFlashCardData {
@@ -36,8 +37,17 @@ export interface StartLearnSessionResponse {
 }
 
 export interface SubmitAnswerPayload {
-  answer: string
-  startTime: number
+  /** Bỏ trống khi `skipped` = true. */
+  answer?: string
+  /** User bấm "I don't know" — server cho qua term này thay vì hỏi lại mãi. */
+  skipped?: boolean
+  /**
+   * Thời gian đã trôi kể từ lúc câu hỏi hiện ra, tính bằng ms.
+   *
+   * Gửi KHOẢNG thời gian chứ không phải mốc `Date.now()` của client: server trừ
+   * bằng đồng hồ của nó, nên lệch giờ giữa hai máy là đủ để ra số âm.
+   */
+  elapsedMs: number
 }
 
 export interface ImportFlashCardData {
@@ -74,9 +84,12 @@ export interface SearchWithinFlashCardResponse {
 }
 
 export const flashcardApi = {
-  // Get all flashcards
-  getFlashCards: async (params?: GetFlashCardsParams): Promise<FlashCardsResponse> => {
-    const response = await axios.get<FlashCardsResponse>('/flashcards', { params })
+  // Get all flashcards. `signal` để huỷ request cũ khi tham số đổi giữa chừng.
+  getFlashCards: async (
+    params?: GetFlashCardsParams,
+    signal?: AbortSignal,
+  ): Promise<FlashCardsResponse> => {
+    const response = await axios.get<FlashCardsResponse>('/flashcards', { params, signal })
     return response.data
   },
 
@@ -181,17 +194,12 @@ export const learnApi = {
     return response.data
   },
 
-  // Get next question in learning session
+  // Get next question in learning session — null nghĩa là session đã xong.
   getQuestion: async (sessionId: string): Promise<LearnQuestion | null> => {
-    try {
-      const response = await axios.get<LearnQuestion>(`/learn/${sessionId}/question`)
-      return response.data
-    } catch (error: any) {
-      if (error.response?.status === 204) {
-        return null
-      }
-      throw error
-    }
+    // 204 là response THÀNH CÔNG, axios không ném lỗi. Bắt nó ở khối catch như
+    // trước là nhánh chết; luồng chỉ chạy đúng nhờ `response.data` rỗng là falsy.
+    const response = await axios.get<LearnQuestion>(`/learn/${sessionId}/question`)
+    return response.status === 204 ? null : response.data
   },
 
   // Submit answer to a question
@@ -209,6 +217,12 @@ export const learnApi = {
   // Get learning session statistics
   getStats: async (sessionId: string): Promise<LearnSessionStats> => {
     const response = await axios.get<LearnSessionStats>(`/learn/${sessionId}/stats`)
+    return response.data
+  },
+
+  // Độ thuộc của bộ thẻ — không cần session, dùng cho trang chi tiết.
+  getMastery: async (flashcardId: string): Promise<{ mastery: MasterySummary }> => {
+    const response = await axios.get<{ mastery: MasterySummary }>(`/learn/${flashcardId}/mastery`)
     return response.data
   },
 

@@ -51,19 +51,21 @@ export interface LearnProgress {
 }
 
 export interface LearnQuestion {
-  termIndex: number;
+  termId: string;
   flashcardId: string; // For redirect after completion
   phase: LearnPhase;
   stepCount: number;
   totalSteps: number;
   prompt: string;
+  /** Rỗng ở phase review — lúc đó người học gõ tay chứ không chọn đáp án. */
   quizOptions: string[];
   progress: LearnProgress;
-  serverTime: number;
 }
 
 export interface AnswerResult {
   correct: boolean;
+  /** User bấm "I don't know" — không phải trả lời sai. */
+  skipped: boolean;
   correctAnswer: string;
   stepCount: number;
   totalSteps: number;
@@ -71,6 +73,20 @@ export interface AnswerResult {
   completed: boolean;
   chunkCompleted: boolean;
   progress: LearnProgress;
+}
+
+/** Độ thuộc dài hạn của một bộ thẻ, tích luỹ qua nhiều phiên học. */
+export interface MasterySummary {
+  totalTerms: number;
+  /** Đã đạt ngưỡng thuộc. */
+  mastered: number;
+  /** Đã học nhưng chưa tới ngưỡng. */
+  learning: number;
+  /** Chưa từng gặp trong phiên học nào. */
+  notStarted: number;
+  /** Tới hạn ôn lại. */
+  dueForReview: number;
+  masteryPercentage: number;
 }
 
 export interface LearnSessionStats {
@@ -85,5 +101,7 @@ export interface LearnSessionStats {
     incorrect: number;
     accuracy: number;
     avgResponseTimeMs: number;
+    skipped: number;
   };
+  mastery: MasterySummary;
 }

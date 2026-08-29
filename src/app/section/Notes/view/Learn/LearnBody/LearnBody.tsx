@@ -6,18 +6,33 @@ import { AnswerResult, LearnQuestion, LearnState } from '../../../types'
 import LoadingView from './LoadingView'
 import QuestionView from './QuestionView/QuestionView'
 import FeedbackView from './FeedbackView/FeedbackView'
-import { Button, Result } from 'antd'
-import { CheckCircleOutlined, HomeOutlined } from '@ant-design/icons'
+import { Button } from 'antd'
+import SessionSummary from './SessionSummary'
+import { LearnSessionStats } from '../../../types'
 
 interface LearnBodyProps {
   state: LearnState
   question: LearnQuestion | null
   result: AnswerResult | null
   onSubmit: (answer: string) => Promise<void>
+  onSkip: () => Promise<void>
   onNext: () => Promise<void>
+  stats: LearnSessionStats | null
+  statsLoading: boolean
+  onLearnAgain: () => void
 }
 
-const LearnBody = ({ state, question, result, onSubmit, onNext }: LearnBodyProps) => {
+const LearnBody = ({
+  state,
+  question,
+  result,
+  onSubmit,
+  onSkip,
+  onNext,
+  stats,
+  statsLoading,
+  onLearnAgain,
+}: LearnBodyProps) => {
   const router = useRouter()
   const params = useParams()
   const flashcardId = params.id as string
@@ -35,32 +50,19 @@ const LearnBody = ({ state, question, result, onSubmit, onNext }: LearnBodyProps
       return <LoadingView />
 
     case 'question':
-      return <QuestionView question={question} onSubmit={onSubmit} />
+      return <QuestionView question={question} onSubmit={onSubmit} onSkip={onSkip} />
 
     case 'feedback':
       return <FeedbackView result={result} onNext={onNext} />
 
     case 'completed':
       return (
-        <div className="py-10">
-          <Result
-            status="success"
-            icon={<CheckCircleOutlined className="text-green-500 text-6xl" />}
-            title="Congratulations! You have completed the session! 🎉"
-            subTitle="You have learned all terms in this flashcard set."
-            extra={[
-              <Button
-                key="detail"
-                type="primary"
-                icon={<HomeOutlined />}
-                size="large"
-                onClick={handleGoToDetail}
-              >
-                Return to details
-              </Button>,
-            ]}
-          />
-        </div>
+        <SessionSummary
+          stats={stats}
+          loading={statsLoading}
+          onGoToDetail={handleGoToDetail}
+          onLearnAgain={onLearnAgain}
+        />
       )
 
     case 'error':

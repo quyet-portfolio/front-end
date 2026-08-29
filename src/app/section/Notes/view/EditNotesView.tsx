@@ -8,8 +8,18 @@ import { MinusCircleOutlined, PlusOutlined, UploadOutlined, ArrowLeftOutlined } 
 import { FlashCard } from '../types'
 import { useMessageApi } from '@/src/contexts/MessageContext'
 import ImportTermsModal from '../component/ImportTermsModal'
+import { useUnsavedChangesGuard } from '../hook/useUnsavedChangesGuard'
 
 const { TextArea } = Input
+
+/**
+ * Số term render mỗi lô trong form.
+ *
+ * Một bộ thẻ có thể tới 1000 term, mỗi term là 3 Form.Item — dựng 3000 field cùng
+ * lúc làm tab đứng hình. Danh sách chỉ nới ra chứ không bao giờ thu lại, nên field
+ * đã mount không bị unmount và không có nguy cơ mất dữ liệu đang gõ.
+ */
+const TERMS_PAGE_SIZE = 50
 
 const EditNotesView = () => {
   const params = useParams()
@@ -21,6 +31,10 @@ const EditNotesView = () => {
   const [fetching, setFetching] = useState(true)
   const [flashcard, setFlashcard] = useState<FlashCard | null>(null)
   const [importModalOpen, setImportModalOpen] = useState(false)
+  const [isDirty, setIsDirty] = useState(false)
+  const [visibleTerms, setVisibleTerms] = useState(TERMS_PAGE_SIZE)
+
+  const { confirmLeave } = useUnsavedChangesGuard({ isDirty })
 
   useEffect(() => {
     const fetchFlashCard = async () => {
@@ -40,12 +54,14 @@ const EditNotesView = () => {
     }
 
     fetchFlashCard()
-  }, [params.id, form])
+    // messageApi từ useMessage() của antd ổn định qua các lần render nên vào deps được.
+  }, [params.id, form, messageApi])
 
   const onFinish = async (values: any) => {
     try {
       setLoading(true)
       await flashcardApi.updateFlashCard(params.id as string, values)
+      setIsDirty(false)
       messageApi?.success('FlashCard updated successfully')
       router.push(`/notes/${params.id}`)
     } catch (error: any) {
@@ -68,7 +84,8 @@ const EditNotesView = () => {
   }
 
   const handleImportSuccess = async () => {
-    // Refresh flashcard data
+    // Import ghi thẳng vào DB nên form phải nạp lại từ server, không còn "chưa lưu".
+    setIsDirty(false)
     const data = await flashcardApi.getFlashCardById(params.id as string)
     setFlashcard(data.flashcard)
     form.setFieldsValue({
@@ -79,10 +96,15 @@ const EditNotesView = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-5xl">
+    // pb-28 chừa chỗ cho thanh nút fixed ở đáy — nếu không nó che mất term cuối cùng.
+    <div className="container mx-auto p-6 pb-28 max-w-5xl">
       <div className="flex justify-between items-center mb-6">
         <div className="flex gap-4 items-center">
-          <Button icon={<ArrowLeftOutlined />} onClick={() => router.back()} />
+          <Button
+            icon={<ArrowLeftOutlined />}
+            aria-label="Go back"
+            onClick={() => confirmLeave(() => router.back())}
+          />
           <h1 className="text-3xl font-bold">Edit FlashCard</h1>
         </div>
         <Button icon={<UploadOutlined />} onClick={() => setImportModalOpen(true)}>
@@ -91,7 +113,7 @@ const EditNotesView = () => {
       </div>
 
       <Card>
-        <Form form={form} layout="vertical" onFinish={onFinish}>
+        <Form form={form} layout="vertical" onFinish={onFinish} onValuesChange={() => setIsDirty(true)}>
           <Form.Item
             label="Title"
             name="title"
@@ -126,7 +148,7 @@ const EditNotesView = () => {
                   </Button>
                 </Form.Item>
 
-                {fields.map(({ key, name, ...restField }) => (
+                {fields.slice(0, visibleTerms).map(({ key, name, ...restField }) => (
                   <div key={key} style={{ position: 'relative' }} className="mb-4">
                     {fields.length > 1 && (
                       <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}>
@@ -166,7 +188,16 @@ const EditNotesView = () => {
                   </div>
                 ))}
 
-
+                {fields.length > visibleTerms && (
+                  <Form.Item>
+                    <Button block onClick={() => setVisibleTerms((n) => n + TERMS_PAGE_SIZE)}>
+                      Show {Math.min(TERMS_PAGE_SIZE, fields.length - visibleTerms)} more
+                      <span className="text-gray-500 ml-1">
+                        ({visibleTerms}/{fields.length})
+                      </span>
+                    </Button>
+                  </Form.Item>
+                )}
               </>
             )}
           </Form.List>
@@ -175,7 +206,7 @@ const EditNotesView = () => {
 
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-white/90 backdrop-blur-sm dark:bg-gray-900/90">
         <div className="max-w-5xl mx-auto flex justify-end gap-4 px-6 py-4">
-          <Button onClick={() => router.back()} size="large">
+          <Button onClick={() => confirmLeave(() => router.back())} size="large">
             Cancel
           </Button>
           <Button type="primary" loading={loading} size="large" onClick={() => form.submit()}>

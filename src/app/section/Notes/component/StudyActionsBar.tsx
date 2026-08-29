@@ -7,9 +7,10 @@ import { useRouter } from 'next/navigation'
 interface StudyActionsBarProps {
   flashcardId: string
   onReset: () => void
+  isResetting?: boolean
 }
 
-const StudyActionsBar = ({ flashcardId, onReset }: StudyActionsBarProps) => {
+const StudyActionsBar = ({ flashcardId, onReset, isResetting }: StudyActionsBarProps) => {
   const router = useRouter()
 
   const handleLearn = () => {
@@ -36,6 +37,7 @@ const StudyActionsBar = ({ flashcardId, onReset }: StudyActionsBarProps) => {
         size="large"
         icon={<RedoOutlined />}
         onClick={onReset}
+        loading={isResetting}
         className="h-12 px-6 text-base"
       >
         Reset

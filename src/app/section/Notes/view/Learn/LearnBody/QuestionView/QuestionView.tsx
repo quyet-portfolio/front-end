@@ -7,9 +7,10 @@ import { Card, Skeleton } from 'antd'
 interface QuestionViewProps {
   question: LearnQuestion | null
   onSubmit: (answer: string) => Promise<void>
+  onSkip: () => Promise<void>
 }
 
-const QuestionView = ({ question, onSubmit }: QuestionViewProps) => {
+const QuestionView = ({ question, onSubmit, onSkip }: QuestionViewProps) => {
   // Loading state
   if (!question) {
     return (
@@ -25,6 +26,7 @@ const QuestionView = ({ question, onSubmit }: QuestionViewProps) => {
         <MultipleChoiceQuestion
           question={question}
           onSubmit={onSubmit}
+          onSkip={onSkip}
         />
       )
 
@@ -33,6 +35,7 @@ const QuestionView = ({ question, onSubmit }: QuestionViewProps) => {
         <TypedQuestion
           question={question}
           onSubmit={onSubmit}
+          onSkip={onSkip}
         />
       )
 

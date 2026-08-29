@@ -3,7 +3,13 @@
 import { useEffect, useState } from 'react'
 import { AnswerResult } from '../../../../types'
 import { Button, Progress } from 'antd'
-import { CheckCircleOutlined, CloseCircleOutlined, ArrowRightOutlined } from '@ant-design/icons'
+import {
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  MinusCircleOutlined,
+  ArrowRightOutlined,
+  BulbOutlined,
+} from '@ant-design/icons'
 import { motion } from 'framer-motion'
 
 interface FeedbackViewProps {
@@ -24,6 +30,7 @@ const FeedbackView = ({ result, onNext }: FeedbackViewProps) => {
   const [countdown, setCountdown] = useState(2)
 
   const isCorrect = result?.correct
+  const isSkipped = result?.skipped
   const progress = result?.progress
 
   // Auto countdown for correct answer
@@ -55,33 +62,81 @@ const FeedbackView = ({ result, onNext }: FeedbackViewProps) => {
 
   if (!result) return null
 
-  const cardBg = isCorrect ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)'
-  const borderColor = isCorrect ? 'rgba(16,185,129,0.4)' : 'rgba(239,68,68,0.4)'
+  // Ba trạng thái chứ không phải hai: bỏ qua là một lựa chọn hợp lệ, không phải
+  // lỗi — nên không tô đỏ và không rung màn hình như khi trả lời sai.
+  const tone = isCorrect ? 'correct' : isSkipped ? 'skipped' : 'wrong'
+
+  const TONE = {
+    correct: {
+      bg: 'rgba(16,185,129,0.08)',
+      border: 'rgba(16,185,129,0.4)',
+      text: 'text-green-400',
+      heading: 'Correct! 🎉',
+      gradient: 'linear-gradient(135deg,#10b981,#6366F1)',
+    },
+    skipped: {
+      bg: 'rgba(245,158,11,0.08)',
+      border: 'rgba(245,158,11,0.4)',
+      text: 'text-amber-400',
+      heading: 'Skipped',
+      gradient: 'linear-gradient(135deg,#f59e0b,#6366F1)',
+    },
+    wrong: {
+      bg: 'rgba(239,68,68,0.08)',
+      border: 'rgba(239,68,68,0.4)',
+      text: 'text-red-400',
+      heading: 'Incorrect 😕',
+      gradient: 'linear-gradient(135deg,#ef4444,#f97316)',
+    },
+  }[tone]
+
+  // Trả lời sai thì con trỏ đứng yên, câu tiếp theo vẫn là term này -> "Try again".
+  // Bỏ qua thì server đã đẩy con trỏ đi -> câu khác -> "Continue".
+  const nextLabel = isCorrect
+    ? `Continue${countdown > 0 ? ` (${countdown})` : ''}`
+    : isSkipped
+      ? 'Continue'
+      : 'Try again'
 
   return (
     <motion.div
-      initial={isCorrect ? CORRECT_INITIAL : WRONG_INITIAL}
-      animate={isCorrect ? CORRECT_ANIMATE : WRONG_ANIMATE}
-      transition={isCorrect ? CORRECT_TRANSITION : WRONG_TRANSITION}
+      initial={tone === 'wrong' ? WRONG_INITIAL : CORRECT_INITIAL}
+      animate={tone === 'wrong' ? WRONG_ANIMATE : CORRECT_ANIMATE}
+      transition={tone === 'wrong' ? WRONG_TRANSITION : CORRECT_TRANSITION}
       className="rounded-2xl p-6 shadow-lg"
-      style={{ background: cardBg, border: `1.5px solid ${borderColor}` }}
+      style={{ background: TONE.bg, border: `1.5px solid ${TONE.border}` }}
     >
       <div className="flex flex-col gap-5 items-center">
         {/* Result icon */}
         <div className="text-6xl">
           {isCorrect ? (
-            <CheckCircleOutlined className="text-green-400" />
+            <CheckCircleOutlined className={TONE.text} />
+          ) : isSkipped ? (
+            <MinusCircleOutlined className={TONE.text} />
           ) : (
-            <CloseCircleOutlined className="text-red-400" />
+            <CloseCircleOutlined className={TONE.text} />
           )}
         </div>
 
         {/* Result message */}
         <div className="text-center">
-          <h3 className={`text-2xl font-bold ${isCorrect ? 'text-green-400' : 'text-red-400'}`}>
-            {isCorrect ? 'Correct! 🎉' : 'Incorrect 😕'}
-          </h3>
+          <h3 className={`text-2xl font-bold ${TONE.text}`}>{TONE.heading}</h3>
         </div>
+
+        {/*
+          Đáp án đúng — thứ quan trọng nhất của cả màn hình này.
+          Server vẫn luôn trả `correctAnswer` nhưng trước đây không chỗ nào hiển thị,
+          nên trả lời sai xong người học không biết đúng là gì để mà học.
+        */}
+        {!isCorrect && result.correctAnswer && (
+          <div className="w-full max-w-md rounded-xl border border-amber-400/30 bg-amber-400/10 p-4">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-amber-300">
+              <BulbOutlined />
+              Correct answer
+            </div>
+            <p className="mt-2 text-lg font-medium text-white break-words">{result.correctAnswer}</p>
+          </div>
+        )}
 
         {/* Progress */}
         {progress && (
@@ -95,7 +150,7 @@ const FeedbackView = ({ result, onNext }: FeedbackViewProps) => {
             <Progress
               percent={progress.percentage}
               size="small"
-              strokeColor={isCorrect ? '#10b981' : '#ef4444'}
+              strokeColor={isCorrect ? '#10b981' : isSkipped ? '#f59e0b' : '#ef4444'}
               showInfo={false}
             />
             <div className="text-xs text-gray-500 text-center mt-1">
@@ -119,13 +174,9 @@ const FeedbackView = ({ result, onNext }: FeedbackViewProps) => {
             icon={<ArrowRightOutlined />}
             onClick={handleNext}
             loading={isLoading}
-            style={
-              isCorrect
-                ? { background: 'linear-gradient(135deg,#10b981,#6366F1)', border: 'none' }
-                : { background: 'linear-gradient(135deg,#ef4444,#f97316)', border: 'none' }
-            }
+            style={{ background: TONE.gradient, border: 'none' }}
           >
-            {isCorrect ? `Continue${countdown > 0 ? ` (${countdown})` : ''}` : 'Try again'}
+            {nextLabel}
           </Button>
         )}
       </div>

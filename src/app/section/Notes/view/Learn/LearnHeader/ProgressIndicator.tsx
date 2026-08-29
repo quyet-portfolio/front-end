@@ -2,7 +2,10 @@ import { Progress } from 'antd'
 import { useLearnStore } from '../../../store'
 
 export function ProgressIndicator() {
-  const { stepCount, totalSteps, progress, phase } = useLearnStore()
+  const stepCount = useLearnStore((s) => s.stepCount)
+  const totalSteps = useLearnStore((s) => s.totalSteps)
+  const progress = useLearnStore((s) => s.progress)
+  const phase = useLearnStore((s) => s.phase)
 
   // Use overall progress if available, otherwise use step progress
   const percentage = progress?.percentage ?? (totalSteps === 0 ? 0 : Math.round((stepCount / totalSteps) * 100))

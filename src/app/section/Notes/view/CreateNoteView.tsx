@@ -7,6 +7,7 @@ import { Button, Card, Form, Input } from 'antd'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import ImportTermsModal from '../component/ImportTermsModal'
+import { useUnsavedChangesGuard } from '../hook/useUnsavedChangesGuard'
 
 const { TextArea } = Input
 
@@ -15,12 +16,17 @@ const CreateNoteView = () => {
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [importModalOpen, setImportModalOpen] = useState(false)
+  const [isDirty, setIsDirty] = useState(false)
   const messageApi = useMessageApi()
+
+  const { confirmLeave } = useUnsavedChangesGuard({ isDirty })
 
   const onFinish = async (values: any) => {
     try {
       setLoading(true)
       await flashcardApi.createFlashCard(values)
+      // Tắt guard trước khi điều hướng, nếu không lưu xong lại bị hỏi "bỏ thay đổi?".
+      setIsDirty(false)
       messageApi?.success('FlashCard created successfully')
       router.push('/notes')
     } catch (error: any) {
@@ -31,14 +37,20 @@ const CreateNoteView = () => {
   }
 
   const handleImportSuccess = () => {
+    setIsDirty(false)
     router.push('/notes')
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-5xl">
+    // pb-28 chừa chỗ cho thanh nút fixed ở đáy — nếu không nó che mất term cuối cùng.
+    <div className="container mx-auto p-6 pb-28 max-w-5xl">
       <div className='flex gap-4 items-center mb-6 justify-between'>
         <div className='flex gap-4 items-center'>
-          <Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/notes')} />
+          <Button
+            icon={<ArrowLeftOutlined />}
+            aria-label="Back to notes"
+            onClick={() => confirmLeave(() => router.push('/notes'))}
+          />
           <h1 className="text-2xl font-bold">Create a new note</h1>
         </div>
         <Button
@@ -56,6 +68,7 @@ const CreateNoteView = () => {
           layout="vertical"
           requiredMark={false}
           onFinish={onFinish}
+          onValuesChange={() => setIsDirty(true)}
           initialValues={{
             terms: [{ term: '', definition: '', related: '' }],
           }}
@@ -137,7 +150,7 @@ const CreateNoteView = () => {
 
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-white/90 backdrop-blur-sm dark:bg-gray-900/90">
         <div className="max-w-5xl mx-auto flex justify-end gap-4 px-6 py-4">
-          <Button onClick={() => router.back()} size="large">
+          <Button onClick={() => confirmLeave(() => router.back())} size="large">
             Cancel
           </Button>
           <Button type="primary" loading={loading} size="large" onClick={() => form.submit()}>

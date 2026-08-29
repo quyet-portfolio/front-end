@@ -7,10 +7,12 @@ import { Alert, Button, Form, Input, Modal, Progress, Space, Table, Tabs, Typogr
 import { useState } from 'react'
 import { useTermsFileUpload } from '../hook/useTermsFileUpload'
 import {
+  MAX_IMPORT_FILE_BYTES,
   MAX_TERMS_PER_FLASHCARD,
   SAMPLE_CSV,
   SAMPLE_JSON,
   downloadTextFile,
+  formatBytes,
 } from '../lib/parseTermsFile'
 
 const { Dragger } = Upload
@@ -73,6 +75,7 @@ const ImportTermsModal = (props: ImportTermsModalProps) => {
 
   const { uploadProps, fileContent, fileType, parseResult, previewTerms, reset } = useTermsFileUpload({
     onUnsupportedFile: () => messageApi?.error('Only CSV, JSON, or Excel (.xlsx) files are supported'),
+    onFileTooLarge: (limit) => messageApi?.error(`File is too large. Maximum size is ${limit}.`),
   })
 
   const currentTermCount = mode === 'append' ? props.currentTermCount : 0
@@ -142,7 +145,9 @@ const ImportTermsModal = (props: ImportTermsModalProps) => {
           <InboxOutlined />
         </p>
         <p className="ant-upload-text">Click or drag file to this area to upload</p>
-        <p className="ant-upload-hint">Support for CSV, JSON, Excel (.xlsx) files.</p>
+        <p className="ant-upload-hint">
+          Support for CSV, JSON, Excel (.xlsx) files. Max size {formatBytes(MAX_IMPORT_FILE_BYTES)}.
+        </p>
       </Dragger>
 
       {parseResult?.status === 'preview-unavailable' && (

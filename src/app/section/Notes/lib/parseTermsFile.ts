@@ -5,6 +5,22 @@ export type TermsFileType = 'csv' | 'json' | 'xlsx'
 /** Phải khớp với giới hạn ở BE (routes/FlashCard/flashCard.ts). */
 export const MAX_TERMS_PER_FLASHCARD = 1000
 
+/**
+ * Trần dung lượng file import.
+ *
+ * Modal vẫn ghi "Max size 5MB" từ trước nhưng chưa bao giờ kiểm tra: file vài chục
+ * MB được FileReader nạp thẳng vào RAM, xlsx còn phình thêm 33% khi sang base64,
+ * rồi đâm vào giới hạn body 10MB của server và trả về một lỗi 413 khó hiểu — nếu
+ * tab chưa treo trước đó.
+ */
+export const MAX_IMPORT_FILE_BYTES = 5 * 1024 * 1024
+
+export function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
 const TERM_HEADERS = ['term', 'từ', 'word', 'phrase']
 const DEFINITION_HEADERS = ['definition', 'định nghĩa', 'meaning', 'nghĩa']
 const RELATED_HEADERS = ['related', 'liên quan', 'extra']

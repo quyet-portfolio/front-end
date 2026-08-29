@@ -1,14 +1,16 @@
 'use client'
 
 import { useAuth } from '@/src/contexts/AuthContext'
-import { Button, Card, Descriptions, Divider, Progress, Spin, Tag } from 'antd'
+import { Button, Card, Descriptions, Divider, Modal, Progress, Spin, Tag } from 'antd'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
 import { FlashCard } from '../types'
-import { flashcardApi } from '@/src/lib/api/notes'
+import { flashcardApi, learnApi } from '@/src/lib/api/notes'
 import {
   ArrowLeftOutlined,
+  DeleteOutlined,
   EditOutlined,
+  ExclamationCircleOutlined,
   LeftOutlined,
   RedoOutlined,
   RightOutlined,
@@ -20,41 +22,61 @@ import { useLearnStore } from '../store'
 import { useMessageApi } from '@/src/contexts/MessageContext'
 import ImportTermsModal from '../component/ImportTermsModal'
 import StudyActionsBar from '../component/StudyActionsBar'
+import MasteryBar from '../component/MasteryBar'
 
-const NotesDetailView = () => {
+/** Số term render mỗi lô. Bộ thẻ được phép có tới 1000 term. */
+const TERMS_PAGE_SIZE = 50
+
+interface NotesDetailViewProps {
+  /** Dữ liệu đã fetch sẵn ở server; thiếu thì client tự gọi API. */
+  initialFlashcard?: FlashCard
+}
+
+const NotesDetailView = ({ initialFlashcard }: NotesDetailViewProps) => {
   const param = useParams()
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const messageApi = useMessageApi()
 
-  const { reset } = useLearnStore()
+  // Selector thay vì lấy cả store: useLearnStore() không selector khiến trang chi
+  // tiết render lại theo mọi thay đổi state của phiên học.
+  const reset = useLearnStore((s) => s.reset)
 
-  const [flashcard, setFlashcard] = useState<FlashCard | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [flashcard, setFlashcard] = useState<FlashCard | null>(initialFlashcard ?? null)
+  const [isLoading, setIsLoading] = useState(!initialFlashcard)
+  const [visibleTerms, setVisibleTerms] = useState(TERMS_PAGE_SIZE)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFlipped, setIsFlipped] = useState(false)
   const [isImportModalOpen, setIsImportModalOpen] = useState(false)
+  const [isResetting, setIsResetting] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [masteryVersion, setMasteryVersion] = useState(0)
 
-  useEffect(() => {
-    const fetchFlashCard = async () => {
-      try {
-        const data = await flashcardApi.getFlashCardById(param.id as string)
-        setFlashcard(data.flashcard)
-      } catch (error) {
-        console.error('Failed to fetch flashcard:', error)
-      } finally {
-        setIsLoading(false)
-      }
+  const fetchFlashCard = useCallback(async () => {
+    try {
+      const data = await flashcardApi.getFlashCardById(param.id as string)
+      setFlashcard(data.flashcard)
+    } catch (error) {
+      console.error('Failed to fetch flashcard:', error)
+    } finally {
+      setIsLoading(false)
     }
-
-    fetchFlashCard()
   }, [param.id])
 
+  useEffect(() => {
+    // Server component đã đưa dữ liệu vào lần render đầu — gọi lại ngay là thừa
+    // một round-trip và một lần nháy nội dung.
+    if (initialFlashcard) return
+    fetchFlashCard()
+  }, [initialFlashcard, fetchFlashCard])
+
+  // Nút ‹ › bị disable ở hai đầu danh sách, nên phím mũi tên cũng dừng ở đó thay
+  // vì nhảy vòng — cùng một thao tác không được cho hai kết quả khác nhau.
   const handleNext = useCallback(() => {
     if (!flashcard) return
     setIsFlipped(false)
     setTimeout(() => {
-      setCurrentIndex((prev) => (prev + 1 < flashcard.terms.length ? prev + 1 : 0))
+      setCurrentIndex((prev) => Math.min(prev + 1, flashcard.terms.length - 1))
     }, 150)
   }, [flashcard])
 
@@ -62,12 +84,24 @@ const NotesDetailView = () => {
     if (!flashcard) return
     setIsFlipped(false)
     setTimeout(() => {
-      setCurrentIndex((prev) => (prev - 1 >= 0 ? prev - 1 : flashcard.terms.length - 1))
+      setCurrentIndex((prev) => Math.max(prev - 1, 0))
     }, 150)
   }, [flashcard])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Handler này gắn lên window nên nó nghe cả khi con trỏ đang nằm trong ô
+      // nhập liệu của modal Import ngay trên cùng trang: preventDefault() cho phím
+      // Space làm người dùng không gõ được khoảng trắng, và thẻ phía sau thì lật
+      // loạn theo từng phím mũi tên.
+      const target = e.target as HTMLElement | null
+      const isInteractive =
+        target?.isContentEditable ||
+        ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(target?.tagName ?? '') ||
+        target?.getAttribute('role') === 'button'
+
+      if (isInteractive) return
+
       switch (e.key) {
         case 'ArrowRight':
           handleNext()
@@ -86,9 +120,63 @@ const NotesDetailView = () => {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [handleNext, handlePrev])
 
-  const handleReset = () => {
-    reset()
-    messageApi?.success('Progress reset successfully')
+  /**
+   * Xoá tiến độ học của bộ thẻ này.
+   *
+   * Trước đây chỗ này chỉ gọi `reset()` của store — tức là dọn state trên client
+   * rồi báo "reset thành công", trong khi session trên server còn nguyên. Bấm
+   * "Learn now" ngay sau đó là thấy lại đúng tiến độ cũ.
+   */
+  const handleReset = async () => {
+    if (isResetting) return
+
+    setIsResetting(true)
+    try {
+      await learnApi.reset(param.id as string)
+      messageApi?.success('Progress reset successfully')
+    } catch (error: any) {
+      const status = error.response?.status
+
+      if (status === 404) {
+        messageApi?.info('There is no learning progress to reset yet')
+      } else if (status === 401) {
+        messageApi?.warning('Log in to reset your learning progress')
+      } else {
+        messageApi?.error(error.response?.data?.message || 'Failed to reset progress')
+      }
+    } finally {
+      // Dọn state client dù server trả gì — giữ hai bên khỏi lệch nhau.
+      reset()
+      setMasteryVersion((v) => v + 1)
+      setIsResetting(false)
+    }
+  }
+
+  /**
+   * Xoá hẳn bộ thẻ. API và check ownership ở server đã có sẵn từ đầu, chỉ là chưa
+   * bao giờ có nút nào gọi tới — CRUD thiếu mất chữ D.
+   */
+  const handleDelete = () => {
+    Modal.confirm({
+      title: 'Delete this note?',
+      icon: <ExclamationCircleOutlined />,
+      content: `"${flashcard?.title}" and all ${flashcard?.terms.length ?? 0} of its terms will be permanently deleted. This cannot be undone.`,
+      okText: 'Delete',
+      okButtonProps: { danger: true },
+      cancelText: 'Cancel',
+      centered: true,
+      onOk: async () => {
+        setIsDeleting(true)
+        try {
+          await flashcardApi.deleteFlashCard(param.id as string)
+          messageApi?.success('Note deleted')
+          router.push('/notes')
+        } catch (error: any) {
+          messageApi?.error(error.response?.data?.message || 'Failed to delete note')
+          setIsDeleting(false)
+        }
+      },
+    })
   }
 
   if (isLoading) {
@@ -136,6 +224,9 @@ const NotesDetailView = () => {
             >
               Edit
             </Button>
+            <Button danger icon={<DeleteOutlined />} loading={isDeleting} onClick={handleDelete}>
+              Delete
+            </Button>
           </div>
         )}
       </div>
@@ -171,8 +262,15 @@ const NotesDetailView = () => {
         </div>
       </Card>
 
+      {/* Độ thuộc tích luỹ, chỉ có ý nghĩa khi đã đăng nhập */}
+      <MasteryBar flashcardId={param.id as string} enabled={isAuthenticated} key={masteryVersion} />
+
       {/* Study Actions: Learn + Reset */}
-      <StudyActionsBar flashcardId={param.id as string} onReset={handleReset} />
+      <StudyActionsBar
+        flashcardId={param.id as string}
+        onReset={handleReset}
+        isResetting={isResetting}
+      />
 
       {/* Flip Card */}
       <div className="my-6 relative">
@@ -238,8 +336,13 @@ const NotesDetailView = () => {
         <h2 className="text-xl font-bold">Terms</h2>
         <Tag color="blue">{flashcard.terms.length}</Tag>
       </div>
+      {/*
+        Render theo lô: bộ thẻ import từ file có thể tới 1000 term, và dựng ngần ấy
+        Card cùng lúc là đủ làm trình duyệt đứng hình vài giây. Chỉ thêm chứ không
+        bao giờ bớt, nên không có chuyện nội dung đã đọc biến mất.
+      */}
       <div className="grid gap-3">
-        {flashcard.terms.map((term, index) => (
+        {flashcard.terms.slice(0, visibleTerms).map((term, index) => (
           <Card key={index} className="shadow-sm" size="small">
             <div className="flex items-start gap-4">
               <div className="bg-indigo-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold flex-shrink-0 text-sm">
@@ -254,13 +357,22 @@ const NotesDetailView = () => {
         ))}
       </div>
 
+      {flashcard.terms.length > visibleTerms && (
+        <div className="flex justify-center mt-4">
+          <Button onClick={() => setVisibleTerms((n) => n + TERMS_PAGE_SIZE)}>
+            Show {Math.min(TERMS_PAGE_SIZE, flashcard.terms.length - visibleTerms)} more
+            <span className="text-gray-500 ml-1">
+              ({visibleTerms}/{flashcard.terms.length})
+            </span>
+          </Button>
+        </div>
+      )}
+
       <ImportTermsModal
         mode="append"
         open={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
-        onSuccess={() => {
-          window.location.reload()
-        }}
+        onSuccess={fetchFlashCard}
         flashcardId={param.id as string}
         currentTermCount={flashcard.terms.length}
       />

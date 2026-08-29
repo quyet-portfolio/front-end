@@ -13,7 +13,9 @@ const NotesHeading = () => {
   const router = useRouter()
   const { isAuthenticated, logout, user } = useAuth()
 
-  const paramsGetFlashCards = useFlashCardsStore((state) => state)
+  const search = useFlashCardsStore((s) => s.search)
+  const setSearch = useFlashCardsStore((s) => s.setSearch)
+  const refreshFlashCards = useFlashCardsStore((s) => s.refresh)
 
   const [isOpenPopupAuthen, setOpenPopupAuthen] = useState(false)
   const [importModalOpen, setImportModalOpen] = useState(false)
@@ -21,24 +23,29 @@ const NotesHeading = () => {
   return (
     <div className="flex justify-between items-center w-full">
       <SidebarMenu />
+      {/* Danh sách tự lọc theo debounce khi gõ, nên icon kính lúp chỉ là chỉ dấu. */}
       <div className="w-[65%] md:w-[36%]">
         <Input
+          // Ô này từng là uncontrolled trong khi từ khoá lưu ở store cấp module:
+          // rời trang rồi quay lại là ô trống nhưng danh sách vẫn đang bị lọc, và
+          // người dùng không có cách nào biết để mà xoá bộ lọc.
+          value={search ?? ''}
           placeholder="Find notes, term, desc ..."
           size="large"
-          onChange={(e) => {
-            useFlashCardsStore.setState({
-              ...paramsGetFlashCards,
-              search: e.target.value,
-            })
-          }}
-          suffix={<SearchOutlined className="cursor-pointer" onClick={() => window.alert('Searching ... ')} />}
+          allowClear
+          aria-label="Search notes"
+          onChange={(e) => setSearch(e.target.value)}
+          suffix={<SearchOutlined className="text-gray-400" />}
         />
       </div>
       <div className="flex items-center gap-2 md:gap-6">
-        <Tooltip title="Create new note" trigger={'hover'}>
-          <PlusCircleOutlined
-            style={{ fontSize: '32px' }}
-            disabled={!isAuthenticated}
+        <Tooltip title="Create new note">
+          <Button
+            type="text"
+            shape="circle"
+            size="large"
+            aria-label="Create new note"
+            icon={<PlusCircleOutlined style={{ fontSize: 28 }} />}
             onClick={() => {
               if (!isAuthenticated) {
                 setOpenPopupAuthen(true)
@@ -49,10 +56,13 @@ const NotesHeading = () => {
             }}
           />
         </Tooltip>
-        <Tooltip title="Import from file" trigger={'hover'}>
-          <UploadOutlined
-            style={{ fontSize: '28px' }}
-            disabled={!isAuthenticated}
+        <Tooltip title="Import from file">
+          <Button
+            type="text"
+            shape="circle"
+            size="large"
+            aria-label="Import notes from file"
+            icon={<UploadOutlined style={{ fontSize: 24 }} />}
             onClick={() => {
               if (!isAuthenticated) {
                 setOpenPopupAuthen(true)
@@ -129,10 +139,8 @@ const NotesHeading = () => {
         mode="create"
         open={importModalOpen}
         onClose={() => setImportModalOpen(false)}
-        onSuccess={() => {
-          // Refresh the list after import
-          window.location.reload()
-        }}
+        // Nạp lại danh sách tại chỗ thay vì reload cả trang.
+        onSuccess={refreshFlashCards}
       />
     </div>
   )

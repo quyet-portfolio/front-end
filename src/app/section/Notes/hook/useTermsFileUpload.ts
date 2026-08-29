@@ -4,10 +4,18 @@ import { useCallback, useState } from 'react'
 import type { UploadFile, UploadProps } from 'antd/es/upload/interface'
 import { Upload } from 'antd'
 import { ITerm } from '../types'
-import { detectFileType, parseTermsFile, ParseTermsResult, TermsFileType } from '../lib/parseTermsFile'
+import {
+  MAX_IMPORT_FILE_BYTES,
+  ParseTermsResult,
+  TermsFileType,
+  detectFileType,
+  formatBytes,
+  parseTermsFile,
+} from '../lib/parseTermsFile'
 
 interface UseTermsFileUploadOptions {
   onUnsupportedFile: () => void
+  onFileTooLarge: (limit: string) => void
 }
 
 /**
@@ -16,7 +24,10 @@ interface UseTermsFileUploadOptions {
  * Tách riêng vì cả luồng "tạo flashcard mới từ file" và "thêm terms vào flashcard
  * có sẵn" đều cần y hệt phần này — trước đây hai modal copy-paste nguyên khối.
  */
-export const useTermsFileUpload = ({ onUnsupportedFile }: UseTermsFileUploadOptions) => {
+export const useTermsFileUpload = ({
+  onUnsupportedFile,
+  onFileTooLarge,
+}: UseTermsFileUploadOptions) => {
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const [fileContent, setFileContent] = useState('')
   const [fileType, setFileType] = useState<TermsFileType>('csv')
@@ -38,6 +49,12 @@ export const useTermsFileUpload = ({ onUnsupportedFile }: UseTermsFileUploadOpti
         onUnsupportedFile()
         return Upload.LIST_IGNORE
       }
+
+      if (file.size > MAX_IMPORT_FILE_BYTES) {
+        onFileTooLarge(formatBytes(MAX_IMPORT_FILE_BYTES))
+        return Upload.LIST_IGNORE
+      }
+
       setFileType(type)
 
       const reader = new FileReader()

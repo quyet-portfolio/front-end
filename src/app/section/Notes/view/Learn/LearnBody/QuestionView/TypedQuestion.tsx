@@ -4,13 +4,16 @@ import React, { useState, useRef } from 'react'
 import { LearnQuestion } from '../../../../types'
 import { Card, Input, Button } from 'antd'
 import { CheckCircleOutlined } from '@ant-design/icons'
+import SkipButton from './SkipButton'
 
 const TypedQuestion = ({
   question,
   onSubmit,
+  onSkip,
 }: {
   question: LearnQuestion | null
   onSubmit: (answer: string) => Promise<void>
+  onSkip: () => Promise<void>
 }) => {
   const [answer, setAnswer] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -65,9 +68,10 @@ const TypedQuestion = ({
           </Button>
         </div>
 
-        {/* Keyboard shortcut hint */}
-        <div className="text-xs text-gray-400 text-center">
-          Press Enter to check
+        <div className="flex items-center justify-between">
+          {/* Keyboard shortcut hint */}
+          <span className="text-xs text-gray-400">Press Enter to check</span>
+          <SkipButton onSkip={onSkip} disabled={isSubmitting} />
         </div>
       </div>
     </Card>
