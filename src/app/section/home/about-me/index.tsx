@@ -5,7 +5,10 @@ import { gridItems } from '@/src/app/data/helper'
 
 const AboutMe = () => {
   return (
-    <section id="about">
+    <section id="about" className="scroll-mt-24" aria-labelledby="about-heading">
+      <h2 id="about-heading" className="sr-only">
+        About me
+      </h2>
       <LayoutGrid className="w-full py-10 lg:py-20">
         {gridItems.map((item, i) => (
           <LayoutGridItem

@@ -5,7 +5,7 @@ import { Tooltip } from 'antd'
 import { AnimatePresence, motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState, type JSX } from 'react';
+import type { JSX } from 'react'
 import SidebarMenu from './SidebarMenu'
 import { useAuth } from '@/src/contexts/AuthContext'
 
@@ -25,7 +25,7 @@ const Navbar = ({ navItems, className, isShowLoginButton }: TNavbar) => {
 
   return (
     <AnimatePresence mode="wait">
-      <motion.div
+      <motion.header
         initial={{
           opacity: 1,
           y: -100,
@@ -44,7 +44,8 @@ const Navbar = ({ navItems, className, isShowLoginButton }: TNavbar) => {
       >
         <SidebarMenu />
         {/* <div className="w-[50px]"></div> */}
-        <div
+        <nav
+          aria-label="Home sections"
           className="hidden md:flex px-6 lg:px-10 py-4 lg:py-5 rounded-lg border shadow-[0px_2px_3px_-1px_rgba(0,0,0,0.1),0px_1px_0px_0px_rgba(25,28,33,0.02),0px_0px_0px_1px_rgba(25,28,33,0.08)] items-center justify-center space-x-3 lg:space-x-4"
           style={{
             backdropFilter: 'blur(16px) saturate(180%)',
@@ -58,14 +59,14 @@ const Navbar = ({ navItems, className, isShowLoginButton }: TNavbar) => {
               key={`link=${idx}`}
               href={navItem.link}
               className={cn(
-                'relative dark:text-neutral-50 items-center flex space-x-1 text-neutral-600 dark:hover:text-neutral-300 hover:text-neutral-500',
+                'relative text-neutral-50 items-center flex space-x-1 hover:text-neutral-300 transition-colors',
               )}
             >
               <span className="block sm:hidden">{navItem.icon}</span>
               <span className="text-sm !cursor-pointer">{navItem.name}</span>
             </Link>
           ))}
-        </div>
+        </nav>
 
         <div className="w-[50px]">
           {isShowLoginButton ? (
@@ -97,7 +98,7 @@ const Navbar = ({ navItems, className, isShowLoginButton }: TNavbar) => {
             </Tooltip>
           ) : null}
         </div>
-      </motion.div>
+      </motion.header>
     </AnimatePresence>
   )
 }

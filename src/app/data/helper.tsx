@@ -51,7 +51,7 @@ export const gridItems = [
   },
   {
     id: 4,
-    title: 'Airing towards Full-stack proficiency',
+    title: 'Aiming towards Full-stack proficiency',
     description: 'Expanding expertise in Node.js, Express, and MongoDB for comprehensive product development.',
     className: 'lg:col-span-2 md:col-span-3 md:row-span-1',
     imgClassName: '',
@@ -72,7 +72,7 @@ export const gridItems = [
   },
   {
     id: 6,
-    title: 'Focus on Performace, Core Web Vitals, and SEO Optimization.',
+    title: 'Focus on Performance, Core Web Vitals, and SEO Optimization.',
     description: '',
     className: 'lg:col-span-2 md:col-span-3 md:row-span-1',
     imgClassName: '',
@@ -88,7 +88,7 @@ export const projects = [
     title: 'BettaMax: E-commerce SaaS',
     des: 'A comprehensive SaaS Platform for merchants with RBAC security, performance analytics, and store operations.',
     img: '/betta-max.webp',
-    iconLists: ['/next.svg', '/ts.svg', '/tail.svg', 'antd.svg', '/re.svg'],
+    iconLists: ['/next.svg', '/ts.svg', '/tail.svg', '/antd.svg', '/re.svg'],
     link: 'https://admin.bettamax.com',
   },
   {
@@ -96,7 +96,7 @@ export const projects = [
     title: 'Sky Solution Website',
     des: 'A business website with integrated Admin CMS. High-performance SSR with Payload CMS and optimized SEO.',
     img: '/sky-solution.webp',
-    iconLists: ['/next.svg', '/tail.svg', 'antd.svg', '/ps.svg'],
+    iconLists: ['/next.svg', '/tail.svg', '/antd.svg', '/ps.svg'],
     link: 'https://skysolution.com/',
   },
   {
@@ -104,7 +104,7 @@ export const projects = [
     title: 'Omega Facebook Pixel Ad Report',
     des: 'Optimize ads & ROAS with Facebook Pixel, CAPI, manage product feeds & access key metrics in one app.',
     img: '/facebook-pixel.webp',
-    iconLists: ['/laravel.svg', '/re.svg', '/redux.svg', 'antd.svg', '/ts.svg'],
+    iconLists: ['/laravel.svg', '/re.svg', '/redux.svg', '/antd.svg', '/ts.svg'],
     link: 'https://apps.shopify.com/facebook-multi-pixels',
   },
   {
@@ -117,7 +117,7 @@ export const projects = [
   },
   {
     id: 5,
-    title: 'Omega Twitter Pixel,Conversion',
+    title: 'Omega Twitter Pixel, Conversion',
     des: "Skyrocket your conversions with Multi Twitter Pixels' 5 powerful events & Conversion API.",
     img: '/twitter-pixel.webp',
     iconLists: ['/laravel.svg', '/re.svg', '/redux.svg'],

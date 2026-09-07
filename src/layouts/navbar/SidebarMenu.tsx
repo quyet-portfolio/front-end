@@ -47,21 +47,21 @@ const SidebarMenu = () => {
                 border: '1px solid rgba(255, 255, 255, 0.125)',
               }}
             >
-              <div className="flex flex-col py-2">
+              <nav aria-label="Pages" className="flex flex-col py-2">
                 {menuItems.map((navItem: any, idx: number) => (
                   <Link
                     key={`dropdown-link-${idx}`}
                     href={navItem.link}
                     onClick={() => setIsMenuOpen(false)}
                     className={cn(
-                      'relative dark:text-neutral-50 items-center flex space-x-3 text-neutral-600 dark:hover:text-neutral-300 hover:text-neutral-500 px-6 py-3 hover:bg-white/10 transition-colors',
+                      'relative text-neutral-50 items-center flex space-x-3 hover:text-neutral-300 px-6 py-3 hover:bg-white/10 transition-colors',
                     )}
                   >
                     <span>{navItem.icon}</span>
                     <span className="text-sm">{navItem.name}</span>
                   </Link>
                 ))}
-              </div>
+              </nav>
             </motion.div>
           </>
         )}

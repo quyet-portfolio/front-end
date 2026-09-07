@@ -7,24 +7,24 @@ import MagicButton from '@/src/components/ui/MagicButton'
 
 const Footer = () => {
   return (
-    <footer className="w-full pt-20 pb-10" id="contact">
+    <footer className="w-full pt-20 pb-10 scroll-mt-24" id="contact">
       <div className="flex flex-col items-center">
-        <a>
-          <MagicButton
-            title="Send me an email"
-            icon={<FaLocationArrow />}
-            position="right"
-            handleClick={() => {
-              const email = 'bquyet09@gmail.com'
-              const gmailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}`
+        <MagicButton
+          title="Send me an email"
+          icon={<FaLocationArrow />}
+          position="right"
+          handleClick={() => {
+            const email = 'bquyet09@gmail.com'
+            const gmailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}`
 
-              window.open(gmailURL, '_blank')
-            }}
-          />
-        </a>
+            window.open(gmailURL, '_blank')
+          }}
+        />
       </div>
       <div className="flex mt-16 md:flex-row flex-col justify-between items-center gap-6 md:gap-0">
-        <p className="md:text-base text-sm md:font-normal font-light">Copyright © 2024 Bui Duy Quyet</p>
+        <p className="md:text-base text-sm md:font-normal font-light">
+          Copyright © {new Date().getFullYear()} Bui Duy Quyet
+        </p>
 
         <div className="flex items-center gap-3">
           {socialMedia.map((info) => (

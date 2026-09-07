@@ -4,11 +4,11 @@ import { workExperience } from '@/src/app/data/helper'
 
 const WorkExperience = () => {
   return (
-    <section id="experience">
+    <section id="experience" className="scroll-mt-24">
       <div className="py-10 lg:py-20 w-full">
-        <h1 className="heading">
+        <h2 className="heading">
           <span className="text-purple">Work Experience</span>
-        </h1>
+        </h2>
 
         <div className="w-full mt-12 grid lg:grid-cols-4 grid-cols-1 gap-10">
           {workExperience.map((card) => (
@@ -20,12 +20,12 @@ const WorkExperience = () => {
                 background: 'linear-gradient(90deg, rgba(4,7,29,1) 0%, rgba(12,14,35,1) 100%)',
                 borderRadius: `calc(1.75rem* 0.96)`,
               }}
-              className="flex-1 text-black dark:text-white border-neutral-200 dark:border-slate-800"
+              className="flex-1 text-white border-slate-800"
             >
               <div className="w-full flex lg:flex-row flex-col lg:items-center justify-start p-3 py-6 md:p-5 lg:p-10 gap-2">
                 <Image src={card.thumbnail} alt={card.title} className="lg:w-32 md:w-20 w-16 h-auto" width={128} height={128} />
                 <div className="lg:ms-5">
-                  <h1 className="text-start text-xl md:text-2xl font-bold">{card.title}</h1>
+                  <h3 className="text-start text-xl md:text-2xl font-bold">{card.title}</h3>
                   <p className="text-start text-white-100 mt-3 font-semibold">{card.desc}</p>
                 </div>
               </div>

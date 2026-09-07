@@ -1,49 +1,39 @@
+'use client'
+
 import { cn } from '@/src/lib/utils'
 import { stagger, useAnimate, motion } from 'framer-motion'
 import React, { useEffect } from 'react'
 
-const TextGenerateEffect = ({ words, className }: { words: string; className?: string }) => {
-  const [scope, animate] = useAnimate()
-  let wordsArray = words.split(' ')
-  useEffect(() => {
-    animate(
-      'span',
-      {
-        opacity: 1,
-      },
-      {
-        duration: 2,
-        delay: stagger(0.2),
-      },
-    )
-  }, [scope.current])
+type TTextGenerateEffect = {
+  words: string
+  className?: string
+  /** Thẻ bọc — Hero truyền "h1" để trang có đúng một heading cấp 1. */
+  as?: 'h1' | 'h2' | 'h3' | 'p' | 'div'
+}
 
-  const renderWords = () => {
-    return (
-      <motion.div ref={scope}>
-        {wordsArray.map((word, idx) => {
-          return (
-            <motion.span
-              key={word + idx}
-              // change here if idx is greater than 3, change the text color to #CBACF9
-              className={` ${idx > 3 ? 'text-purple' : 'dark:text-white text-black'} opacity-0`}
-            >
-              {word}{' '}
-            </motion.span>
-          )
-        })}
-      </motion.div>
-    )
-  }
+const TextGenerateEffect = ({ words, className, as: Tag = 'div' }: TTextGenerateEffect) => {
+  const [scope, animate] = useAnimate()
+  const wordsArray = words.split(' ')
+
+  useEffect(() => {
+    // Đọc trong effect (không phải lúc render) để không lệch hydration giữa server và client.
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    animate('span', { opacity: 1 }, prefersReduced ? { duration: 0 } : { duration: 2, delay: stagger(0.2) })
+  }, [animate])
 
   return (
-    <div className={cn('font-bold', className)}>
-      {/* mt-4 to my-4 */}
-      <div className="my-4">
-        {/* remove  text-2xl from the original */}
-        <div className=" dark:text-white text-black leading-snug tracking-wide">{renderWords()}</div>
-      </div>
-    </div>
+    <Tag
+      ref={scope}
+      data-text-generate
+      className={cn('font-bold my-4 leading-snug tracking-wide text-white', className)}
+    >
+      {wordsArray.map((word, idx) => (
+        <motion.span key={word + idx} className={cn('opacity-0', idx > 3 && 'text-purple')}>
+          {word}{' '}
+        </motion.span>
+      ))}
+    </Tag>
   )
 }
 

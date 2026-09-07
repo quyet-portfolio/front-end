@@ -5,11 +5,11 @@ import { projects } from '@/src/app/data/helper'
 
 const RecentProjects = () => {
   return (
-    <section id="projects">
+    <section id="projects" className="scroll-mt-24">
       <div className="py-10 lg:py-20">
-        <h1 className="heading">
+        <h2 className="heading">
           <span className="text-purple">Recent Projects</span>
-        </h1>
+        </h2>
         <div className="flex justify-between flex-wrap gap-10 mt-10">
           {projects.map((item) => (
             <div
@@ -20,7 +20,7 @@ const RecentProjects = () => {
                 <div className="overflow-hidden mb-6 rounded-lg">
                   <Image src={item.img} alt="cover" className='w-full h-full hover:scale-105 transition duration-500 object-cover' width={400} height={300} />
                 </div>
-                <h1 className="font-bold lg:text-2xl md:text-xl text-base line-clamp-1">{item.title}</h1>
+                <h3 className="font-bold lg:text-2xl md:text-xl text-base line-clamp-1">{item.title}</h3>
                 <p className="lg:text-xl lg:font-normal font-light text-sm line-clamp-2 text-[#BEC1DD] my-[1vh]">
                   {item.des}
                 </p>
