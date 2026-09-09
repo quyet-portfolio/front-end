@@ -1,15 +1,17 @@
 import Image from 'next/image'
-import { FaLocationArrow } from 'react-icons/fa6'
+import { FaLocationArrow, FaRegEnvelope } from 'react-icons/fa6'
 import MagicButton from '@/src/components/ui/MagicButton'
 import TextGenerateEffect from '@/src/components/ui/TextGenerateEffect'
 
 const Hero = () => {
   return (
     <div className="pb-20 pt-36">
+      {/* w-screen + left-1/2 để nền lưới tràn hết viewport: container cha giờ bị
+          giới hạn ở max-w-7xl nên nếu để w-full sẽ lộ mép lưới hai bên. */}
       <div
         aria-hidden
-        className="h-screen w-full bg-black-100 bg-grid-white/[0.03]
-       absolute top-0 left-0 flex items-center justify-center"
+        className="h-screen w-screen bg-black-100 bg-grid-white/[0.03]
+       absolute top-0 left-1/2 -translate-x-1/2 flex items-center justify-center"
       >
         <div
           className="absolute pointer-events-none inset-0 flex items-center justify-center bg-black-100
@@ -39,7 +41,10 @@ const Hero = () => {
           <noscript>
             <style>{`[data-text-generate] span { opacity: 1 !important; }`}</style>
           </noscript>
-          <MagicButton href="#about" title="Show about me" icon={<FaLocationArrow />} position="right" />
+
+          <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 w-full md:w-auto">
+            <MagicButton href="#projects" title="View my work" icon={<FaLocationArrow />} position="right" />
+          </div>
         </div>
       </div>
     </div>

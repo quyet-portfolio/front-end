@@ -38,7 +38,7 @@ const Navbar = ({ navItems, className, isShowLoginButton }: TNavbar) => {
           duration: 0.2,
         }}
         className={cn(
-          'flex max-w-[90%] lg:max-w-[75%] fixed z-[5000] top-4 inset-x-0 mx-auto items-center justify-between gap-4',
+          'flex w-full max-w-7xl px-4 sm:px-6 lg:px-8 fixed z-[5000] top-4 inset-x-0 mx-auto items-center justify-between gap-4',
           className,
         )}
       >
