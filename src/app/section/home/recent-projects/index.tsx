@@ -9,7 +9,7 @@ const RecentProjects = () => {
         <h2 className="heading">
           <span className="text-purple">Recent Projects</span>
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mt-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 lg:gap-10 mt-10">
           {projects.map((item) => (
             // Cả thẻ là một <a> thật: mở tab mới / copy link / focus bàn phím đều chạy,
             // và crawler nhìn thấy liên kết ra sản phẩm.

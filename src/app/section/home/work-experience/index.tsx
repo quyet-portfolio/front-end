@@ -10,7 +10,7 @@ const WorkExperience = () => {
           <span className="text-purple">Work Experience</span>
         </h2>
 
-        <div className="w-full mt-12 grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <div className="w-full mt-12 grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-10">
           {workExperience.map((card) => (
             <MagicCard
               key={card.id}

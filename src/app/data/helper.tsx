@@ -181,3 +181,30 @@ export const socialMedia = [
     link: 'https://www.linkedin.com/in/dev-bui-duy-quyet/',
   },
 ]
+
+export const subProjects = [
+  {
+    id: 'blogs',
+    name: 'Blogs',
+    href: '/blogs',
+    tagline: 'Web, Next.js and psychology',
+    description: 'Web performance, Next.js and system design — plus notes on health and psychology.',
+    cta: 'Read the blog',
+  },
+  {
+    id: 'notes',
+    name: 'Notes',
+    href: '/notes',
+    tagline: 'Flashcards with a learn mode',
+    description: 'Flashcards with a learn mode: multiple choice first, then typed recall.',
+    cta: 'Browse notes',
+  },
+  {
+    id: 'portfolio-builder',
+    name: 'Portfolio Builder',
+    href: undefined,
+    tagline: 'Build yours from a template',
+    description: 'Pick a template, arrange blocks, publish your own portfolio.',
+    cta: undefined,
+  },
+]
