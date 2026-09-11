@@ -1,17 +1,10 @@
+import Image from 'next/image'
 import { cn } from '@/src/lib/utils'
 
-// Preview là giao diện của từng sub-project vẽ lại ở dạng thu nhỏ, dùng chung cho
-// popover (desktop) và thẻ (mobile). Nội dung tĩnh, chỉ để minh hoạ — tên, mô tả và
-// link đã có ở phần tử cha, nên toàn bộ preview ẩn khỏi cây accessibility.
-
-// Nền lưới đứng thay cho ảnh bìa bài viết.
 const GRID_PLACEHOLDER =
   'bg-[#10132E] bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[length:12px_12px]'
 
-const SAMPLE_POSTS = [
-  { category: 'Programming', title: 'SEO cho blog Next.js: 9 bài học sau ba tuần sửa lại' },
-  { category: 'Psychology', title: 'Có người nói chẳng cần đến tình yêu, cho đến khi họ có một điều gì đó muốn kể.' },
-]
+const SAMPLE_POSTS = [{ category: 'Programming' }, { category: 'Psychology' }]
 
 const BUILDER_BLOCKS = ['Hero', 'About', 'Skills', 'Projects', 'Experience', 'Contact']
 
@@ -33,14 +26,17 @@ export const BlogsPreview = () => (
 
     <div className="grid grid-cols-2 gap-2.5">
       {SAMPLE_POSTS.map((post) => (
-        <div key={post.title} className="overflow-hidden rounded-[10px] border border-white/[0.06] bg-white/[0.03]">
+        <div key={post.category} className="overflow-hidden rounded-[10px] border border-white/[0.06] bg-white/[0.03]">
           <div className={cn('relative h-[84px]', GRID_PLACEHOLDER)}>
             <span className="absolute left-1.5 top-1.5 rounded-full bg-primary px-1.5 py-0.5 text-[7px] font-bold uppercase leading-none text-white">
               {post.category}
             </span>
           </div>
           <div className="px-2 pb-2.5 pt-1.5">
-            <p className="line-clamp-2 text-[10px] font-bold leading-[14px] text-white">{post.title}</p>
+            <div className="flex flex-col gap-1.5">
+              <div className="h-[10px] rounded bg-white/[0.06]" />
+              <div className="h-[10px] w-[50%] rounded bg-white/[0.06]" />
+            </div>
           </div>
         </div>
       ))}
@@ -55,6 +51,86 @@ export const NotesPreview = () => (
       <div className="absolute inset-x-0 top-0 flex h-[152px] items-center justify-center rounded-2xl border border-white/10 bg-slate-900 px-5 shadow-xl shadow-black/40">
         <span className="absolute left-3 top-3 text-[10px] font-bold uppercase tracking-wider text-gray-400">Term</span>
         <span className="text-center text-[26px] font-bold leading-8 text-white">Within</span>
+      </div>
+    </div>
+  </div>
+)
+
+const NAMDINH_LOGO = '/projects/namdinhfc-logo.webp'
+
+const NAMDINH_SECTIONS = ['Squad', 'Fixtures', 'Standings']
+
+export const NamDinhFcPreview = () => (
+  <div aria-hidden className="flex h-full p-3">
+    <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-white/[0.08] bg-[#0B0E24]">
+      <div className="flex h-[22px] shrink-0 items-center gap-1.5 border-b border-white/[0.06] bg-white/[0.02] px-2">
+        <div className="flex gap-[3px]">
+          {[0, 1, 2].map((dot) => (
+            <span key={dot} className="size-[5px] rounded-full bg-white/20" />
+          ))}
+        </div>
+        <div className="flex h-3 min-w-0 flex-1 items-center gap-1 overflow-hidden whitespace-nowrap rounded-full bg-white/[0.05] px-1.5 text-[7px] leading-none text-white-100">
+          <svg
+            width="6"
+            height="6"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            className="shrink-0"
+          >
+            <rect x="5" y="11" width="14" height="10" rx="2" />
+            <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+          </svg>
+          namdinhfc.vercel.app
+        </div>
+      </div>
+
+      <div className="flex min-h-0 flex-1 flex-col gap-2 p-2.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Image src={NAMDINH_LOGO} alt="" width={12} height={12} className="size-3" />
+            <span className="h-1.5 w-[34px] rounded-full bg-white/[0.18]" />
+          </div>
+          <div className="flex gap-1.5">
+            {[0, 1, 2].map((bar) => (
+              <span key={bar} className="h-1 w-3.5 rounded-full bg-white/10" />
+            ))}
+          </div>
+        </div>
+
+        <div className="flex min-h-0 flex-1 items-center justify-between gap-2 overflow-hidden rounded-md bg-[linear-gradient(135deg,rgba(99,102,241,0.38)_0%,rgba(203,172,249,0.12)_55%,rgba(16,19,46,0.4)_100%)] p-2.5">
+          <div className="flex min-w-0 flex-1 flex-col gap-[5px]">
+            <span className="self-start rounded-full bg-purple/15 px-[5px] py-0.5 text-[6px] font-bold leading-[7px] tracking-[0.08em] text-purple">
+              V.LEAGUE
+            </span>
+            <span className="h-[7px] w-[85%] rounded-full bg-white/55" />
+            <span className="h-[7px] w-[55%] rounded-full bg-white/55" />
+            <div className="mt-[3px] flex gap-[5px]">
+              <span className="h-2.5 w-8 rounded-full bg-primary" />
+              <span className="h-2.5 w-8 rounded-full border border-white/30" />
+            </div>
+          </div>
+          <Image
+            src={NAMDINH_LOGO}
+            alt=""
+            width={64}
+            height={64}
+            className="size-16 shrink-0 drop-shadow-[0_6px_14px_rgba(59,130,246,0.35)]"
+          />
+        </div>
+
+        <div className="grid grid-cols-3 gap-1.5">
+          {NAMDINH_SECTIONS.map((section) => (
+            <div key={section} className="flex flex-col overflow-hidden rounded-[5px] border border-white/[0.06]">
+              <div className={cn('h-[22px]', GRID_PLACEHOLDER)} />
+              <span className="bg-white/[0.03] px-1.5 py-[3px] text-[7px] font-semibold leading-[8px] text-white-100">
+                {section}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   </div>

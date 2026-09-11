@@ -182,7 +182,7 @@ export const socialMedia = [
   },
 ]
 
-export const subProjects = [
+export const personalProjects = [
   {
     id: 'blogs',
     name: 'Blogs',
@@ -198,6 +198,14 @@ export const subProjects = [
     tagline: 'Flashcards with a learn mode',
     description: 'Flashcards with a learn mode: multiple choice first, then typed recall.',
     cta: 'Browse notes',
+  },
+  {
+    id: 'namdinh-fc',
+    name: 'Nam Dinh FC',
+    href: 'https://namdinhfc.vercel.app',
+    tagline: 'V.League club website',
+    description: 'Club website for Thep Xanh Nam Dinh: squad, fixtures, standings and news.',
+    cta: 'Visit site',
   },
   {
     id: 'portfolio-builder',
