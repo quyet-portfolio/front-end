@@ -1,6 +1,5 @@
 'use client'
 
-import { CaretLeftFilled, CaretRightOutlined } from '@ant-design/icons'
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { cn } from '@/src/lib/utils'
 
@@ -17,8 +16,6 @@ const NAV_BUTTON =
 const ProjectCarousel = ({ children, label }: { children: ReactNode; label: string }) => {
   const trackRef = useRef<HTMLUListElement>(null)
   const trackId = useId()
-  // Mặc định coi như còn thẻ phía sau để HTML từ server đã có nút và vệt mờ, tránh
-  // layout nhảy khi hydrate; đo lại ngay khi mount.
   const [state, setState] = useState<TCarouselState>({ canPrev: false, canNext: true, thumbWidth: 40, thumbOffset: 0 })
 
   useEffect(() => {
@@ -51,16 +48,6 @@ const ProjectCarousel = ({ children, label }: { children: ReactNode; label: stri
     }
   }, [])
 
-  const scrollByCard = (direction: 1 | -1) => {
-    const track = trackRef.current
-    if (!track) return
-    const firstCard = track.firstElementChild as HTMLElement | null
-    const gap = parseFloat(getComputedStyle(track).columnGap) || 0
-    const step = firstCard ? firstCard.offsetWidth + gap : track.clientWidth
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    track.scrollBy({ left: direction * step, behavior: prefersReduced ? 'auto' : 'smooth' })
-  }
-
   const overflowing = state.canPrev || state.canNext
 
   return (
@@ -86,32 +73,12 @@ const ProjectCarousel = ({ children, label }: { children: ReactNode; label: stri
 
       {overflowing && (
         <div className="mt-6 flex items-center justify-center gap-4">
-          <button
-            type="button"
-            aria-label="Previous project"
-            aria-controls={trackId}
-            disabled={!state.canPrev}
-            onClick={() => scrollByCard(-1)}
-            className={NAV_BUTTON}
-          >
-            <CaretLeftFilled aria-hidden />
-          </button>
           <div aria-hidden className="relative h-1 w-24 overflow-hidden rounded-full bg-white/10">
             <div
               className="absolute inset-y-0 rounded-full bg-purple transition-[left] duration-150"
               style={{ width: `${state.thumbWidth}%`, left: `${state.thumbOffset}%` }}
             />
           </div>
-          <button
-            type="button"
-            aria-label="Next project"
-            aria-controls={trackId}
-            disabled={!state.canNext}
-            onClick={() => scrollByCard(1)}
-            className={NAV_BUTTON}
-          >
-            <CaretRightOutlined aria-hidden />
-          </button>
         </div>
       )}
     </div>
