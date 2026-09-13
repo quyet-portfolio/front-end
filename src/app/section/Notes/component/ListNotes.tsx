@@ -10,7 +10,7 @@ import { BookOutlined, UserOutlined } from '@ant-design/icons'
 import { useFlashCardsStore } from '../store'
 import { useDebounce } from '@/src/hooks/useDebounce'
 import { motion } from 'framer-motion'
-import { FlashCard } from '../types'
+import { FlashCard, FlashCardsResponse } from '../types'
 
 /**
  * Thẻ trong danh sách là một <Link> chứ không phải <div onClick>.
@@ -53,7 +53,7 @@ const FlashCardItem = ({ item }: { item: FlashCard }) => (
   </motion.div>
 )
 
-const ListNotes = () => {
+const ListNotes = ({ initialData }: { initialData?: FlashCardsResponse }) => {
   const router = useRouter()
   const { isAuthenticated } = useAuth()
 
@@ -73,6 +73,7 @@ const ListNotes = () => {
     createdBy,
     search: debouncedSearch,
     refreshToken,
+    initialData,
   })
 
   const [isOpenPopupAuthen, setOpenPopupAuthen] = useState(false)

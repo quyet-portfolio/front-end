@@ -14,6 +14,10 @@ export default function robots(): MetadataRoute.Robots {
           '/blogs/create',
           '/blogs/edit/',
           '/blogs/my-blogs',
+          '/notes/create',
+          '/notes/edit/',
+          // Phiên học theo từng người dùng. Google và Bing hiểu ký tự đại diện "*".
+          '/notes/*/learn',
           '/login',
           '/register',
           '/forgot-password',

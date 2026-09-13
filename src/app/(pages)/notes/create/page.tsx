@@ -1,6 +1,12 @@
+import type { Metadata } from 'next'
 import CreateNoteView from '@/src/app/section/Notes/view/CreateNoteView'
 import ProtectedRoute from '@/src/components/ProtectedRoute'
-import React from 'react'
+
+// Trang quản trị — xem chú thích ở /blogs/create.
+export const metadata: Metadata = {
+  title: 'Create a New Note',
+  robots: { index: false, follow: false },
+}
 
 const CreateNotesPage = () => {
   return (

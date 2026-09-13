@@ -67,7 +67,14 @@ const BlogsHeader = ({ defaultValue = '', onSearch }: BlogsHeaderProps) => {
         {isAuthenticated ? (
           <>
             <Tooltip title="Create new blog" trigger={'hover'}>
-              <PlusCircleOutlined style={{ fontSize: '40px' }} onClick={handleCreate} />
+              <Button
+                type="text"
+                shape="circle"
+                size="large"
+                aria-label="Create new blog"
+                icon={<PlusCircleOutlined style={{ fontSize: 28 }} />}
+                onClick={handleCreate}
+              />
             </Tooltip>
             <Dropdown
               menu={{

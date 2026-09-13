@@ -1,5 +1,6 @@
 import { GetFlashCardsParams, learnApi } from "@/src/lib/api/notes";
 import { create } from "zustand";
+import { NOTES_PAGE_SIZE } from "./constants";
 import {
   AnswerResult,
   LearnQuestion,
@@ -87,7 +88,7 @@ interface FlashCardsQueryStore extends GetFlashCardsParams {
 
 const INITIAL_QUERY = {
   page: 1,
-  limit: 10,
+  limit: NOTES_PAGE_SIZE,
   search: undefined as string | undefined,
   createdBy: undefined as string | undefined,
 };

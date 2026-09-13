@@ -1,13 +1,15 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import axios from 'axios'
-import { FlashCard, FlashCardPaginationResponse } from '../types'
+import { FlashCard, FlashCardPaginationResponse, FlashCardsResponse } from '../types'
 import { flashcardApi, GetFlashCardsParams } from '@/src/lib/api/notes'
 
 interface UseFlashCardsParams extends GetFlashCardsParams {
   /** Đổi giá trị này để ép nạp lại với cùng bộ tham số. */
   refreshToken?: number
+  /** Trang đầu (không lọc) đã fetch sẵn ở server. */
+  initialData?: FlashCardsResponse
 }
 
 export const useFlashCards = ({
@@ -16,16 +18,32 @@ export const useFlashCards = ({
   search,
   createdBy,
   refreshToken = 0,
+  initialData,
 }: UseFlashCardsParams) => {
-  const [flashcards, setFlashCards] = useState<FlashCard[]>([])
-  const [pagination, setPagination] = useState<FlashCardPaginationResponse | null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
+  // Dữ liệu server chỉ khớp khi đang ở trạng thái mặc định. Quay lại /notes bằng
+  // điều hướng phía client thì store vẫn còn từ khoá/trang cũ — lúc đó phải fetch.
+  const canUseInitial = Boolean(initialData) && page === 1 && !search && !createdBy && refreshToken === 0
+
+  const [flashcards, setFlashCards] = useState<FlashCard[]>(() =>
+    canUseInitial && initialData ? initialData.flashcards : [],
+  )
+  const [pagination, setPagination] = useState<FlashCardPaginationResponse | null>(() =>
+    canUseInitial && initialData ? initialData.pagination : null,
+  )
+  const [loading, setLoading] = useState<boolean>(!canUseInitial)
+  const skipFirstFetch = useRef(canUseInitial)
   const [error, setError] = useState<string | null>(null)
   const [reloadIndex, setReloadIndex] = useState(0)
 
   const refetch = useCallback(() => setReloadIndex((i) => i + 1), [])
 
   useEffect(() => {
+    // Lần chạy đầu với dữ liệu server sẵn có thì khỏi gọi lại cùng một trang.
+    if (skipFirstFetch.current) {
+      skipFirstFetch.current = false
+      return
+    }
+
     // Gõ nhanh trong ô search sinh nhiều request chồng nhau. Không huỷ request cũ
     // thì response về sau — có thể là của từ khoá đã bị xoá — ghi đè lên kết quả
     // mới, và danh sách hiển thị sai so với ô tìm kiếm.

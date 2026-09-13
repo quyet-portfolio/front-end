@@ -1,5 +1,10 @@
 import { Blog } from './types'
+import { FlashCard } from '@/src/app/section/Notes/types'
 import { BLOG_LANG, SITE_NAME, SITE_URL, absoluteUrl } from './site'
+
+// Bộ thẻ được phép có tới 1000 term. Nhét hết vào JSON-LD là cả trăm KB chữ trong
+// <head> trước khi trình duyệt vẽ được gì; 100 thẻ đầu đã đủ để mô tả bộ thẻ.
+const QUIZ_MAX_FLASHCARDS = 100
 
 // schema.org khuyến nghị headline không quá 110 ký tự; Google bỏ qua structured
 // data có headline dài hơn.
@@ -64,4 +69,55 @@ export function buildBreadcrumbJsonLd(blog: Blog, url: string) {
  */
 export function serializeJsonLd(data: unknown): string {
   return JSON.stringify(data).replace(/</g, '\\u003c')
+}
+
+/**
+ * Bộ thẻ dưới dạng schema.org `Quiz` gồm các `Question` loại "Flashcard".
+ *
+ * Đây đúng là kiểu Google dùng cho structured data học tập (Education Q&A): mỗi
+ * thẻ là một câu hỏi với mặt trước là `text` và mặt sau là `acceptedAnswer`.
+ * Nội dung chỉ lấy từ những gì trang thật sự hiển thị, đúng yêu cầu của Google
+ * rằng structured data không được mô tả thứ người dùng không thấy.
+ */
+export function buildFlashcardQuizJsonLd(flashcard: FlashCard, url: string, description?: string) {
+  const terms = flashcard.terms ?? []
+  const cards = terms.slice(0, QUIZ_MAX_FLASHCARDS)
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Quiz',
+    name: flashcard.title,
+    description,
+    url,
+    inLanguage: 'en',
+    dateCreated: flashcard.createdAt,
+    dateModified: flashcard.updatedAt,
+    author: flashcard.createdBy?.username ? { '@type': 'Person', name: flashcard.createdBy.username } : undefined,
+    publisher: PUBLISHER,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    numberOfQuestions: terms.length,
+    hasPart: cards.map((card) => ({
+      '@type': 'Question',
+      eduQuestionType: 'Flashcard',
+      text: card.term,
+      acceptedAnswer: { '@type': 'Answer', text: card.definition },
+    })),
+  }
+}
+
+export function buildNoteBreadcrumbJsonLd(flashcard: FlashCard, url: string) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { name: 'Home', item: absoluteUrl('/') },
+      { name: 'Notes', item: absoluteUrl('/notes') },
+      { name: flashcard.title, item: url },
+    ].map((entry, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: entry.name,
+      item: entry.item,
+    })),
+  }
 }
