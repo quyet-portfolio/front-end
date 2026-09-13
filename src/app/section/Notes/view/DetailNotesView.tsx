@@ -199,10 +199,10 @@ const NotesDetailView = ({ initialFlashcard }: NotesDetailViewProps) => {
   const isOwner = user?._id === flashcard.createdBy._id
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <div className="container mx-auto py-6 px-0 lg:px-6 max-w-4xl">
       {/* Header */}
       <div className="mb-4 flex justify-between items-center">
-        <div className="flex gap-4">
+        <div className="flex gap-4 items-center">
           <Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/notes')} />
           <div className="flex flex-col justify-between">
             <h1 className="text-2xl font-bold">{flashcard.title}</h1>
@@ -239,10 +239,10 @@ const NotesDetailView = ({ initialFlashcard }: NotesDetailViewProps) => {
             <Tag color="blue">{flashcard.terms.length}</Tag>
           </Descriptions.Item>
           <Descriptions.Item label="Created At">
-            {new Date(flashcard.createdAt).toLocaleString()}
+            {new Date(flashcard.createdAt).toLocaleDateString()}
           </Descriptions.Item>
           <Descriptions.Item label="Updated At">
-            {new Date(flashcard.updatedAt).toLocaleString()}
+            {new Date(flashcard.updatedAt).toLocaleDateString()}
           </Descriptions.Item>
         </Descriptions>
         {/* Progress bar inside metadata card */}

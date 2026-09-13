@@ -21,14 +21,10 @@ const NotesHeading = () => {
   const [importModalOpen, setImportModalOpen] = useState(false)
 
   return (
-    <div className="flex justify-between items-center w-full">
+    <div className="flex justify-between gap-2 items-center w-full">
       <SidebarMenu />
-      {/* Danh sách tự lọc theo debounce khi gõ, nên icon kính lúp chỉ là chỉ dấu. */}
       <div className="w-[65%] md:w-[36%]">
         <Input
-          // Ô này từng là uncontrolled trong khi từ khoá lưu ở store cấp module:
-          // rời trang rồi quay lại là ô trống nhưng danh sách vẫn đang bị lọc, và
-          // người dùng không có cách nào biết để mà xoá bộ lọc.
           value={search ?? ''}
           placeholder="Find notes, term, desc ..."
           size="large"
@@ -38,42 +34,42 @@ const NotesHeading = () => {
           suffix={<SearchOutlined className="text-gray-400" />}
         />
       </div>
-      <div className="flex items-center gap-2 md:gap-6">
-        <Tooltip title="Create new note">
-          <Button
-            type="text"
-            shape="circle"
-            size="large"
-            aria-label="Create new note"
-            icon={<PlusCircleOutlined style={{ fontSize: 28 }} />}
-            onClick={() => {
-              if (!isAuthenticated) {
-                setOpenPopupAuthen(true)
-                return
-              }
+      {isAuthenticated ? (
+        <div className="flex items-center gap-0 md:gap-6">
+          <Tooltip title="Create new note">
+            <Button
+              type="text"
+              shape="circle"
+              size="large"
+              aria-label="Create new note"
+              icon={<PlusCircleOutlined style={{ fontSize: 28 }} />}
+              onClick={() => {
+                if (!isAuthenticated) {
+                  setOpenPopupAuthen(true)
+                  return
+                }
 
-              router.push('/notes/create')
-            }}
-          />
-        </Tooltip>
-        <Tooltip title="Import from file">
-          <Button
-            type="text"
-            shape="circle"
-            size="large"
-            aria-label="Import notes from file"
-            icon={<UploadOutlined style={{ fontSize: 24 }} />}
-            onClick={() => {
-              if (!isAuthenticated) {
-                setOpenPopupAuthen(true)
-                return
-              }
+                router.push('/notes/create')
+              }}
+            />
+          </Tooltip>
+          <Tooltip title="Import from file">
+            <Button
+              type="text"
+              shape="circle"
+              size="large"
+              aria-label="Import notes from file"
+              icon={<UploadOutlined style={{ fontSize: 24 }} />}
+              onClick={() => {
+                if (!isAuthenticated) {
+                  setOpenPopupAuthen(true)
+                  return
+                }
 
-              setImportModalOpen(true)
-            }}
-          />
-        </Tooltip>
-        {isAuthenticated ? (
+                setImportModalOpen(true)
+              }}
+            />
+          </Tooltip>
           <Dropdown
             menu={{
               items: [
@@ -110,14 +106,14 @@ const NotesHeading = () => {
           >
             <Avatar className='cursor-pointer' src={user?.avatar || undefined} style={{ backgroundColor: '#6366F1' }} size={'large'} icon={<UserOutlined />} />
           </Dropdown>
-        ) : (
-          <Tooltip title="Login">
-            <Button variant="outlined" color="default" onClick={() => router.push('/login')}>
-              <LoginOutlined />
-            </Button>
-          </Tooltip>
-        )}
-      </div>
+        </div>
+      ) : (
+        <Tooltip title="Login">
+          <Button variant="outlined" color="default" onClick={() => router.push('/login')}>
+            <LoginOutlined />
+          </Button>
+        </Tooltip>
+      )}
       <Modal
         title="Access denied !!"
         open={isOpenPopupAuthen}

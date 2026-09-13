@@ -5,7 +5,7 @@ import Snowfall from '@/src/components/snow-fall'
 const LayoutContent = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="relative bg-black-100 flex flex-col min-h-screen justify-center items-center overflow-hidden">
-      <Snowfall />
+      {/* <Snowfall /> */}
       <div className="absolute inset-0 pointer-events-none">
         <Spotlight className="top-40 -left-10 md:-left-32 md:-top-20 h-screen" fill="white" />
         <Spotlight className="h-[80vh] w-[50vw] top-10 left-full" fill="purple" />

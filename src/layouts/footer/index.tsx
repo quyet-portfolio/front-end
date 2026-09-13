@@ -21,7 +21,7 @@ const Footer = () => {
           }}
         />
       </div>
-      <div className="flex mt-16 md:flex-row flex-col justify-between items-center gap-6 md:gap-0">
+      <div className="flex mt-8 md:flex-row flex-col justify-between items-center gap-6 md:gap-0">
         <p className="md:text-base text-sm md:font-normal font-light">
           Copyright © {new Date().getFullYear()} Bui Duy Quyet
         </p>

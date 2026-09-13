@@ -10,9 +10,6 @@ type TCarouselState = {
   thumbOffset: number
 }
 
-const NAV_BUTTON =
-  'flex size-11 items-center justify-center rounded-full border border-black-300 bg-black-200 text-lg text-white backdrop-blur-lg transition hover:border-white/30 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-black-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple focus-visible:ring-offset-2 focus-visible:ring-offset-black-100'
-
 const ProjectCarousel = ({ children, label }: { children: ReactNode; label: string }) => {
   const trackRef = useRef<HTMLUListElement>(null)
   const trackId = useId()
