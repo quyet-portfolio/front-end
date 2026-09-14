@@ -4,8 +4,8 @@ import { useAuth } from '@/src/contexts/AuthContext'
 import { Button, Card, Descriptions, Divider, Modal, Progress, Spin, Tag } from 'antd'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useCallback, useEffect, useState } from 'react'
-import { FlashCard } from '../types'
-import { flashcardApi, learnApi } from '@/src/lib/api/notes'
+import { Flashcard } from '../types'
+import { flashcardApi, learnApi } from '@/src/lib/api/flashcards'
 import {
   ArrowLeftOutlined,
   DeleteOutlined,
@@ -23,16 +23,17 @@ import { useMessageApi } from '@/src/contexts/MessageContext'
 import ImportTermsModal from '../component/ImportTermsModal'
 import StudyActionsBar from '../component/StudyActionsBar'
 import MasteryBar from '../component/MasteryBar'
+import { flashcardsRoutes } from '@/src/app/section/Flashcards/routes'
 
 /** Số term render mỗi lô. Bộ thẻ được phép có tới 1000 term. */
 const TERMS_PAGE_SIZE = 50
 
-interface NotesDetailViewProps {
+interface FlashcardDetailViewProps {
   /** Dữ liệu đã fetch sẵn ở server; thiếu thì client tự gọi API. */
-  initialFlashcard?: FlashCard
+  initialFlashcard?: Flashcard
 }
 
-const NotesDetailView = ({ initialFlashcard }: NotesDetailViewProps) => {
+const FlashcardDetailView = ({ initialFlashcard }: FlashcardDetailViewProps) => {
   const param = useParams()
   const router = useRouter()
   const { user, isAuthenticated } = useAuth()
@@ -42,7 +43,7 @@ const NotesDetailView = ({ initialFlashcard }: NotesDetailViewProps) => {
   // tiết render lại theo mọi thay đổi state của phiên học.
   const reset = useLearnStore((s) => s.reset)
 
-  const [flashcard, setFlashcard] = useState<FlashCard | null>(initialFlashcard ?? null)
+  const [flashcard, setFlashcard] = useState<Flashcard | null>(initialFlashcard ?? null)
   const [isLoading, setIsLoading] = useState(!initialFlashcard)
   const [visibleTerms, setVisibleTerms] = useState(TERMS_PAGE_SIZE)
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -52,9 +53,9 @@ const NotesDetailView = ({ initialFlashcard }: NotesDetailViewProps) => {
   const [isDeleting, setIsDeleting] = useState(false)
   const [masteryVersion, setMasteryVersion] = useState(0)
 
-  const fetchFlashCard = useCallback(async () => {
+  const fetchFlashcard = useCallback(async () => {
     try {
-      const data = await flashcardApi.getFlashCardById(param.id as string)
+      const data = await flashcardApi.getFlashcardById(param.id as string)
       setFlashcard(data.flashcard)
     } catch (error) {
       console.error('Failed to fetch flashcard:', error)
@@ -67,8 +68,8 @@ const NotesDetailView = ({ initialFlashcard }: NotesDetailViewProps) => {
     // Server component đã đưa dữ liệu vào lần render đầu — gọi lại ngay là thừa
     // một round-trip và một lần nháy nội dung.
     if (initialFlashcard) return
-    fetchFlashCard()
-  }, [initialFlashcard, fetchFlashCard])
+    fetchFlashcard()
+  }, [initialFlashcard, fetchFlashcard])
 
   // Nút ‹ › bị disable ở hai đầu danh sách, nên phím mũi tên cũng dừng ở đó thay
   // vì nhảy vòng — cùng một thao tác không được cho hai kết quả khác nhau.
@@ -158,7 +159,7 @@ const NotesDetailView = ({ initialFlashcard }: NotesDetailViewProps) => {
    */
   const handleDelete = () => {
     Modal.confirm({
-      title: 'Delete this note?',
+      title: 'Delete this set?',
       icon: <ExclamationCircleOutlined />,
       content: `"${flashcard?.title}" and all ${flashcard?.terms.length ?? 0} of its terms will be permanently deleted. This cannot be undone.`,
       okText: 'Delete',
@@ -168,11 +169,11 @@ const NotesDetailView = ({ initialFlashcard }: NotesDetailViewProps) => {
       onOk: async () => {
         setIsDeleting(true)
         try {
-          await flashcardApi.deleteFlashCard(param.id as string)
-          messageApi?.success('Note deleted')
-          router.push('/notes')
+          await flashcardApi.deleteFlashcard(param.id as string)
+          messageApi?.success('Set deleted')
+          router.push(flashcardsRoutes.list)
         } catch (error: any) {
-          messageApi?.error(error.response?.data?.message || 'Failed to delete note')
+          messageApi?.error(error.response?.data?.message || 'Failed to delete set')
           setIsDeleting(false)
         }
       },
@@ -188,7 +189,7 @@ const NotesDetailView = ({ initialFlashcard }: NotesDetailViewProps) => {
   }
 
   if (!flashcard) {
-    return <div className="text-center p-8">FlashCard not found</div>
+    return <div className="text-center p-8">Flashcard set not found</div>
   }
 
   const currentCard = flashcard?.terms?.[currentIndex]
@@ -203,7 +204,7 @@ const NotesDetailView = ({ initialFlashcard }: NotesDetailViewProps) => {
       {/* Header */}
       <div className="mb-4 flex justify-between items-center">
         <div className="flex gap-4 items-center">
-          <Button icon={<ArrowLeftOutlined />} onClick={() => router.push('/notes')} />
+          <Button icon={<ArrowLeftOutlined />} onClick={() => router.push(flashcardsRoutes.list)} />
           <div className="flex flex-col justify-between">
             <h1 className="text-2xl font-bold">{flashcard.title}</h1>
             {flashcard.description && (
@@ -220,7 +221,7 @@ const NotesDetailView = ({ initialFlashcard }: NotesDetailViewProps) => {
             <Button
               type="primary"
               icon={<EditOutlined />}
-              onClick={() => router.push(`/notes/edit/${param.id}`)}
+              onClick={() => router.push(flashcardsRoutes.edit(param.id as string))}
             >
               Edit
             </Button>
@@ -372,7 +373,7 @@ const NotesDetailView = ({ initialFlashcard }: NotesDetailViewProps) => {
         mode="append"
         open={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
-        onSuccess={fetchFlashCard}
+        onSuccess={fetchFlashcard}
         flashcardId={param.id as string}
         currentTermCount={flashcard.terms.length}
       />
@@ -380,4 +381,4 @@ const NotesDetailView = ({ initialFlashcard }: NotesDetailViewProps) => {
   )
 }
 
-export default NotesDetailView
+export default FlashcardDetailView

@@ -1,10 +1,10 @@
 import { cache } from 'react'
-import { FlashCard, FlashCardsResponse } from '@/src/app/section/Notes/types'
+import { Flashcard, FlashcardsResponse } from '@/src/app/section/Flashcards/types'
 
 const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api').replace(/\/+$/, '')
 
 // Danh sách chỉ đổi khi có bộ thẻ mới — vài phút là đủ tươi, lại tránh được cold
-// start của back-end ở mỗi lượt mở /notes.
+// start của back-end ở mỗi lượt mở /flashcards.
 const LIST_REVALIDATE_SECONDS = 300
 
 // Sitemap chỉ đổi khi có bộ thẻ mới được tạo.
@@ -16,8 +16,8 @@ const SITEMAP_PAGE_SIZE = 100
 // Chặn vòng lặp vô hạn nếu API trả `hasNextPage` sai. 50 trang = 5.000 bộ thẻ.
 const SITEMAP_MAX_PAGES = 50
 
-export type FlashCardFetchResult =
-  | { status: 'ok'; flashcard: FlashCard }
+export type FlashcardFetchResult =
+  | { status: 'ok'; flashcard: Flashcard }
   /** Server nói rõ là không có bộ thẻ này. */
   | { status: 'not-found' }
   /** API lỗi hoặc không gọi được — khác hẳn "không tồn tại". */
@@ -39,7 +39,7 @@ export type FlashCardFetchResult =
  * Phân biệt "không tồn tại" với "API chết": cái đầu đáng trả 404, cái sau thì để
  * client tự thử lại chứ không được biến một bộ thẻ hợp lệ thành trang 404.
  */
-export const getFlashCardForPage = cache(async (id: string): Promise<FlashCardFetchResult> => {
+export const getFlashcardForPage = cache(async (id: string): Promise<FlashcardFetchResult> => {
   try {
     const res = await fetch(`${API_URL}/flashcards/${encodeURIComponent(id)}`, {
       cache: 'no-store',
@@ -48,7 +48,7 @@ export const getFlashCardForPage = cache(async (id: string): Promise<FlashCardFe
     if (res.status === 404 || res.status === 400) return { status: 'not-found' }
     if (!res.ok) return { status: 'unavailable' }
 
-    const data = (await res.json()) as { flashcard?: FlashCard }
+    const data = (await res.json()) as { flashcard?: Flashcard }
     return data.flashcard ? { status: 'ok', flashcard: data.flashcard } : { status: 'not-found' }
   } catch {
     return { status: 'unavailable' }
@@ -56,19 +56,19 @@ export const getFlashCardForPage = cache(async (id: string): Promise<FlashCardFe
 })
 
 /**
- * Trang đầu của danh sách cho lần render đầu ở /notes.
+ * Trang đầu của danh sách cho lần render đầu ở /flashcards.
  *
  * Không có nó thì HTML server chỉ chứa spinner — nghĩa là không có link <a> nào
  * trỏ tới trang chi tiết cho tới khi JS chạy, và crawler không có đường nào đi
  * vào từng bộ thẻ ngoài sitemap.
  */
-export async function getFlashCardsForList(limit: number): Promise<FlashCardsResponse | null> {
+export async function getFlashcardsForList(limit: number): Promise<FlashcardsResponse | null> {
   try {
     const res = await fetch(`${API_URL}/flashcards?page=1&limit=${limit}`, {
       next: { revalidate: LIST_REVALIDATE_SECONDS },
     })
     if (!res.ok) return null
-    return (await res.json()) as FlashCardsResponse
+    return (await res.json()) as FlashcardsResponse
   } catch {
     // Client sẽ tự fetch lại — mất SSR ở lần này nhưng trang vẫn dùng được.
     return null
@@ -76,8 +76,8 @@ export async function getFlashCardsForList(limit: number): Promise<FlashCardsRes
 }
 
 /** Toàn bộ bộ thẻ, dùng để dựng sitemap.xml. */
-export async function getFlashCardsForSitemap(): Promise<FlashCard[]> {
-  const flashcards: FlashCard[] = []
+export async function getFlashcardsForSitemap(): Promise<Flashcard[]> {
+  const flashcards: Flashcard[] = []
 
   try {
     for (let page = 1; page <= SITEMAP_MAX_PAGES; page += 1) {
@@ -86,7 +86,7 @@ export async function getFlashCardsForSitemap(): Promise<FlashCard[]> {
       })
       if (!res.ok) break
 
-      const data = (await res.json()) as FlashCardsResponse
+      const data = (await res.json()) as FlashcardsResponse
       flashcards.push(...(data.flashcards ?? []))
       if (!data.pagination?.hasNextPage) break
     }

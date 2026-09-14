@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next'
 import { SITE_URL } from '@/src/lib/site'
+import { FLASHCARDS_PATH, flashcardsRoutes } from '@/src/app/section/Flashcards/routes'
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -14,10 +15,10 @@ export default function robots(): MetadataRoute.Robots {
           '/blogs/create',
           '/blogs/edit/',
           '/blogs/my-blogs',
-          '/notes/create',
-          '/notes/edit/',
+          flashcardsRoutes.create,
+          `${FLASHCARDS_PATH}/edit/`,
           // Phiên học theo từng người dùng. Google và Bing hiểu ký tự đại diện "*".
-          '/notes/*/learn',
+          flashcardsRoutes.learn('*'),
           '/login',
           '/register',
           '/forgot-password',

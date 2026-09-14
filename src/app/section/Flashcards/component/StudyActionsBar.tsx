@@ -3,6 +3,7 @@
 import { FormOutlined, RedoOutlined } from '@ant-design/icons'
 import { Button } from 'antd'
 import { useRouter } from 'next/navigation'
+import { flashcardsRoutes } from '@/src/app/section/Flashcards/routes'
 
 interface StudyActionsBarProps {
   flashcardId: string
@@ -14,7 +15,7 @@ const StudyActionsBar = ({ flashcardId, onReset, isResetting }: StudyActionsBarP
   const router = useRouter()
 
   const handleLearn = () => {
-    router.push(`/notes/${flashcardId}/learn`)
+    router.push(flashcardsRoutes.learn(flashcardId))
   }
 
   return (

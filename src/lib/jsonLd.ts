@@ -1,6 +1,7 @@
 import { Blog } from './types'
-import { FlashCard } from '@/src/app/section/Notes/types'
+import { Flashcard } from '@/src/app/section/Flashcards/types'
 import { BLOG_LANG, SITE_NAME, SITE_URL, absoluteUrl } from './site'
+import { flashcardsRoutes } from '@/src/app/section/Flashcards/routes'
 
 // Bộ thẻ được phép có tới 1000 term. Nhét hết vào JSON-LD là cả trăm KB chữ trong
 // <head> trước khi trình duyệt vẽ được gì; 100 thẻ đầu đã đủ để mô tả bộ thẻ.
@@ -79,7 +80,7 @@ export function serializeJsonLd(data: unknown): string {
  * Nội dung chỉ lấy từ những gì trang thật sự hiển thị, đúng yêu cầu của Google
  * rằng structured data không được mô tả thứ người dùng không thấy.
  */
-export function buildFlashcardQuizJsonLd(flashcard: FlashCard, url: string, description?: string) {
+export function buildFlashcardQuizJsonLd(flashcard: Flashcard, url: string, description?: string) {
   const terms = flashcard.terms ?? []
   const cards = terms.slice(0, QUIZ_MAX_FLASHCARDS)
 
@@ -105,13 +106,13 @@ export function buildFlashcardQuizJsonLd(flashcard: FlashCard, url: string, desc
   }
 }
 
-export function buildNoteBreadcrumbJsonLd(flashcard: FlashCard, url: string) {
+export function buildFlashcardBreadcrumbJsonLd(flashcard: Flashcard, url: string) {
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     itemListElement: [
       { name: 'Home', item: absoluteUrl('/') },
-      { name: 'Notes', item: absoluteUrl('/notes') },
+      { name: 'Flashcards', item: absoluteUrl(flashcardsRoutes.list) },
       { name: flashcard.title, item: url },
     ].map((entry, index) => ({
       '@type': 'ListItem',

@@ -15,9 +15,9 @@ export const BLOG_LANG = 'vi'
 
 export const absoluteUrl = (path: string): string => `${SITE_URL}${path.startsWith('/') ? path : `/${path}`}`
 
-// Phần Notes (flashcard) viết bằng tiếng Anh — trùng với <html lang="en"> ở root
+// Phần Flashcards viết bằng tiếng Anh — trùng với <html lang="en"> ở root
 // nên không cần khai báo lại `lang` như trang blog.
-export const NOTES_LOCALE = 'en_US'
+export const FLASHCARDS_LOCALE = 'en_US'
 
-export const NOTES_DESCRIPTION =
+export const FLASHCARDS_DESCRIPTION =
   'Flashcard sets for learning vocabulary and technical terms — flip through cards, quiz yourself, and track what you have mastered.'

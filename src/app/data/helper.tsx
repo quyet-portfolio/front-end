@@ -1,4 +1,5 @@
 import { FormOutlined, HomeOutlined, ProductOutlined } from '@ant-design/icons'
+import { flashcardsRoutes } from '@/src/app/section/Flashcards/routes'
 
 export const navItems = [
   { name: 'Home', link: '/' },
@@ -15,7 +16,7 @@ export const menuItems = [
     icon: <HomeOutlined />,
   },
   { name: 'Blogs', link: '/blogs', icon: <ProductOutlined /> },
-  { name: 'Notes', link: '/notes', icon: <FormOutlined /> },
+  { name: 'Flashcards', link: flashcardsRoutes.list, icon: <FormOutlined /> },
 ]
 
 export const gridItems = [
@@ -192,12 +193,12 @@ export const personalProjects = [
     cta: 'Read the blog',
   },
   {
-    id: 'notes',
-    name: 'Notes',
-    href: '/notes',
+    id: 'flashcards',
+    name: 'Flashcards',
+    href: flashcardsRoutes.list,
     tagline: 'Flashcards with a learn mode',
     description: 'Flashcards with a learn mode: multiple choice first, then typed recall.',
-    cta: 'Browse notes',
+    cta: 'Browse flashcards',
   },
   {
     id: 'namdinh-fc',

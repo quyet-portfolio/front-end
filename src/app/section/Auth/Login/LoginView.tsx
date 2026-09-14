@@ -116,7 +116,7 @@ const LoginView = () => {
                 Log in
               </Button>
               <Button className="w-full" variant="text" color="default" onClick={() => router.push('/register')}>
-                New to Notes? Create an account
+                New here? Create an account
               </Button>
             </div>
           </Form>

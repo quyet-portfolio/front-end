@@ -2,15 +2,16 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useFlashCards } from '../hook/useFlashCards'
+import { useFlashcards } from '../hook/useFlashcards'
 import { useAuth } from '@/src/contexts/AuthContext'
 import { useState } from 'react'
 import { Avatar, Button, Empty, Modal, Pagination, Spin, Tag } from 'antd'
 import { BookOutlined, UserOutlined } from '@ant-design/icons'
-import { useFlashCardsStore } from '../store'
+import { useFlashcardsStore } from '../store'
 import { useDebounce } from '@/src/hooks/useDebounce'
 import { motion } from 'framer-motion'
-import { FlashCard, FlashCardsResponse } from '../types'
+import { Flashcard, FlashcardsResponse } from '../types'
+import { flashcardsRoutes } from '@/src/app/section/Flashcards/routes'
 
 /**
  * Thẻ trong danh sách là một <Link> chứ không phải <div onClick>.
@@ -18,10 +19,10 @@ import { FlashCard, FlashCardsResponse } from '../types'
  * Cái div cũ không tab tới được, không mở tab mới bằng ctrl/cmd-click được, và
  * với crawler thì trang chi tiết coi như không tồn tại vì chẳng có <a> nào trỏ tới.
  */
-const FlashCardItem = ({ item }: { item: FlashCard }) => (
+const FlashcardItem = ({ item }: { item: Flashcard }) => (
   <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
     <Link
-      href={`/notes/${item._id}`}
+      href={flashcardsRoutes.detail(item._id)}
       className="group relative p-5 rounded-xl min-h-[160px] flex flex-col justify-between overflow-hidden
         bg-gradient-to-br from-[#0d1433] to-[#0a0f24]
         border border-white/5 hover:border-indigo-500/60
@@ -53,21 +54,21 @@ const FlashCardItem = ({ item }: { item: FlashCard }) => (
   </motion.div>
 )
 
-const ListNotes = ({ initialData }: { initialData?: FlashCardsResponse }) => {
+const FlashcardList = ({ initialData }: { initialData?: FlashcardsResponse }) => {
   const router = useRouter()
   const { isAuthenticated } = useAuth()
 
-  const page = useFlashCardsStore((s) => s.page)
-  const limit = useFlashCardsStore((s) => s.limit)
-  const search = useFlashCardsStore((s) => s.search)
-  const createdBy = useFlashCardsStore((s) => s.createdBy)
-  const refreshToken = useFlashCardsStore((s) => s.refreshToken)
-  const setPage = useFlashCardsStore((s) => s.setPage)
-  const setSearch = useFlashCardsStore((s) => s.setSearch)
+  const page = useFlashcardsStore((s) => s.page)
+  const limit = useFlashcardsStore((s) => s.limit)
+  const search = useFlashcardsStore((s) => s.search)
+  const createdBy = useFlashcardsStore((s) => s.createdBy)
+  const refreshToken = useFlashcardsStore((s) => s.refreshToken)
+  const setPage = useFlashcardsStore((s) => s.setPage)
+  const setSearch = useFlashcardsStore((s) => s.setSearch)
 
   const debouncedSearch = useDebounce(search, 500)
 
-  const { flashcards, pagination, loading } = useFlashCards({
+  const { flashcards, pagination, loading } = useFlashcards({
     page,
     limit,
     createdBy,
@@ -83,7 +84,7 @@ const ListNotes = ({ initialData }: { initialData?: FlashCardsResponse }) => {
       setOpenPopupAuthen(true)
       return
     }
-    router.push('/notes/create')
+    router.push(flashcardsRoutes.create)
   }
 
   const isSearching = Boolean(debouncedSearch)
@@ -99,16 +100,16 @@ const ListNotes = ({ initialData }: { initialData?: FlashCardsResponse }) => {
   return (
     <div className="mt-4 w-full h-full">
       {flashcards.length === 0 ? (
-        // Không tìm ra kết quả khác hẳn với chưa có note nào — mời người đang tìm
-        // kiếm "tạo note mới" là trả lời lệch câu hỏi họ vừa đặt.
+        // Không tìm ra kết quả khác hẳn với chưa có bộ thẻ nào — mời người đang tìm
+        // kiếm "tạo bộ thẻ mới" là trả lời lệch câu hỏi họ vừa đặt.
         isSearching ? (
-          <Empty description={`No notes match "${debouncedSearch}"`}>
+          <Empty description={`No sets match "${debouncedSearch}"`}>
             <Button onClick={() => setSearch('')}>Clear search</Button>
           </Empty>
         ) : (
-          <Empty description="No note here">
+          <Empty description="No flashcard sets yet">
             <Button type="primary" onClick={handleCreateClick}>
-              Create a note now
+              Create your first set
             </Button>
           </Empty>
         )
@@ -116,12 +117,12 @@ const ListNotes = ({ initialData }: { initialData?: FlashCardsResponse }) => {
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {flashcards.map((item) => (
-              <FlashCardItem key={item._id} item={item} />
+              <FlashcardItem key={item._id} item={item} />
             ))}
           </div>
 
           {/*
-            Không có phân trang thì note thứ 11 trở đi không có cách nào mở được:
+            Không có phân trang thì bộ thẻ thứ 11 trở đi không có cách nào mở được:
             server vẫn trả về `pagination` đầy đủ nhưng UI chưa từng dùng tới.
           */}
           {pagination && pagination.totalPages > 1 && (
@@ -155,10 +156,10 @@ const ListNotes = ({ initialData }: { initialData?: FlashCardsResponse }) => {
           </div>
         }
       >
-        Log in to create a note.
+        Log in to create a flashcard set.
       </Modal>
     </div>
   )
 }
 
-export default ListNotes
+export default FlashcardList

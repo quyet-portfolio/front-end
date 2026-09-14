@@ -3,12 +3,13 @@
 import { Button, Card, Form, Input, Spin } from 'antd'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
-import { flashcardApi } from '@/src/lib/api/notes'
+import { flashcardApi } from '@/src/lib/api/flashcards'
 import { MinusCircleOutlined, PlusOutlined, UploadOutlined, ArrowLeftOutlined } from '@ant-design/icons'
-import { FlashCard } from '../types'
+import { Flashcard } from '../types'
 import { useMessageApi } from '@/src/contexts/MessageContext'
 import ImportTermsModal from '../component/ImportTermsModal'
 import { useUnsavedChangesGuard } from '../hook/useUnsavedChangesGuard'
+import { flashcardsRoutes } from '@/src/app/section/Flashcards/routes'
 
 const { TextArea } = Input
 
@@ -21,7 +22,7 @@ const { TextArea } = Input
  */
 const TERMS_PAGE_SIZE = 50
 
-const EditNotesView = () => {
+const EditFlashcardView = () => {
   const params = useParams()
   const router = useRouter()
   const [form] = Form.useForm()
@@ -29,7 +30,7 @@ const EditNotesView = () => {
 
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
-  const [flashcard, setFlashcard] = useState<FlashCard | null>(null)
+  const [flashcard, setFlashcard] = useState<Flashcard | null>(null)
   const [importModalOpen, setImportModalOpen] = useState(false)
   const [isDirty, setIsDirty] = useState(false)
   const [visibleTerms, setVisibleTerms] = useState(TERMS_PAGE_SIZE)
@@ -37,9 +38,9 @@ const EditNotesView = () => {
   const { confirmLeave } = useUnsavedChangesGuard({ isDirty })
 
   useEffect(() => {
-    const fetchFlashCard = async () => {
+    const fetchFlashcard = async () => {
       try {
-        const data = await flashcardApi.getFlashCardById(params.id as string)
+        const data = await flashcardApi.getFlashcardById(params.id as string)
         setFlashcard(data.flashcard)
         form.setFieldsValue({
           title: data.flashcard.title,
@@ -47,25 +48,25 @@ const EditNotesView = () => {
           terms: data.flashcard.terms,
         })
       } catch (error) {
-        messageApi?.error('Failed to fetch flashcard')
+        messageApi?.error('Failed to load set')
       } finally {
         setFetching(false)
       }
     }
 
-    fetchFlashCard()
+    fetchFlashcard()
     // messageApi từ useMessage() của antd ổn định qua các lần render nên vào deps được.
   }, [params.id, form, messageApi])
 
   const onFinish = async (values: any) => {
     try {
       setLoading(true)
-      await flashcardApi.updateFlashCard(params.id as string, values)
+      await flashcardApi.updateFlashcard(params.id as string, values)
       setIsDirty(false)
-      messageApi?.success('FlashCard updated successfully')
-      router.push(`/notes/${params.id}`)
+      messageApi?.success('Set updated')
+      router.push(flashcardsRoutes.detail(params.id as string))
     } catch (error: any) {
-      messageApi?.error(error.response?.data?.message || 'Failed to update flashcard')
+      messageApi?.error(error.response?.data?.message || 'Failed to update set')
     } finally {
       setLoading(false)
     }
@@ -80,13 +81,13 @@ const EditNotesView = () => {
   }
 
   if (!flashcard) {
-    return <div className="text-center p-8">FlashCard not found</div>
+    return <div className="text-center p-8">Flashcard set not found</div>
   }
 
   const handleImportSuccess = async () => {
     // Import ghi thẳng vào DB nên form phải nạp lại từ server, không còn "chưa lưu".
     setIsDirty(false)
-    const data = await flashcardApi.getFlashCardById(params.id as string)
+    const data = await flashcardApi.getFlashcardById(params.id as string)
     setFlashcard(data.flashcard)
     form.setFieldsValue({
       title: data.flashcard.title,
@@ -105,7 +106,7 @@ const EditNotesView = () => {
             aria-label="Go back"
             onClick={() => confirmLeave(() => router.back())}
           />
-          <h1 className="text-3xl font-bold">Edit FlashCard</h1>
+          <h1 className="text-3xl font-bold">Edit flashcard set</h1>
         </div>
         <Button icon={<UploadOutlined />} onClick={() => setImportModalOpen(true)}>
           Import Terms
@@ -123,7 +124,7 @@ const EditNotesView = () => {
               { max: 200, message: 'Title must not exceed 200 characters' },
             ]}
           >
-            <Input placeholder="Enter flashcard title" size="large" />
+            <Input placeholder="Enter set title" size="large" />
           </Form.Item>
 
           <Form.Item
@@ -227,4 +228,4 @@ const EditNotesView = () => {
   )
 }
 
-export default EditNotesView
+export default EditFlashcardView

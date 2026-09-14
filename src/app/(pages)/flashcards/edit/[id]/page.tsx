@@ -1,19 +1,19 @@
 import type { Metadata } from 'next'
-import EditNotesView from '@/src/app/section/Notes/view/EditNotesView'
+import EditFlashcardView from '@/src/app/section/Flashcards/view/EditFlashcardView'
 import ProtectedRoute from '@/src/components/ProtectedRoute'
 
 // Trang quản trị — xem chú thích ở /blogs/create.
 export const metadata: Metadata = {
-  title: 'Edit Note',
+  title: 'Edit Flashcard Set',
   robots: { index: false, follow: false },
 }
 
-const EditNotesPage = () => {
+const EditFlashcardPage = () => {
   return (
     <ProtectedRoute>
-      <EditNotesView />
+      <EditFlashcardView />
     </ProtectedRoute>
   )
 }
 
-export default EditNotesPage
+export default EditFlashcardPage

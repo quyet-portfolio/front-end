@@ -1,31 +1,32 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import NotesDetailView from '@/src/app/section/Notes/view/DetailNotesView'
-import { getFlashCardForPage } from '@/src/lib/api/notesServer'
-import { buildFlashcardQuizJsonLd, buildNoteBreadcrumbJsonLd, serializeJsonLd } from '@/src/lib/jsonLd'
-import { NOTES_LOCALE, SITE_NAME, absoluteUrl } from '@/src/lib/site'
-import { toNoteDescription } from '@/src/utils/seo'
+import FlashcardDetailView from '@/src/app/section/Flashcards/view/FlashcardDetailView'
+import { getFlashcardForPage } from '@/src/lib/api/flashcardsServer'
+import { buildFlashcardQuizJsonLd, buildFlashcardBreadcrumbJsonLd, serializeJsonLd } from '@/src/lib/jsonLd'
+import { FLASHCARDS_LOCALE, SITE_NAME, absoluteUrl } from '@/src/lib/site'
+import { toFlashcardDescription } from '@/src/utils/seo'
+import { flashcardsRoutes } from '@/src/app/section/Flashcards/routes'
 
 // Server component: `generateMetadata` chỉ chạy được ở đây, và đây cũng là nơi
 // duy nhất đưa được nội dung bộ thẻ vào HTML đầu tiên.
-type NotesDetailPageProps = {
+type FlashcardDetailPageProps = {
   params: Promise<{ id: string }>
 }
 
-export async function generateMetadata({ params }: NotesDetailPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: FlashcardDetailPageProps): Promise<Metadata> {
   const { id } = await params
-  const canonical = absoluteUrl(`/notes/${id}`)
-  const result = await getFlashCardForPage(id)
+  const canonical = absoluteUrl(flashcardsRoutes.detail(id))
+  const result = await getFlashcardForPage(id)
 
   if (result.status !== 'ok') {
     // API tạm chết thì KHÔNG được khai noindex: Google gặp đúng lúc đó sẽ gỡ một
     // trang hợp lệ khỏi index. Chỉ trả về metadata tối thiểu và để lần crawl sau
     // lấy bản đầy đủ. Trường hợp not-found đã có metadata riêng ở not-found.tsx.
-    return { title: 'Notes', alternates: { canonical } }
+    return { title: 'Flashcards', alternates: { canonical } }
   }
 
   const { flashcard } = result
-  const description = toNoteDescription(flashcard)
+  const description = toFlashcardDescription(flashcard)
   const author = flashcard.createdBy?.username
 
   return {
@@ -40,7 +41,7 @@ export async function generateMetadata({ params }: NotesDetailPageProps): Promis
       description,
       url: canonical,
       siteName: SITE_NAME,
-      locale: NOTES_LOCALE,
+      locale: FLASHCARDS_LOCALE,
       publishedTime: flashcard.createdAt,
       modifiedTime: flashcard.updatedAt,
       authors: author ? [author] : undefined,
@@ -53,22 +54,22 @@ export async function generateMetadata({ params }: NotesDetailPageProps): Promis
   }
 }
 
-const NotesDetailPage = async ({ params }: NotesDetailPageProps) => {
+const FlashcardDetailPage = async ({ params }: FlashcardDetailPageProps) => {
   const { id } = await params
 
   // Cùng tham số với lần gọi trong generateMetadata, và hàm đã bọc cache() nên chỉ
   // có một request cho mỗi lượt render.
-  const result = await getFlashCardForPage(id)
+  const result = await getFlashcardForPage(id)
 
   if (result.status === 'not-found') notFound()
 
   // API chết thì vẫn render view và để client tự thử lại — không biến sự cố tạm
   // thời của back-end thành trang 404 cho một bộ thẻ vẫn còn tồn tại.
-  if (result.status === 'unavailable') return <NotesDetailView />
+  if (result.status === 'unavailable') return <FlashcardDetailView />
 
   const { flashcard } = result
-  const canonical = absoluteUrl(`/notes/${flashcard._id}`)
-  const description = toNoteDescription(flashcard)
+  const canonical = absoluteUrl(flashcardsRoutes.detail(flashcard._id))
+  const description = toFlashcardDescription(flashcard)
 
   return (
     <>
@@ -81,11 +82,11 @@ const NotesDetailPage = async ({ params }: NotesDetailPageProps) => {
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: serializeJsonLd(buildNoteBreadcrumbJsonLd(flashcard, canonical)) }}
+        dangerouslySetInnerHTML={{ __html: serializeJsonLd(buildFlashcardBreadcrumbJsonLd(flashcard, canonical)) }}
       />
-      <NotesDetailView initialFlashcard={flashcard} />
+      <FlashcardDetailView initialFlashcard={flashcard} />
     </>
   )
 }
 
-export default NotesDetailPage
+export default FlashcardDetailPage

@@ -5,17 +5,18 @@ import { Avatar, Button, Dropdown, Input, Modal, Tooltip } from 'antd'
 import { useRouter } from 'next/navigation'
 import SidebarMenu from '@/src/layouts/navbar/SidebarMenu'
 import { useAuth } from '@/src/contexts/AuthContext'
-import { useFlashCardsStore } from '../store'
+import { useFlashcardsStore } from '../store'
 import { useState } from 'react'
 import ImportTermsModal from './ImportTermsModal'
+import { flashcardsRoutes } from '@/src/app/section/Flashcards/routes'
 
-const NotesHeading = () => {
+const FlashcardsHeading = () => {
   const router = useRouter()
   const { isAuthenticated, logout, user } = useAuth()
 
-  const search = useFlashCardsStore((s) => s.search)
-  const setSearch = useFlashCardsStore((s) => s.setSearch)
-  const refreshFlashCards = useFlashCardsStore((s) => s.refresh)
+  const search = useFlashcardsStore((s) => s.search)
+  const setSearch = useFlashcardsStore((s) => s.setSearch)
+  const refreshFlashcards = useFlashcardsStore((s) => s.refresh)
 
   const [isOpenPopupAuthen, setOpenPopupAuthen] = useState(false)
   const [importModalOpen, setImportModalOpen] = useState(false)
@@ -26,22 +27,22 @@ const NotesHeading = () => {
       <div className="w-[65%] md:w-[36%]">
         <Input
           value={search ?? ''}
-          placeholder="Find notes, term, desc ..."
+          placeholder="Search sets, terms, definitions..."
           size="large"
           allowClear
-          aria-label="Search notes"
+          aria-label="Search flashcard sets"
           onChange={(e) => setSearch(e.target.value)}
           suffix={<SearchOutlined className="text-gray-400" />}
         />
       </div>
       {isAuthenticated ? (
         <div className="flex items-center gap-0 md:gap-6">
-          <Tooltip title="Create new note">
+          <Tooltip title="Create a flashcard set">
             <Button
               type="text"
               shape="circle"
               size="large"
-              aria-label="Create new note"
+              aria-label="Create a flashcard set"
               icon={<PlusCircleOutlined style={{ fontSize: 28 }} />}
               onClick={() => {
                 if (!isAuthenticated) {
@@ -49,7 +50,7 @@ const NotesHeading = () => {
                   return
                 }
 
-                router.push('/notes/create')
+                router.push(flashcardsRoutes.create)
               }}
             />
           </Tooltip>
@@ -58,7 +59,7 @@ const NotesHeading = () => {
               type="text"
               shape="circle"
               size="large"
-              aria-label="Import notes from file"
+              aria-label="Import a flashcard set from file"
               icon={<UploadOutlined style={{ fontSize: 24 }} />}
               onClick={() => {
                 if (!isAuthenticated) {
@@ -128,7 +129,7 @@ const NotesHeading = () => {
           </div>
         }
       >
-        Log in to create a note.
+        Log in to create a flashcard set.
       </Modal>
 
       <ImportTermsModal
@@ -136,10 +137,10 @@ const NotesHeading = () => {
         open={importModalOpen}
         onClose={() => setImportModalOpen(false)}
         // Nạp lại danh sách tại chỗ thay vì reload cả trang.
-        onSuccess={refreshFlashCards}
+        onSuccess={refreshFlashcards}
       />
     </div>
   )
 }
 
-export default NotesHeading
+export default FlashcardsHeading

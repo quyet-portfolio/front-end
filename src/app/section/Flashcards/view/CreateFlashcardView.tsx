@@ -1,17 +1,18 @@
 'use client'
 
 import { useMessageApi } from '@/src/contexts/MessageContext'
-import { flashcardApi } from '@/src/lib/api/notes'
+import { flashcardApi } from '@/src/lib/api/flashcards'
 import { ArrowLeftOutlined, MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons'
 import { Button, Card, Form, Input } from 'antd'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import ImportTermsModal from '../component/ImportTermsModal'
 import { useUnsavedChangesGuard } from '../hook/useUnsavedChangesGuard'
+import { flashcardsRoutes } from '@/src/app/section/Flashcards/routes'
 
 const { TextArea } = Input
 
-const CreateNoteView = () => {
+const CreateFlashcardView = () => {
   const router = useRouter()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
@@ -24,13 +25,13 @@ const CreateNoteView = () => {
   const onFinish = async (values: any) => {
     try {
       setLoading(true)
-      await flashcardApi.createFlashCard(values)
+      await flashcardApi.createFlashcard(values)
       // Tắt guard trước khi điều hướng, nếu không lưu xong lại bị hỏi "bỏ thay đổi?".
       setIsDirty(false)
-      messageApi?.success('FlashCard created successfully')
-      router.push('/notes')
+      messageApi?.success('Flashcard set created')
+      router.push(flashcardsRoutes.list)
     } catch (error: any) {
-      messageApi?.error(error.response?.data?.message || 'Failed to create flashcard')
+      messageApi?.error(error.response?.data?.message || 'Failed to create set')
     } finally {
       setLoading(false)
     }
@@ -38,7 +39,7 @@ const CreateNoteView = () => {
 
   const handleImportSuccess = () => {
     setIsDirty(false)
-    router.push('/notes')
+    router.push(flashcardsRoutes.list)
   }
 
   return (
@@ -48,10 +49,10 @@ const CreateNoteView = () => {
         <div className='flex gap-4 items-center'>
           <Button
             icon={<ArrowLeftOutlined />}
-            aria-label="Back to notes"
-            onClick={() => confirmLeave(() => router.push('/notes'))}
+            aria-label="Back to flashcards"
+            onClick={() => confirmLeave(() => router.push(flashcardsRoutes.list))}
           />
-          <h1 className="text-2xl font-bold">Create a new note</h1>
+          <h1 className="text-2xl font-bold">Create a flashcard set</h1>
         </div>
         <Button
           icon={<UploadOutlined />}
@@ -82,7 +83,7 @@ const CreateNoteView = () => {
               { max: 200, message: 'Title must not exceed 200 characters' },
             ]}
           >
-            <Input placeholder="Enter flashcard title" size="large" />
+            <Input placeholder="Enter set title" size="large" />
           </Form.Item>
 
           <Form.Item
@@ -169,4 +170,4 @@ const CreateNoteView = () => {
   )
 }
 
-export default CreateNoteView
+export default CreateFlashcardView

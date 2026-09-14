@@ -1,6 +1,6 @@
 import { LuBookOpen, LuLayers, LuLayoutTemplate, LuTrophy } from 'react-icons/lu'
 import { personalProjects } from '@/src/app/data/helper'
-import { BlogsPreview, BuilderPreview, NamDinhFcPreview, NotesPreview } from './previews'
+import { BlogsPreview, BuilderPreview, NamDinhFcPreview, FlashcardsPreview } from './previews'
 import ProjectCard from './ProjectCard'
 import ProjectCarousel from './ProjectCarousel'
 import ProjectStripItem from './ProjectStripItem'
@@ -8,7 +8,7 @@ import ProjectStripItem from './ProjectStripItem'
 const PersonalProjects = () => {
   const visuals = {
     blogs: { icon: <LuBookOpen />, preview: <BlogsPreview /> },
-    notes: { icon: <LuLayers />, preview: <NotesPreview /> },
+    flashcards: { icon: <LuLayers />, preview: <FlashcardsPreview /> },
     'namdinh-fc': { icon: <LuTrophy />, preview: <NamDinhFcPreview /> },
     'portfolio-builder': { icon: <LuLayoutTemplate />, preview: <BuilderPreview /> },
   }

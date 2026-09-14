@@ -44,7 +44,7 @@ export const BlogsPreview = () => (
   </div>
 )
 
-export const NotesPreview = () => (
+export const FlashcardsPreview = () => (
   <div aria-hidden className="flex h-full items-center justify-center">
     <div className="relative h-[166px] w-[230px]">
       <div className="absolute inset-x-3 top-3.5 h-[152px] rounded-2xl border border-white/[0.06] bg-card opacity-50" />

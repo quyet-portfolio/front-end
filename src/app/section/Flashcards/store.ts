@@ -1,6 +1,6 @@
-import { GetFlashCardsParams, learnApi } from "@/src/lib/api/notes";
+import { GetFlashcardsParams, learnApi } from "@/src/lib/api/flashcards";
 import { create } from "zustand";
-import { NOTES_PAGE_SIZE } from "./constants";
+import { FLASHCARDS_PAGE_SIZE } from "./constants";
 import {
   AnswerResult,
   LearnQuestion,
@@ -70,7 +70,7 @@ async function finish(get: LearnGet, set: LearnSet): Promise<void> {
   }
 }
 
-interface FlashCardsQueryStore extends GetFlashCardsParams {
+interface FlashcardsQueryStore extends GetFlashcardsParams {
   /**
    * Tăng lên để ép danh sách nạp lại.
    *
@@ -88,12 +88,12 @@ interface FlashCardsQueryStore extends GetFlashCardsParams {
 
 const INITIAL_QUERY = {
   page: 1,
-  limit: NOTES_PAGE_SIZE,
+  limit: FLASHCARDS_PAGE_SIZE,
   search: undefined as string | undefined,
   createdBy: undefined as string | undefined,
 };
 
-export const useFlashCardsStore = create<FlashCardsQueryStore>((set) => ({
+export const useFlashcardsStore = create<FlashcardsQueryStore>((set) => ({
   ...INITIAL_QUERY,
   refreshToken: 0,
 

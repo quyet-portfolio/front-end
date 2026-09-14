@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
-import LearnView from '@/src/app/section/Notes/view/Learn/LearnView'
+import LearnView from '@/src/app/section/Flashcards/view/Learn/LearnView'
 import ProtectedRoute from '@/src/components/ProtectedRoute'
 
 // Phiên học gắn với từng người dùng, không có nội dung gì cho công cụ tìm kiếm —
-// nội dung thật của bộ thẻ nằm ở /notes/[id].
+// nội dung thật của bộ thẻ nằm ở /flashcards/[id].
 export const metadata: Metadata = {
   title: 'Learn',
   robots: { index: false, follow: false },

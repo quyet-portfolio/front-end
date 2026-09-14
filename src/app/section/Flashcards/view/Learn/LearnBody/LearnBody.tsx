@@ -9,6 +9,7 @@ import FeedbackView from './FeedbackView/FeedbackView'
 import { Button } from 'antd'
 import SessionSummary from './SessionSummary'
 import { LearnSessionStats } from '../../../types'
+import { flashcardsRoutes } from '@/src/app/section/Flashcards/routes'
 
 interface LearnBodyProps {
   state: LearnState
@@ -39,9 +40,9 @@ const LearnBody = ({
 
   const handleGoToDetail = () => {
     if (flashcardId) {
-      router.push(`/notes/${flashcardId}`)
+      router.push(flashcardsRoutes.detail(flashcardId))
     } else {
-      router.push('/notes')
+      router.push(flashcardsRoutes.list)
     }
   }
 

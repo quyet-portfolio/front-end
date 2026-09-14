@@ -1,7 +1,7 @@
 'use client'
 
 import { useMessageApi } from '@/src/contexts/MessageContext'
-import { flashcardApi } from '@/src/lib/api/notes'
+import { flashcardApi } from '@/src/lib/api/flashcards'
 import { InboxOutlined, DownloadOutlined, FileExcelOutlined } from '@ant-design/icons'
 import { Alert, Button, Form, Input, Modal, Progress, Space, Table, Tabs, Typography, Upload } from 'antd'
 import { useState } from 'react'
@@ -107,7 +107,7 @@ const ImportTermsModal = (props: ImportTermsModalProps) => {
       setLoading(true)
 
       if (mode === 'create') {
-        const result = await flashcardApi.importFlashCards({
+        const result = await flashcardApi.importFlashcards({
           title: values!.title,
           description: values!.description,
           fileContent,
@@ -286,7 +286,7 @@ const ImportTermsModal = (props: ImportTermsModalProps) => {
 
   return (
     <Modal
-      title={mode === 'create' ? 'Import Flashcard from File' : 'Import Terms to Flashcard'}
+      title={mode === 'create' ? 'Import a Set from File' : 'Import Terms into Set'}
       open={open}
       onCancel={handleClose}
       width={700}
@@ -297,7 +297,7 @@ const ImportTermsModal = (props: ImportTermsModalProps) => {
       {mode === 'create' ? (
         <Form form={form} layout="vertical" onFinish={handleImport} style={{ marginTop: 16 }}>
           <Form.Item
-            label="Flashcard Title"
+            label="Set title"
             name="title"
             rules={[
               { required: true, message: 'Please input title!' },
@@ -305,7 +305,7 @@ const ImportTermsModal = (props: ImportTermsModalProps) => {
               { max: 200, message: 'Title must not exceed 200 characters' },
             ]}
           >
-            <Input placeholder="Enter flashcard title" />
+            <Input placeholder="Enter set title" />
           </Form.Item>
 
           <Form.Item
@@ -313,7 +313,7 @@ const ImportTermsModal = (props: ImportTermsModalProps) => {
             name="description"
             rules={[{ max: 1000, message: 'Description must not exceed 1000 characters' }]}
           >
-            <TextArea placeholder="Enter flashcard description" rows={2} />
+            <TextArea placeholder="Enter set description" rows={2} />
           </Form.Item>
 
           {tabs}

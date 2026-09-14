@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Progress, Tooltip } from 'antd'
 import { TrophyOutlined } from '@ant-design/icons'
-import { learnApi } from '@/src/lib/api/notes'
+import { learnApi } from '@/src/lib/api/flashcards'
 import { MasterySummary } from '../types'
 
 interface MasteryBarProps {

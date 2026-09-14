@@ -59,7 +59,7 @@ function clipMetaDescription(text: string): string | undefined {
 }
 
 /** Số term nêu tên trong mô tả tự sinh — đủ gợi nội dung mà không vượt 160 ký tự. */
-const NOTE_DESCRIPTION_SAMPLE_TERMS = 4
+const FLASHCARD_DESCRIPTION_SAMPLE_TERMS = 4
 
 /**
  * Meta description cho một bộ thẻ, luôn bằng tiếng Anh.
@@ -68,31 +68,31 @@ const NOTE_DESCRIPTION_SAMPLE_TERMS = 4
  * dựng một câu từ số lượng và vài term đầu — cụ thể hơn hẳn một câu chung chung
  * dùng lại cho mọi bộ thẻ, thứ Google sẽ coi là mô tả trùng lặp.
  */
-export function toNoteDescription(note: {
+export function toFlashcardDescription(flashcard: {
   title: string
   description?: string
   terms: Array<{ term: string }>
 }): string | undefined {
-  const authored = toMetaDescription(note.description)
+  const authored = toMetaDescription(flashcard.description)
   if (authored) return authored
 
   // `?? []`: metadata không được phép làm sập trang chỉ vì API trả thiếu field.
-  const terms = note.terms ?? []
+  const terms = flashcard.terms ?? []
   const count = terms.length
   // Chỉ gộp khoảng trắng, KHÔNG chạy qua toMetaDescription: bộ lọc thẻ HTML ở đó
   // nuốt mất những term hợp lệ như "<div>" trong bộ thẻ lập trình web, để lại
   // chuỗi kiểu "useState, , useMemo". Next tự escape giá trị thuộc tính meta.
   const clean = (value: string) => value.replace(/\s+/g, ' ').trim()
-  const title = clean(note.title)
+  const title = clean(flashcard.title)
 
   if (count === 0) return clipMetaDescription(`"${title}" flashcard set.`)
 
   const sample = terms
     .map((t) => clean(t.term))
     .filter(Boolean)
-    .slice(0, NOTE_DESCRIPTION_SAMPLE_TERMS)
+    .slice(0, FLASHCARD_DESCRIPTION_SAMPLE_TERMS)
     .join(', ')
-  const more = count > NOTE_DESCRIPTION_SAMPLE_TERMS ? ' and more' : ''
+  const more = count > FLASHCARD_DESCRIPTION_SAMPLE_TERMS ? ' and more' : ''
 
   return clipMetaDescription(
     `Learn "${title}" with ${count} flashcard${count === 1 ? '' : 's'}: ${sample}${more}. Flip the cards, quiz yourself and track your mastery.`,

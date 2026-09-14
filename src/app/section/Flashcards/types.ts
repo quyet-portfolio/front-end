@@ -4,7 +4,7 @@ export interface ITerm {
   related?: string;
 }
 
-export interface FlashCard {
+export interface Flashcard {
   _id: string;
   title: string;
   description?: string;
@@ -18,7 +18,7 @@ export interface FlashCard {
   updatedAt: string;
 }
 
-export interface FlashCardPaginationResponse {
+export interface FlashcardPaginationResponse {
   currentPage: number;
   totalPages: number;
   totalFlashCards: number;
@@ -26,9 +26,9 @@ export interface FlashCardPaginationResponse {
   hasPrevPage: boolean;
 }
 
-export interface FlashCardsResponse {
-  flashcards: FlashCard[];
-  pagination: FlashCardPaginationResponse;
+export interface FlashcardsResponse {
+  flashcards: Flashcard[];
+  pagination: FlashcardPaginationResponse;
 }
 
 // learn.types.ts

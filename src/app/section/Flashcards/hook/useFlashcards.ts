@@ -2,32 +2,32 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import axios from 'axios'
-import { FlashCard, FlashCardPaginationResponse, FlashCardsResponse } from '../types'
-import { flashcardApi, GetFlashCardsParams } from '@/src/lib/api/notes'
+import { Flashcard, FlashcardPaginationResponse, FlashcardsResponse } from '../types'
+import { flashcardApi, GetFlashcardsParams } from '@/src/lib/api/flashcards'
 
-interface UseFlashCardsParams extends GetFlashCardsParams {
+interface UseFlashcardsParams extends GetFlashcardsParams {
   /** Đổi giá trị này để ép nạp lại với cùng bộ tham số. */
   refreshToken?: number
   /** Trang đầu (không lọc) đã fetch sẵn ở server. */
-  initialData?: FlashCardsResponse
+  initialData?: FlashcardsResponse
 }
 
-export const useFlashCards = ({
+export const useFlashcards = ({
   page,
   limit,
   search,
   createdBy,
   refreshToken = 0,
   initialData,
-}: UseFlashCardsParams) => {
-  // Dữ liệu server chỉ khớp khi đang ở trạng thái mặc định. Quay lại /notes bằng
+}: UseFlashcardsParams) => {
+  // Dữ liệu server chỉ khớp khi đang ở trạng thái mặc định. Quay lại /flashcards bằng
   // điều hướng phía client thì store vẫn còn từ khoá/trang cũ — lúc đó phải fetch.
   const canUseInitial = Boolean(initialData) && page === 1 && !search && !createdBy && refreshToken === 0
 
-  const [flashcards, setFlashCards] = useState<FlashCard[]>(() =>
+  const [flashcards, setFlashcards] = useState<Flashcard[]>(() =>
     canUseInitial && initialData ? initialData.flashcards : [],
   )
-  const [pagination, setPagination] = useState<FlashCardPaginationResponse | null>(() =>
+  const [pagination, setPagination] = useState<FlashcardPaginationResponse | null>(() =>
     canUseInitial && initialData ? initialData.pagination : null,
   )
   const [loading, setLoading] = useState<boolean>(!canUseInitial)
@@ -54,11 +54,11 @@ export const useFlashCards = ({
       setError(null)
 
       try {
-        const data = await flashcardApi.getFlashCards(
+        const data = await flashcardApi.getFlashcards(
           { page, limit, search, createdBy },
           controller.signal,
         )
-        setFlashCards(data.flashcards)
+        setFlashcards(data.flashcards)
         setPagination(data.pagination)
       } catch (err: any) {
         // Request bị huỷ không phải lỗi — đừng nhá thông báo đỏ lên màn hình.

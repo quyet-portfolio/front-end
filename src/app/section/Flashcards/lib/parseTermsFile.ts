@@ -2,7 +2,7 @@ import { ITerm } from '../types'
 
 export type TermsFileType = 'csv' | 'json' | 'xlsx'
 
-/** Phải khớp với giới hạn ở BE (routes/FlashCard/flashCard.ts). */
+/** Phải khớp với giới hạn ở BE (routes/Flashcard/flashCard.ts). */
 export const MAX_TERMS_PER_FLASHCARD = 1000
 
 /**
