@@ -110,12 +110,3 @@ export interface ApiError {
     param: string;
   }>;
 }
-
-export interface GenerateSocialPostRequest {
-  topic: string;
-}
-
-export interface GenerateSocialPostResponse {
-  caption: string;
-  image: string;
-}

@@ -8,7 +8,7 @@ import { flashcardsRoutes } from '@/src/app/section/Flashcards/routes'
 // băng tại thời điểm deploy. Revalidate để bài publish sau đó vẫn tự vào sitemap.
 export const revalidate = 3600
 
-// Các trang tĩnh muốn Google index. `/social`, `/gold` là công cụ cá nhân, không
+// Các trang tĩnh muốn Google index. `/gold` là công cụ cá nhân, không
 // phải trang nội dung — cố tình để ngoài sitemap (vẫn crawl được nếu có link trỏ
 // tới, chỉ là không tự đề xuất). Flashcards từng nằm trong nhóm này; nay các bộ thẻ
 // đã có metadata và structured data riêng nên được đưa vào như trang nội dung.
@@ -16,8 +16,6 @@ const STATIC_ROUTES: MetadataRoute.Sitemap = [
   { url: `${SITE_URL}/`, changeFrequency: 'monthly', priority: 1 },
   { url: `${SITE_URL}/blogs`, changeFrequency: 'daily', priority: 0.9 },
   { url: `${SITE_URL}${flashcardsRoutes.list}`, changeFrequency: 'weekly', priority: 0.7 },
-  { url: `${SITE_URL}/privacy-policy`, changeFrequency: 'yearly', priority: 0.2 },
-  { url: `${SITE_URL}/terms-of-service`, changeFrequency: 'yearly', priority: 0.2 },
 ]
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
