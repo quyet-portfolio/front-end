@@ -11,7 +11,7 @@ interface LoginPromptProps {
 }
 
 export function LoginPrompt({
-  message = 'Đăng nhập để trải nghiệm đầy đủ tính năng',
+  message = 'Sign in to unlock the full experience',
   showClose = false,
   onClose,
 }: LoginPromptProps) {
@@ -26,13 +26,13 @@ export function LoginPrompt({
           <p className="text-sm text-blue-800 mb-2">{message}</p>
           <div className="flex gap-3">
             <Link href="/login" className="text-sm bg-blue-500 text-white px-4 py-1.5 rounded hover:bg-blue-600">
-              Đăng nhập
+              Sign In
             </Link>
             <Link
               href="/register"
               className="text-sm bg-white text-blue-500 border border-blue-500 px-4 py-1.5 rounded hover:bg-blue-50"
             >
-              Đăng ký
+              Sign Up
             </Link>
           </div>
         </div>

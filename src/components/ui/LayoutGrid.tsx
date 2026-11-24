@@ -1,8 +1,6 @@
 import { cn } from '@/src/lib/utils'
-import React, { useState } from 'react'
-import MagicButton from './MagicButton'
-import { IoCopyOutline } from 'react-icons/io5'
 import Image from 'next/image'
+import React from 'react'
 
 type TLayoutGrid = {
   className?: string
@@ -14,6 +12,14 @@ type TLayoutGrid = {
   titleClassName?: string
   spareImg?: string
 }
+
+// Ảnh nền trang trí là SVG nên next/image bỏ qua optimizer; vẫn cần width/height
+// đúng kích thước gốc để giữ layout như cũ và tránh CLS.
+const DECOR_SIZE: Record<string, { width: number; height: number }> = {
+  '/grid.svg': { width: 351, height: 180 },
+  '/b4.svg': { width: 208, height: 96 },
+}
+const decorSize = (src: string) => DECOR_SIZE[src] ?? { width: 351, height: 180 }
 
 export const LayoutGrid = ({ className, children }: { className?: string; children?: React.ReactNode }) => {
   return (
@@ -41,24 +47,30 @@ export const LayoutGridItem = ({
   return (
     <div
       className={cn(
-        'row-span-1 relative overflow-hidden rounded-3xl border border-white/[0.1] group/bento hover:shadow-xl transition duration-200 shadow-input dark:shadow-none justify-between flex flex-col space-y-4',
+        'row-span-1 relative overflow-hidden rounded-3xl border border-white/[0.1] group/bento hover:shadow-xl transition duration-200 justify-between flex flex-col space-y-4',
         className,
       )}
       style={{
-        background: 'rgb(4,7,29)',
-        backgroundColor: 'linear-gradient(90deg, rgba(4,7,29,1) 0%, rgba(12,14,35,1) 100%)',
+        background: 'linear-gradient(90deg, rgba(4,7,29,1) 0%, rgba(12,14,35,1) 100%)',
       }}
     >
       <div className={`h-full`}>
-        <div className="w-full h-full absolute">
-          {img && <img src={img} alt={img} className={cn(imgClassName, 'object-cover object-center ')} />}
+        <div className="w-full h-full absolute" aria-hidden>
+          {img && (
+            <Image
+              src={img}
+              alt=""
+              {...decorSize(img)}
+              className={cn(imgClassName, 'object-cover object-center')}
+            />
+          )}
         </div>
-        <div className={`absolute right-0 -bottom-8 ${id === 5 && 'w-full opacity-80'} `}>
+        <div className={`absolute right-0 -bottom-8 ${id === 5 && 'w-full opacity-80'} `} aria-hidden>
           {spareImg && (
-            <img
+            <Image
               src={spareImg}
-              alt={spareImg}
-              //   width={220}
+              alt=""
+              {...decorSize(spareImg)}
               className="object-cover object-center w-full h-full"
             />
           )}
@@ -67,10 +79,10 @@ export const LayoutGridItem = ({
         <div
           className={cn(
             titleClassName,
-            'group-hover/bento:translate-x-2 transition duration-200 relative md:h-full min-h- flex flex-col px-5 p-5 lg:p-4',
+            'group-hover/bento:translate-x-2 transition duration-200 relative md:h-full flex flex-col px-5 p-5 lg:p-4',
           )}
         >
-          <div className={`font-sans text-lg font-bold z-10`}>{title}</div>
+          <h3 className={`font-sans text-lg font-bold z-10`}>{title}</h3>
 
           {id === 3 && (
             <div className="flex gap-1 lg:gap-5 w-fit absolute top-1 right-4 lg:right-10">

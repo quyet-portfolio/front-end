@@ -27,40 +27,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // Check if user is logged in on mount
     const initAuth = async () => {
-            const accessToken = localStorage.getItem('accessToken');
-      const refreshToken = localStorage.getItem('refreshToken');
+      const accessToken = localStorage.getItem('accessToken')
+      const refreshToken = localStorage.getItem('refreshToken')
       const storedUser = localStorage.getItem('user')
 
-      if (accessToken && refreshToken && storedUser) {
-        try {
-          // Verify token is still valid
-          const { user: currentUser } = await authApi.getCurrentUser()
-          setUser(currentUser)
-          localStorage.setItem('user', JSON.stringify(currentUser))
-        } catch (error: any) {
-          // Access token expired, try refresh
-          if (error.response?.data?.code === 'TOKEN_EXPIRED') {
-            try {
-              const response = await authApi.refreshToken(refreshToken);
-              localStorage.setItem('accessToken', response.accessToken);
-              if (response.refreshToken) {
-                localStorage.setItem('refreshToken', response.refreshToken);
-              }
-              setUser(response.user);
-              localStorage.setItem('user', JSON.stringify(response.user));
-            } catch (refreshError) {
-              // Refresh cũng fail → Clear và logout
-              localStorage.clear();
-            }
-          } else {
-            localStorage.clear();
-          }
-        }
+      // Chưa từng đăng nhập → không gọi API, render trạng thái khách
+      if (!accessToken || !refreshToken || !storedUser) {
+        setLoading(false)
+        return
       }
-      setLoading(false)
+
+      try {
+        // Axios interceptor tự refresh khi access token hết hạn / không hợp lệ.
+        // Ở đây chỉ cần verify, không xử lý refresh thủ công nữa.
+        const { user: currentUser } = await authApi.getCurrentUser()
+        setUser(currentUser)
+        localStorage.setItem('user', JSON.stringify(currentUser))
+      } catch (error) {
+        // Token không thể khôi phục (refresh cũng fail) → đăng xuất im lặng.
+        // KHÔNG redirect — trang public vẫn hiển thị bình thường.
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
+        localStorage.removeItem('user')
+        setUser(null)
+      } finally {
+        setLoading(false)
+      }
     }
 
     initAuth()
+
+    // Đồng bộ React state khi interceptor buộc đăng xuất (refresh token hết hạn).
+    // ProtectedRoute sẽ tự đẩy sang /login nếu trang hiện tại cần auth.
+    const handleForcedLogout = () => setUser(null)
+    window.addEventListener('auth:logout', handleForcedLogout)
+    return () => window.removeEventListener('auth:logout', handleForcedLogout)
   }, [])
 
   const login = (accessToken: string, refreshToken: string, userData: User) => {
@@ -71,7 +72,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
-    localStorage.removeItem('token')
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
     localStorage.removeItem('user')
     setUser(null)
     messageApi?.success("Logout successfully!")

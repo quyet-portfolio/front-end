@@ -7,18 +7,33 @@ import Collapse from 'antd/es/collapse'
 import Form from 'antd/es/form'
 import Input from 'antd/es/input'
 import TextArea from 'antd/es/input/TextArea'
+import Modal from 'antd/es/modal'
 import Select from 'antd/es/select'
 import Spin from 'antd/es/spin'
 import Switch from 'antd/es/switch'
+import Tag from 'antd/es/tag'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useRouter, useParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { useMessageApi } from '@/src/contexts/MessageContext'
 import { blogApi, UpdateBlogData } from '@/src/lib/api/blog'
-import { Blog } from '@/src/lib/types'
+import { useInvalidateBlogs } from '@/src/hooks/useInvalidateBlogs'
+import { recoverEscapedHtml } from '@/src/utils/htmlContent'
+import { Blog, BlogContentFormat } from '@/src/lib/types'
+import { SLUG_PATTERN } from '@/src/utils/slug'
+import CategorySelect from './components/CategorySelect'
+
+// Số bài tối đa được ghim lên BlogHeading (khớp với backend)
+const MAX_FEATURED = 3
 
 // Dynamic import: avoid SSR crash for CKEditor
 const DynamicBlogEditor = dynamic(() => import('./components/BlogCKEditor'), {
+  ssr: false,
+  loading: () => <div className="p-4 text-center border-2 border-dashed">Loading Editor...</div>,
+})
+
+// Markdown editor (chỉ tải khi bài dùng định dạng Markdown)
+const DynamicMarkdownEditor = dynamic(() => import('./components/MarkdownEditor'), {
   ssr: false,
   loading: () => <div className="p-4 text-center border-2 border-dashed">Loading Editor...</div>,
 })
@@ -30,11 +45,16 @@ const EditBlogView = () => {
 
   const [form] = Form.useForm()
   const messageApi = useMessageApi()
+  const invalidateBlogs = useInvalidateBlogs()
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
   const [blog, setBlog] = useState<Blog | null>(null)
-  // Track CKEditor content separately since it's not a native form element
+  // Track editor content separately since it's not a native form element
   const [content, setContent] = useState<string>('')
+  // Định dạng nội dung của bài — khóa theo bài, không đổi khi sửa
+  const [contentFormat, setContentFormat] = useState<BlogContentFormat>('html')
+  // Số bài featured KHÁC bài đang sửa — để cảnh báo khi đã đủ MAX_FEATURED
+  const [otherFeaturedCount, setOtherFeaturedCount] = useState(0)
 
   // Fetch blog by id (via slug stored in URL), then pre-fill the form
   useEffect(() => {
@@ -46,15 +66,25 @@ const EditBlogView = () => {
         const res = await blogApi.getBlogBySlug(slug)
         const fetchedBlog = res.blog
         setBlog(fetchedBlog)
-        setContent(fetchedBlog.content)
+        const format: BlogContentFormat = fetchedBlog.contentFormat === 'markdown' ? 'markdown' : 'html'
+        setContentFormat(format)
+        // Markdown content is stored raw; only legacy HTML needs entity recovery
+        // (re-saving then persists the corrected markup).
+        setContent(format === 'markdown' ? fetchedBlog.content : recoverEscapedHtml(fetchedBlog.content))
         form.setFieldsValue({
           title: fetchedBlog.title,
+          slug: fetchedBlog.slug,
           category: fetchedBlog.category,
           excerpt: fetchedBlog.excerpt,
           tags: fetchedBlog.tags,
           featuredImage: fetchedBlog.featuredImage,
           isPublished: fetchedBlog.isPublished,
+          isFeatured: fetchedBlog.isFeatured ?? false,
         })
+
+        // Đếm số bài featured khác bài đang sửa để biết khi nào slot đã đầy
+        const featured = await blogApi.getFeaturedBlogs()
+        setOtherFeaturedCount(featured.blogs.filter((b) => b._id !== fetchedBlog._id).length)
       } catch (err: any) {
         if (messageApi) messageApi.error('Blog not found')
         router.push('/blogs')
@@ -66,13 +96,31 @@ const EditBlogView = () => {
     fetchBlog()
   }, [slug])
 
+  // Khi bật ghim lúc đã đủ 3 bài khác: cảnh báo sẽ thay thế bài cũ nhất
+  const handleFeaturedChange = (checked: boolean) => {
+    if (!checked || otherFeaturedCount < MAX_FEATURED) return
+
+    Modal.confirm({
+      title: 'The Blog Page Already Has 3 Featured Posts',
+      content:
+        'Featuring this post on the homepage will replace the oldest of the 3 currently featured posts. Do you want to continue?',
+      okText: 'Continue',
+      cancelText: 'Cancel',
+      onCancel: () => form.setFieldValue('isFeatured', false),
+    })
+  }
+
   const onFinish = async (values: UpdateBlogData) => {
     if (!blog) return
     try {
       setLoading(true)
-      await blogApi.updateBlog(blog._id, { ...values, content })
+      const res = await blogApi.updateBlog(blog._id, { ...values, content, contentFormat })
       if (messageApi) messageApi.success('Blog updated successfully!')
-      router.push(`/blogs/${blog.slug}`)
+      // Xoá cache của cả slug cũ lẫn slug mới, nếu không trang chi tiết sẽ dựng
+      // lại bản trước khi sửa từ cache
+      invalidateBlogs([blog.slug, res.blog.slug])
+      // Dùng slug trả về từ server — slug có thể vừa bị đổi trong lần lưu này
+      router.push(`/blogs/${res.blog.slug}`)
     } catch (error: any) {
       if (messageApi) {
         messageApi.error(error.response?.data?.message || 'Failed to update blog')
@@ -91,7 +139,7 @@ const EditBlogView = () => {
   }
 
   return (
-    <div className="p-6 mx-auto max-w-5xl container">
+    <div className="py-6 px-0 lg:px-6 mx-auto max-w-5xl container">
       <div className="flex justify-between items-center mb-6">
         <div className="flex gap-4 items-center">
           <Button icon={<ArrowLeftOutlined />} onClick={() => router.back()} />
@@ -100,12 +148,7 @@ const EditBlogView = () => {
       </div>
 
       <Card className="mb-24">
-        <Form
-          form={form}
-          layout="vertical"
-          requiredMark={false}
-          onFinish={onFinish}
-        >
+        <Form form={form} layout="vertical" requiredMark={false} onFinish={onFinish}>
           <Form.Item
             label="Title"
             name="title"
@@ -119,11 +162,28 @@ const EditBlogView = () => {
           </Form.Item>
 
           <Form.Item
+            label="Slug"
+            name="slug"
+            extra="Used in the post URL. Changing it breaks existing links to this post."
+            rules={[
+              { required: true, message: 'Please input slug!' },
+              { min: 3, message: 'Slug must be at least 3 characters' },
+              { max: 200, message: 'Slug must not exceed 200 characters' },
+              {
+                pattern: SLUG_PATTERN,
+                message: 'Slug may only contain lowercase letters, numbers and hyphens',
+              },
+            ]}
+          >
+            <Input placeholder="my-first-post" size="large" maxLength={200} />
+          </Form.Item>
+
+          <Form.Item
             label="Category"
             name="category"
-            rules={[{ required: true, message: 'Please input a category!' }]}
+            rules={[{ required: true, message: 'Please select a category!' }]}
           >
-            <Input placeholder="Enter category (e.g., Programming, Tech)" />
+            <CategorySelect />
           </Form.Item>
 
           <Form.Item
@@ -147,24 +207,32 @@ const EditBlogView = () => {
             <Input placeholder="https://example.com/image.jpg" />
           </Form.Item>
 
-          <Form.Item label={null} required>
-            <Collapse
-              defaultActiveKey={['content']}
-              items={[{
-                key: 'content',
-                label: 'Content',
-                children: (
-                  <DynamicBlogEditor
-                    value={content}
-                    onChange={(val) => setContent(val)}
-                  />
-                ),
-              }]}
-            />
-          </Form.Item>
+          <div className="flex flex-col gap-4">
+            <Form.Item label="Published" name="isPublished" valuePropName="checked">
+              <Switch checkedChildren="Yes" unCheckedChildren="Draft" />
+            </Form.Item>
 
-          <Form.Item label="Published" name="isPublished" valuePropName="checked">
-            <Switch checkedChildren="Yes" unCheckedChildren="Draft" />
+            <Form.Item label="Feature on page" name="isFeatured" valuePropName="checked">
+              <Switch checkedChildren="On" unCheckedChildren="Off" onChange={handleFeaturedChange} />
+            </Form.Item>
+          </div>
+
+          <Form.Item
+            label={
+              <span className="flex gap-2 items-center">
+                Content
+                <Tag color={contentFormat === 'markdown' ? 'purple' : 'blue'}>
+                  {contentFormat === 'markdown' ? 'Markdown' : 'Rich text'}
+                </Tag>
+              </span>
+            }
+            required
+          >
+            {contentFormat === 'markdown' ? (
+              <DynamicMarkdownEditor value={content} onChange={(val) => setContent(val)} />
+            ) : (
+              <DynamicBlogEditor value={content} onChange={(val) => setContent(val)} />
+            )}
           </Form.Item>
         </Form>
       </Card>

@@ -1,10 +1,12 @@
 'use client'
 
 import { goldApi, GoldResponse, InvestmentsResponseData, TimeRange } from '@/src/lib/api/gold'
-import { Select, Spin, Table } from 'antd'
+import { Button, Select, Spin, Table } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import { useEffect, useState } from 'react'
 import { Line } from 'react-chartjs-2'
+import AddGoldPriceModal from './components/AddGoldPriceModal'
+import AddInvestmentModal from './components/AddInvestmentModal'
 
 import {
   Chart as ChartJS,
@@ -22,10 +24,10 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 const { Option } = Select
 
 const TIME_RANGE_OPTIONS: { value: TimeRange; label: string }[] = [
-  { value: 7, label: '7 ngày' },
-  { value: 30, label: '30 ngày' },
-  { value: 60, label: '60 ngày' },
-  { value: 365, label: '1 năm' },
+  { value: 7, label: '7 days' },
+  { value: 30, label: '30 days' },
+  { value: 60, label: '60 days' },
+  { value: 365, label: '1 year' },
 ]
 
 export function formatDate(dateString: string) {
@@ -48,6 +50,8 @@ const GoldView = () => {
   const [loading, setLoading] = useState(true)
   const [chartLoading, setChartLoading] = useState(false)
   const [selectedDays, setSelectedDays] = useState<TimeRange>(30)
+  const [addPriceModalOpen, setAddPriceModalOpen] = useState<boolean>(false)
+  const [addInvestmentModalOpen, setAddInvestmentModalOpen] = useState<boolean>(false)
 
   const fetchGoldData = async () => {
     try {
@@ -77,13 +81,13 @@ const GoldView = () => {
           .map((item) => formatDate(item?.createdAt)),
         datasets: [
           {
-            label: 'Giá mua',
+            label: 'Buy price',
             data: goldPriceListRes.map((item) => item?.buyPrice),
             borderColor: 'rgb(75, 192, 192)',
             backgroundColor: 'rgba(75, 192, 192, 0.2)',
           },
           {
-            label: 'Giá bán',
+            label: 'Sell price',
             data: goldPriceListRes.map((item) => item?.sellPrice),
             borderColor: 'rgb(255, 99, 132)',
             backgroundColor: 'rgba(255, 99, 132, 0.2)',
@@ -110,18 +114,18 @@ const GoldView = () => {
 
   const columns: ColumnsType<InvestmentsResponseData> = [
     {
-      title: 'Ngày mua',
+      title: 'Purchase date',
       dataIndex: 'date',
       key: 'date',
       render: (_, record) => <div>{formatDate(record?.date)}</div>,
     },
     {
-      title: 'Số chỉ vàng',
+      title: 'Gold amount (chỉ)',
       dataIndex: 'goldGram',
       key: 'goldGram',
     },
     {
-      title: 'Số tiền / Giá mua (VND)',
+      title: 'Cost / Purchase price (VND)',
       key: 'amount',
       render: (_, record) => (
         <div>
@@ -130,15 +134,17 @@ const GoldView = () => {
       ),
     },
     {
-      title: 'Giá mua hiện tại',
+      // Shop's buyPrice — what we'd receive if we sold our gold back today
+      title: 'Current sell-back price',
       render: () => <div>--</div>,
     },
     {
-      title: 'Giá bán hiện tại',
+      // Shop's sellPrice — what we'd pay to buy more gold today
+      title: 'Current buy-in price',
       render: () => <div>--</div>,
     },
     {
-      title: 'Lãi/Lỗ (VND)',
+      title: 'Profit/Loss (VND)',
       render: (_, record, index) =>
         index === 0 ? <div>{formatPrice(dataGold?.profit || 0)}</div> : '--',
     },
@@ -152,25 +158,54 @@ const GoldView = () => {
       },
       title: {
         display: true,
-        text: `Lịch sử giá vàng (${TIME_RANGE_OPTIONS.find((o) => o.value === selectedDays)?.label})`,
+        text: `Gold Price History (${TIME_RANGE_OPTIONS.find((o) => o.value === selectedDays)?.label})`,
       },
     },
   }
 
   return (
     <div className="mt-10 flex flex-col gap-10">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-gray-700 bg-black-100 p-4">
+        <div className="flex flex-col gap-1">
+          <div className="text-sm text-gray-400">Today&apos;s gold price</div>
+          {dataGold?.price ? (
+            <>
+              <div className="text-lg font-semibold">
+                Buy <span className="text-emerald-400">{formatPrice(dataGold.price.buyPrice)}</span>{' '}
+                / Sell <span className="text-rose-400">{formatPrice(dataGold.price.sellPrice)}</span>
+              </div>
+              <div className="text-xs text-gray-500">
+                Updated: {new Date(dataGold.price.updatedAt).toLocaleString('vi-VN')} ·{' '}
+                Source: {dataGold.price.source || '—'}
+              </div>
+            </>
+          ) : (
+            <div className="text-base text-gray-500">No gold price data yet</div>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <Button onClick={() => setAddPriceModalOpen(true)} disabled={loading}>
+            Update Gold Price
+          </Button>
+          <Button type="primary" onClick={() => setAddInvestmentModalOpen(true)} disabled={loading}>
+            Add Investment
+          </Button>
+        </div>
+      </div>
+
       <Table
         dataSource={listInvestments}
         columns={columns}
         loading={loading}
         rowKey={(record) => record._id}
+        scroll={{ x: 'max-content' }}
         summary={() => {
           return (
             <>
               {dataGold ? (
                 <Table.Summary.Row className="bg-black-100">
                   <Table.Summary.Cell index={0} className="text-[16px] font-semibold">
-                    Tổng
+                    Total
                   </Table.Summary.Cell>
                   <Table.Summary.Cell index={1}>
                     <div className="text-[16px] font-semibold">{formatPrice(dataGold?.totalGold)}</div>
@@ -201,7 +236,7 @@ const GoldView = () => {
       />
 
       <div className="flex items-center gap-4">
-        <span className="text-gray-600">Khoảng thời gian:</span>
+        <span className="text-gray-600">Time range:</span>
         <Select
           value={selectedDays}
           onChange={handleTimeRangeChange}
@@ -217,6 +252,24 @@ const GoldView = () => {
       </div>
 
       {chartLoading ? <Spin /> : <Line options={options} data={goldPriceList} />}
+
+      <AddGoldPriceModal
+        open={addPriceModalOpen}
+        onClose={() => setAddPriceModalOpen(false)}
+        onSuccess={() => {
+          fetchGoldData()
+          fetchChartData(selectedDays)
+        }}
+        initialBuyPrice={dataGold?.price?.buyPrice}
+        initialSellPrice={dataGold?.price?.sellPrice}
+      />
+
+      <AddInvestmentModal
+        open={addInvestmentModalOpen}
+        onClose={() => setAddInvestmentModalOpen(false)}
+        onSuccess={fetchGoldData}
+        initialSellPrice={dataGold?.price?.sellPrice}
+      />
     </div>
   )
 }

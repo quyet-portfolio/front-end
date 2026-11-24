@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import LoginView from '../../section/Auth/Login/LoginView'
 
 export const metadata = {
@@ -5,5 +6,9 @@ export const metadata = {
 }
 
 export default function LoginPage() {
-  return <LoginView />
+  return (
+    <Suspense fallback={null}>
+      <LoginView />
+    </Suspense>
+  )
 }

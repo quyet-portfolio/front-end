@@ -68,7 +68,10 @@
 
 @layer base {
   * {
-    @apply border-border !scroll-smooth;
+    @apply border-border;
+  }
+  html {
+    @apply scroll-smooth;
   }
   body {
     @apply bg-background text-foreground;
@@ -101,8 +104,18 @@
   }
 }
 
-.reveal {
-  opacity: 1;
-  transform: translateY(30px);
-  transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+/* Tôn trọng prefers-reduced-motion: vô hiệu hoá animation/transition CSS
+   (spotlight, moving-border, spin của MagicButton, snowfall) và scroll mượt.
+   Framer-motion được xử lý riêng qua <MotionConfig reducedMotion="user">. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  html {
+    scroll-behavior: auto !important;
+  }
 }

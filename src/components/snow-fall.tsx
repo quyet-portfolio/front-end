@@ -3,6 +3,10 @@ import { useEffect } from 'react'
 
 export default function Snowfall() {
   useEffect(() => {
+    // Người dùng bật "giảm chuyển động" thì không tạo bông tuyết nào. Không thể chỉ
+    // tắt animation bằng CSS vì flake sẽ đứng chết giữa màn hình cho tới khi bị gỡ.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
     const createSnowflake = () => {
       const snowflake = document.createElement('div')
       snowflake.classList.add('snowflake')

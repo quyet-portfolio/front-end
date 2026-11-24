@@ -12,8 +12,8 @@ import {
   List,
   Heading,
   Image,
-  ImageUpload,
-  Base64UploadAdapter as CKBase64UploadAdapter,
+  ImageInsertViaUrl,
+  AutoImage,
   MediaEmbed,
   Table,
   TableToolbar,
@@ -54,7 +54,7 @@ const TOOLBAR_ITEMS = [
   'bulletedList',
   'numberedList',
   '|',
-  'uploadImage',
+  'insertImage',
   'mediaEmbed',
   '|',
   'insertTable',
@@ -89,11 +89,16 @@ const CODE_BLOCK_LANGUAGES = [
 ]
 
 const BlogCKEditor: React.FC<BlogCKEditorProps> = ({ value = '', onChange }) => {
+  // CKEditor owns its content after mount; capture only the initial value so we
+  // never call setData() on every change (which would fight source-editing mode
+  // and reset the caret). `onChange` keeps the parent form in sync.
+  const [initialData] = React.useState(value)
+
   return (
     <div className="blog-editor-wrapper text-black">
       <CKEditor
         editor={ClassicEditor}
-        data={value}
+        data={initialData}
         config={{
           licenseKey: 'GPL',
           plugins: [
@@ -107,8 +112,8 @@ const BlogCKEditor: React.FC<BlogCKEditorProps> = ({ value = '', onChange }) => 
             Link,
             List,
             Image,
-            ImageUpload,
-            CKBase64UploadAdapter,
+            ImageInsertViaUrl,
+            AutoImage,
             MediaEmbed,
             Table,
             TableToolbar,
@@ -123,7 +128,23 @@ const BlogCKEditor: React.FC<BlogCKEditorProps> = ({ value = '', onChange }) => 
             GeneralHtmlSupport,
           ],
           htmlSupport: {
-            allow: [{ name: /.*/, attributes: true, classes: true, styles: true }],
+            // Preserve rich markup on normal content elements, but never let raw
+            // elements (script/style/iframe/...) into the model: CKEditor renders
+            // them as unbreakable RawElements and downcasting formatting around
+            // them throws `view-writer-cannot-break-raw-element`. They are also an
+            // XSS surface. MediaEmbed/Image handle embeds/images natively without GHS.
+            allow: [
+              {
+                name: /^(p|h[1-6]|blockquote|pre|code|figure|figcaption|div|span|section|article|ul|ol|li|dl|dt|dd|table|thead|tbody|tfoot|tr|td|th|caption|a|img|strong|em|b|i|u|s|del|ins|sub|sup|br|hr|mark|small|abbr|kbd)$/,
+                attributes: true,
+                classes: true,
+                styles: true,
+              },
+            ],
+            disallow: [
+              { name: /^(script|style|iframe|object|embed|form|input|button|textarea|select|option|link|meta|base)$/ },
+              { attributes: /^on.*/i },
+            ],
           },
           toolbar: { items: TOOLBAR_ITEMS, shouldNotGroupWhenFull: true },
           codeBlock: {
@@ -141,6 +162,20 @@ const BlogCKEditor: React.FC<BlogCKEditorProps> = ({ value = '', onChange }) => 
           if (onChange) {
             onChange(data)
           }
+        }}
+        onReady={(editor) => {
+          // CKEditor does not emit a model `change` event while the user edits
+          // raw HTML in source-editing mode (data only syncs to the model when
+          // leaving that mode). Without this, HTML pasted in source mode is lost
+          // on submit. Delegate the source textarea's input events to keep
+          // `onChange` in sync live.
+          const root = editor.ui.view.element
+          root?.addEventListener('input', (event) => {
+            const target = event.target as HTMLElement | null
+            if (target instanceof HTMLTextAreaElement && target.closest('.ck-source-editing-area')) {
+              onChange?.(target.value)
+            }
+          })
         }}
       />
     </div>

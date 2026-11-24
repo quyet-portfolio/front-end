@@ -1,4 +1,5 @@
 import { BuildOutlined, FormOutlined, HomeOutlined, ProductOutlined } from '@ant-design/icons'
+import { flashcardsRoutes } from '@/src/app/section/Flashcards/routes'
 
 export const navItems = [
   { name: 'Home', link: '/' },
@@ -15,8 +16,10 @@ export const menuItems = [
     icon: <HomeOutlined />,
   },
   { name: 'Blogs', link: '/blogs', icon: <ProductOutlined /> },
-  { name: 'Notes', link: '/notes', icon: <FormOutlined /> },
+  // { name: 'Notes', link: '/notes', icon: <FormOutlined /> },
+  { name: 'Flashcards', link: flashcardsRoutes.list, icon: <FormOutlined /> },
   { name: "Page builder", link: '/portfolio-builder', icon: <BuildOutlined /> }
+  
 ]
 
 export const gridItems = [
@@ -52,7 +55,7 @@ export const gridItems = [
   },
   {
     id: 4,
-    title: 'Airing towards Full-stack proficiency',
+    title: 'Aiming towards Full-stack proficiency',
     description: 'Expanding expertise in Node.js, Express, and MongoDB for comprehensive product development.',
     className: 'lg:col-span-2 md:col-span-3 md:row-span-1',
     imgClassName: '',
@@ -73,7 +76,7 @@ export const gridItems = [
   },
   {
     id: 6,
-    title: 'Focus on Performace, Core Web Vitals, and SEO Optimization.',
+    title: 'Focus on Performance, Core Web Vitals, and SEO Optimization.',
     description: '',
     className: 'lg:col-span-2 md:col-span-3 md:row-span-1',
     imgClassName: '',
@@ -89,7 +92,7 @@ export const projects = [
     title: 'BettaMax: E-commerce SaaS',
     des: 'A comprehensive SaaS Platform for merchants with RBAC security, performance analytics, and store operations.',
     img: '/betta-max.webp',
-    iconLists: ['/next.svg', '/ts.svg', '/tail.svg', 'antd.svg', '/re.svg'],
+    iconLists: ['/next.svg', '/ts.svg', '/tail.svg', '/antd.svg', '/re.svg'],
     link: 'https://admin.bettamax.com',
   },
   {
@@ -97,7 +100,7 @@ export const projects = [
     title: 'Sky Solution Website',
     des: 'A business website with integrated Admin CMS. High-performance SSR with Payload CMS and optimized SEO.',
     img: '/sky-solution.webp',
-    iconLists: ['/next.svg', '/tail.svg', 'antd.svg', '/ps.svg'],
+    iconLists: ['/next.svg', '/tail.svg', '/antd.svg', '/ps.svg'],
     link: 'https://skysolution.com/',
   },
   {
@@ -105,7 +108,7 @@ export const projects = [
     title: 'Omega Facebook Pixel Ad Report',
     des: 'Optimize ads & ROAS with Facebook Pixel, CAPI, manage product feeds & access key metrics in one app.',
     img: '/facebook-pixel.webp',
-    iconLists: ['/laravel.svg', '/re.svg', '/redux.svg', 'antd.svg', '/ts.svg'],
+    iconLists: ['/laravel.svg', '/re.svg', '/redux.svg', '/antd.svg', '/ts.svg'],
     link: 'https://apps.shopify.com/facebook-multi-pixels',
   },
   {
@@ -118,7 +121,7 @@ export const projects = [
   },
   {
     id: 5,
-    title: 'Omega Twitter Pixel,Conversion',
+    title: 'Omega Twitter Pixel, Conversion',
     des: "Skyrocket your conversions with Multi Twitter Pixels' 5 powerful events & Conversion API.",
     img: '/twitter-pixel.webp',
     iconLists: ['/laravel.svg', '/re.svg', '/redux.svg'],
@@ -180,5 +183,40 @@ export const socialMedia = [
     id: 3,
     img: '/link.svg',
     link: 'https://www.linkedin.com/in/dev-bui-duy-quyet/',
+  },
+]
+
+export const personalProjects = [
+  {
+    id: 'blogs',
+    name: 'Blogs',
+    href: '/blogs',
+    tagline: 'Web, Next.js and psychology',
+    description: 'Web performance, Next.js and system design — plus notes on health and psychology.',
+    cta: 'Read the blog',
+  },
+  {
+    id: 'flashcards',
+    name: 'Flashcards',
+    href: flashcardsRoutes.list,
+    tagline: 'Flashcards with a learn mode',
+    description: 'Flashcards with a learn mode: multiple choice first, then typed recall.',
+    cta: 'Browse flashcards',
+  },
+  {
+    id: 'namdinh-fc',
+    name: 'Nam Dinh FC',
+    href: 'https://namdinhfc.vercel.app',
+    tagline: 'V.League club website',
+    description: 'Club website for Thep Xanh Nam Dinh: squad, fixtures, standings and news.',
+    cta: 'Visit site',
+  },
+  {
+    id: 'portfolio-builder',
+    name: 'Portfolio Builder',
+    href: undefined,
+    tagline: 'Build yours from a template',
+    description: 'Pick a template, arrange blocks, publish your own portfolio.',
+    cta: undefined,
   },
 ]

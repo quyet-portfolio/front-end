@@ -5,6 +5,7 @@ import {
   useAnimationFrame,
   useMotionTemplate,
   useMotionValue,
+  useReducedMotion,
   useTransform,
 } from "framer-motion";
 import { useRef } from "react";
@@ -32,8 +33,7 @@ export function MagicCard({
   return (
     <Component
       className={cn(
-        // remove h-16 w-40, add  md:col-span-2
-        "bg-transparent relative text-xl p-[1px] overflow-hidden md:col-span-2 md:row-span-1",
+        "bg-transparent relative text-xl p-[1px] overflow-hidden",
         containerClassName
       )}
       style={{
@@ -42,7 +42,7 @@ export function MagicCard({
       {...otherProps}
     >
       <div
-        className="absolute inset-0 rounde-[1.75rem]"
+        className="absolute inset-0"
         style={{ borderRadius: `calc(${borderRadius} * 0.96)` }}
       >
         <MovingBorder duration={duration} rx="30%" ry="30%">
@@ -57,7 +57,7 @@ export function MagicCard({
 
       <div
         className={cn(
-          "relative p-6 bg-slate-900/[0.] border border-slate-800 backdrop-blur-xl text-white flex items-center justify-center w-full h-full text-sm antialiased",
+          "relative p-6 border border-slate-800 backdrop-blur-xl text-white flex items-center justify-center w-full h-full text-sm antialiased",
           className
         )}
         style={{
@@ -85,8 +85,10 @@ export const MovingBorder = ({
 }) => {
   const pathRef = useRef<any>(undefined);
   const progress = useMotionValue<number>(0);
+  const shouldReduceMotion = useReducedMotion();
 
   useAnimationFrame((time) => {
+    if (shouldReduceMotion) return;
     const length = pathRef.current?.getTotalLength();
     if (length) {
       const pxPerMillisecond = length / duration;

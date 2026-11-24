@@ -1,56 +1,86 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useParams, useRouter } from 'next/navigation'
-import { HeartOutlined, HeartFilled, HomeOutlined, EditOutlined } from '@ant-design/icons'
+import { useParams, usePathname, useRouter } from 'next/navigation'
+import {
+  HeartOutlined,
+  HeartFilled,
+  HomeOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  ExpandOutlined,
+} from '@ant-design/icons'
 import Button from 'antd/es/button'
 import Tag from 'antd/es/tag'
+// Alias để không đụng tên với next/image — antd chỉ dùng cho lớp lightbox
+import AntImage from 'antd/es/image'
 import Spin from 'antd/es/spin'
 import Breadcrumb from 'antd/es/breadcrumb'
+import Popconfirm from 'antd/es/popconfirm'
+import dynamic from 'next/dynamic'
 import DOMPurify from 'isomorphic-dompurify'
+import { useQueryClient } from '@tanstack/react-query'
 import { blogApi } from '@/src/lib/api/blog'
-import { Blog } from '@/src/lib/types'
+import { blogKeys } from '@/src/lib/queryKeys'
+import { useBlog } from '@/src/hooks/useBlog'
+import { demoteContentHeadings, recoverEscapedHtml } from '@/src/utils/htmlContent'
 import { useAuth } from '@/src/contexts/AuthContext'
 import { useMessageApi } from '@/src/contexts/MessageContext'
+import { Blog } from '@/src/lib/types'
+import { FALLBACK_IMAGE_BLOG } from './BlogsHeading'
+import ScrollToTopButton from './components/ScrollToTopButton'
 
-const BlogDetailView = () => {
+// KHÔNG đặt ssr: false ở đây. Nội dung bài là thứ duy nhất crawler cần đọc —
+// tắt SSR thì HTML trả về chỉ còn một dòng "Loading content…".
+const MarkdownContent = dynamic(() => import('./components/MarkdownContent'))
+
+interface BlogDetailViewProps {
+  // Bài do server fetch sẵn. Không có (trang not-found dùng lại component này để
+  // tác giả xem bản nháp của mình) thì rơi về fetch phía client như cũ.
+  initialBlog?: Blog | null
+}
+
+const BlogDetailView = ({ initialBlog }: BlogDetailViewProps = {}) => {
   const params = useParams()
+  const pathname = usePathname()
   const router = useRouter()
-  const slug = params.slug as string
 
-  const [blog, setBlog] = useState<Blog | null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
-  const [likesCount, setLikesCount] = useState<number>(0)
-  const [isLiked, setIsLiked] = useState<boolean>(false)
+  // not-found.tsx KHÔNG nhận params của segment động, mà đó lại là nơi component
+  // này chạy khi server không đọc được bài (bản nháp của chính tác giả luôn rơi
+  // vào nhánh đó vì request phía server ẩn danh). Thiếu fallback theo pathname thì
+  // slug rỗng → query không chạy → tác giả kẹt vĩnh viễn ở spinner.
+  const slug = (params?.slug as string) || pathname?.match(/^\/blogs\/([^/]+)$/)?.[1] || ''
+
+  const [deleting, setDeleting] = useState<boolean>(false)
+  const [previewOpen, setPreviewOpen] = useState<boolean>(false)
+  // Kết quả like đè lên dữ liệu server cho tới khi rời trang. Cố tình KHÔNG
+  // invalidate query chi tiết: refetch sẽ cộng thêm một lượt view giả.
+  // Gắn kèm slug để override tự hết hiệu lực khi sang bài khác — không cần effect
+  // reset, thứ sẽ tạo thêm một lượt render thừa với dữ liệu sai.
+  const [likeOverride, setLikeOverride] = useState<{
+    slug: string
+    count: number
+    isLiked: boolean
+  } | null>(null)
 
   const { isAuthenticated, user } = useAuth()
   const messageApi = useMessageApi()
+  const queryClient = useQueryClient()
 
-  useEffect(() => {
-    if (!slug) return
+  // Bản cũ fetch lại mỗi khi object `user` đổi tham chiếu — mỗi lần như vậy là
+  // một lượt view bị đếm thừa. useQuery chỉ gọi một lần cho mỗi slug.
+  const { blog, loading, error } = useBlog(slug, initialBlog)
 
-    const fetchBlog = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        const response = await blogApi.getBlogBySlug(slug)
-        setBlog(response.blog)
-        setLikesCount(response.blog.likes.length)
-        if (user) {
-          setIsLiked(response.blog.likes.some((l: any) => l._id === user._id || l === user._id))
-        }
-      } catch (err: any) {
-        setError(err.response?.data?.message || 'Blog not found')
-      } finally {
-        setLoading(false)
-      }
-    }
+  const activeLikeOverride = likeOverride?.slug === slug ? likeOverride : null
 
-    fetchBlog()
-  }, [slug, user])
+  const likesCount = activeLikeOverride?.count ?? blog?.likes.length ?? 0
+  const isLiked = useMemo(() => {
+    if (activeLikeOverride) return activeLikeOverride.isLiked
+    if (!user || !blog) return false
+    return blog.likes.some((l: any) => l._id === user._id || l === user._id)
+  }, [activeLikeOverride, user, blog])
 
   const handleLike = async () => {
     if (!isAuthenticated) {
@@ -62,14 +92,39 @@ const BlogDetailView = () => {
 
     try {
       const res = await blogApi.likeBlog(blog._id)
-      setLikesCount(res.likesCount)
-      setIsLiked(res.isLiked)
+      setLikeOverride({ slug, count: res.likesCount, isLiked: res.isLiked })
     } catch (err: any) {
       if (messageApi) {
         messageApi.error(err.response?.data?.message || 'Action failed')
       }
     }
   }
+
+  const handleDelete = async () => {
+    if (!blog) return
+
+    try {
+      setDeleting(true)
+      await blogApi.deleteBlog(blog._id)
+      if (messageApi) messageApi.success('Blog deleted successfully')
+      // Dọn cache trước khi điều hướng, nếu không /blogs sẽ dựng lại danh sách
+      // cũ (còn nguyên bài vừa xoá) từ cache và hiển thị tức thì.
+      queryClient.removeQueries({ queryKey: blogKeys.detail(blog.slug) })
+      queryClient.invalidateQueries({ queryKey: blogKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: blogKeys.featured() })
+      router.push('/blogs')
+    } catch (err: any) {
+      if (messageApi) {
+        messageApi.error(err.response?.data?.message || 'Failed to delete blog')
+      }
+      setDeleting(false)
+    }
+  }
+
+  // Author hoặc admin mới được sửa/xoá bài
+  const canManage = !!user && !!blog && (user._id === blog.author._id || user.role === 'admin')
+
+  const coverImage = blog?.featuredImage || FALLBACK_IMAGE_BLOG
 
   if (loading) {
     return (
@@ -91,11 +146,14 @@ const BlogDetailView = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 max-w-4xl mb-16 mt-6 text-white">
+    // <article> thay cho <div> để crawler nhận ra đâu là khối nội dung chính.
+    // lang="vi" được khai báo ở page.tsx (wrapper do server render) — xem chú
+    // thích ở đó để biết vì sao không đặt tại đây.
+    <article className="container mx-auto px-0 sm:px-4 max-w-4xl mb-16 mt-6 text-white">
 
-      {/* Breadcrumb */}
+      {/* Breadcrumb — single line with ellipsis on overflow */}
       <Breadcrumb
-        className="!mb-10 text-white-100 w-full"
+        className="!mb-6 sm:!mb-10 text-white-100 w-full px-4 sm:px-0 [&_ol]:flex-nowrap [&_li]:whitespace-nowrap [&_.ant-breadcrumb-separator]:!mx-1.5"
         items={[
           {
             href: '/',
@@ -109,24 +167,41 @@ const BlogDetailView = () => {
             ? [{ title: <span className="text-blue-400 text-[16px] font-medium">{blog.category}</span> }]
             : []),
           {
-            title: <span className="text-gray-500 max-w-full truncate inline-block align-bottom text-[16px] font-medium">{blog.title}</span>,
+            title: <span className="text-gray-500 max-w-[140px] sm:max-w-[320px] truncate inline-block align-bottom text-[16px] font-medium">{blog.title}</span>,
           },
         ]}
       />
 
       {/* Card wrapper */}
-      <div className="rounded-lg border border-blue-950 bg-black-100 shadow-xl overflow-hidden">
-        {/* Featured Image Banner */}
-        <div className="relative w-full h-[380px]">
+      <div className="rounded-none sm:rounded-lg border-x-0 border-y sm:border bg-black-100 shadow-xl overflow-hidden border-blue-950">
+        {/* Featured Image Banner — click để mở lightbox xem ảnh cỡ lớn */}
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="View cover image in full size"
+          onClick={() => setPreviewOpen(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              setPreviewOpen(true)
+            }
+          }}
+          className="group relative w-full h-[380px] cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-purple focus-visible:ring-inset"
+        >
           <Image
-            src={blog.featuredImage || '/images/next-js-a-react-js-framework.jpg'}
+            src={coverImage}
             alt={blog.title}
             fill
-            className="object-cover"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#000319] via-[#000319]/40 to-transparent" />
-          <div className="absolute bottom-6 left-6 z-10 pr-8">
+          {/* Gợi ý ảnh bấm được — chỉ hiện khi hover, không che tiêu đề */}
+          <span className="absolute top-4 right-4 z-10 flex items-center gap-1.5 rounded-full bg-black-100/80 px-3 py-1.5 text-xs font-medium text-white-100 opacity-0 backdrop-blur-md transition-opacity duration-300 group-hover:opacity-100">
+            <ExpandOutlined /> View full size
+          </span>
+          {/* Text đè lên ảnh: bỏ qua chuột để mọi cú click đều rơi vào banner */}
+          <div className="pointer-events-none absolute bottom-6 left-6 z-10 pr-8">
             {blog.category && (
               <Tag className="!mb-3 !px-3 !py-1 text-sm font-bold !bg-primary-100">
                 {blog.category.toUpperCase()}
@@ -136,7 +211,7 @@ const BlogDetailView = () => {
           </div>
         </div>
 
-        <div className="px-6 md:px-10 py-6">
+        <div className="px-0 md:px-10 py-6">
           {/* Meta row */}
           <div className="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-gray-800 mb-6">
             {/* Author + date */}
@@ -167,16 +242,30 @@ const BlogDetailView = () => {
               >
                 {likesCount} {likesCount === 1 ? 'Like' : 'Likes'}
               </Button>
-              {/* Show Edit button only for author or admin */}
-              {user && (user._id === blog.author._id || user.role === 'admin') && (
-                <Button
-                  type="default"
-                  size="small"
-                  icon={<EditOutlined />}
-                  onClick={() => router.push(`/blogs/edit/${blog.slug}`)}
-                >
-                  Edit
-                </Button>
+              {/* Edit & Delete chỉ hiện cho author hoặc admin */}
+              {canManage && (
+                <>
+                  <Button
+                    type="default"
+                    size="small"
+                    icon={<EditOutlined />}
+                    onClick={() => router.push(`/blogs/edit/${blog.slug}`)}
+                  >
+                    Edit
+                  </Button>
+                  <Popconfirm
+                    title="Delete This Blog?"
+                    description="This action cannot be undone."
+                    okText="Delete"
+                    cancelText="Cancel"
+                    okButtonProps={{ danger: true, loading: deleting }}
+                    onConfirm={handleDelete}
+                  >
+                    <Button danger type="default" size="small" icon={<DeleteOutlined />} loading={deleting}>
+                      Delete
+                    </Button>
+                  </Popconfirm>
+                </>
               )}
             </div>
           </div>
@@ -192,14 +281,36 @@ const BlogDetailView = () => {
             </div>
           )}
 
-          {/* Content — prose renders CKEditor HTML beautifully */}
-          <div
-            className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-a:text-blue-400 prose-img:rounded-md pb-10"
-            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(blog.content) }}
-          />
+          {/* Content — Markdown blogs render via MarkdownContent; HTML blogs keep the
+              sanitized CKEditor path (with legacy entity recovery). */}
+          {blog.contentFormat === 'markdown' ? (
+            <MarkdownContent content={blog.content} />
+          ) : (
+            <div
+              className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-a:text-blue-400 prose-img:rounded-md pb-10"
+              dangerouslySetInnerHTML={{
+                __html: demoteContentHeadings(DOMPurify.sanitize(recoverEscapedHtml(blog.content))),
+              }}
+            />
+          )}
         </div>
       </div>
-    </div>
+
+      {/* Lightbox cho cover: chỉ mượn lớp preview của antd (zoom/xoay/phóng to),
+          phần banner vẫn do next/image render để giữ tối ưu ảnh + priority */}
+      <AntImage
+        src={coverImage}
+        alt={blog.title}
+        style={{ display: 'none' }}
+        preview={{
+          visible: previewOpen,
+          src: coverImage,
+          onVisibleChange: (value) => setPreviewOpen(value),
+        }}
+      />
+
+      <ScrollToTopButton />
+    </article>
   )
 }
 
