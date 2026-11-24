@@ -25,6 +25,15 @@ const config = {
     },
     extend: {
       colors: {
+        // Token Global Theme của Portfolio Builder (khai báo ở PortfolioBuilder/theme.ts).
+        // Fallback = theme tối mặc định, dùng khi render ngoài scope .pf-root / .pf-canvas.
+        pf: {
+          primary: 'var(--portfolio-primary, #6366F1)',
+          text: 'var(--portfolio-text, #f8fafc)',
+          muted: 'var(--portfolio-muted, #94a3b8)',
+          surface: 'var(--portfolio-surface, rgba(30, 41, 59, 0.5))',
+          border: 'var(--portfolio-border, #334155)',
+        },
         black: {
           DEFAULT: '#000',
           100: '#000319',
@@ -196,6 +205,15 @@ const config = {
         },
         { values: flattenColorPalette(theme('backgroundColor')), type: 'color' },
       )
+    },
+    // Portfolio Builder: breakpoint theo KHUNG CHỨA (container query) thay vì viewport.
+    // .pf-root (trang public) và .pf-canvas (editor) khai báo container-type, nên
+    // canvas 400px ở chế độ Mobile của editor hiển thị đúng như điện thoại thật.
+    // Dùng: `pf-md:grid-cols-2` thay cho `md:grid-cols-2` trong craftjs-components.
+    function ({ addVariant }: any) {
+      addVariant('pf-sm', '@container (min-width: 640px)')
+      addVariant('pf-md', '@container (min-width: 768px)')
+      addVariant('pf-lg', '@container (min-width: 1024px)')
     },
   ],
 } satisfies Config

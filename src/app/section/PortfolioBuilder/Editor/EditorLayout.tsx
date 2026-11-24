@@ -4,15 +4,17 @@
  */
 'use client'
 
-import { Editor, Frame, Element } from '@craftjs/core'
-import { useEffect, useState } from 'react'
+import { Editor, Frame, Element, useEditor } from '@craftjs/core'
+import { useEffect, useMemo, useState } from 'react'
 import Segmented from 'antd/es/segmented'
 import { craftResolver, CraftContainer } from '@/src/craftjs-components'
 import { ComponentPanel } from './Sidebar/ComponentPanel'
 import { SettingsPanel } from './Settings/SettingsPanel'
 import { GlobalSettingsPanel } from './Settings/GlobalSettingsPanel'
 import { EditorToolbar } from './Toolbar/EditorToolbar'
+import { useEditorSave } from './useEditorSave'
 import { usePortfolioApi } from '@/src/hooks/usePortfolioApi'
+import { buildGoogleFontsHref, buildThemeCss, type PortfolioTheme } from '../theme'
 
 interface Portfolio {
   _id: string
@@ -20,7 +22,8 @@ interface Portfolio {
   status: 'draft' | 'published'
   slug?: string
   seo?: { title?: string; description?: string; ogImage?: string }
-  themeOverride?: { colors?: Record<string, string>; font?: { heading?: string; body?: string } }
+  themeOverride?: PortfolioTheme
+  hasUnpublishedChanges?: boolean
 }
 
 interface EditorLayoutProps {
@@ -29,6 +32,10 @@ interface EditorLayoutProps {
 
 type ViewMode = 'desktop' | 'mobile'
 
+/**
+ * Seed data cũ thiếu field `parent`, nhưng Craft.js actions.delete() cần
+ * node.data.parent → điền lại từ nodes / linkedNodes trước khi deserialize.
+ */
 function patchCraftJsonParents(craftJson: Record<string, any>): Record<string, any> {
   const patched: Record<string, any> = JSON.parse(JSON.stringify(craftJson))
   for (const [nodeId, node] of Object.entries(patched)) {
@@ -42,6 +49,20 @@ function patchCraftJsonParents(craftJson: Record<string, any>): Record<string, a
   return patched
 }
 
+/**
+ * Ghi nhận JSON ngay sau khi Frame deserialize xong làm mốc "đã lưu".
+ * Effect của component con chạy trước khi <Editor> đăng ký onNodesChange,
+ * nên mọi thay đổi sau mốc này mới tính là chưa lưu.
+ */
+const SaveBaseline = ({ onReady }: { onReady: (json: string) => void }) => {
+  const { query } = useEditor()
+  useEffect(() => {
+    onReady(query.serialize())
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  return null
+}
+
 export const EditorLayout = ({ portfolioId }: EditorLayoutProps) => {
   const { fetchPortfolioById } = usePortfolioApi()
   const [portfolio, setPortfolio] = useState<Portfolio | null>(null)
@@ -50,17 +71,31 @@ export const EditorLayout = ({ portfolioId }: EditorLayoutProps) => {
   const [leftTab, setLeftTab] = useState<'components' | 'layers'>('components')
   const [rightTab, setRightTab] = useState<'element' | 'global'>('element')
   const [viewMode, setViewMode] = useState<ViewMode>('desktop')
-  const [publishedSlug, setPublishedSlug] = useState<string | undefined>()
+  const [isPublished, setIsPublished] = useState(false)
+  const [hasUnpublishedChanges, setHasUnpublishedChanges] = useState(false)
+
+  // Mọi lần lưu bản nháp thành công → bản live đã cũ hơn bản nháp
+  const editorSave = useEditorSave(portfolioId, () => setHasUnpublishedChanges(true))
 
   useEffect(() => {
     fetchPortfolioById(portfolioId)
       .then((data) => {
-        setPortfolio(data.portfolio)
-        setPublishedSlug(data.portfolio?.slug)
+        const p: Portfolio = data.portfolio
+        setPortfolio(p)
+        setIsPublished(p.status === 'published')
+        setHasUnpublishedChanges(Boolean(p.hasUnpublishedChanges))
       })
       .catch(() => setError('Failed to load portfolio'))
       .finally(() => setLoading(false))
   }, [portfolioId, fetchPortfolioById])
+
+  // Frame chỉ đọc `data` một lần khi mount → chỉ tính lại khi layout gốc đổi,
+  // không phải mỗi lần đổi theme / SEO.
+  const craftJsonStr = useMemo(
+    () => (portfolio ? JSON.stringify(patchCraftJsonParents(portfolio.layout.craftJson)) : ''),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [portfolio?.layout.craftJson]
+  )
 
   if (loading) {
     return (
@@ -84,36 +119,26 @@ export const EditorLayout = ({ portfolioId }: EditorLayoutProps) => {
     )
   }
 
-  // Patch missing `parent` fields — old seed data doesn't include them,
-  // but Craft.js actions.delete() requires node.data.parent to be set.
-  const patchedCraftJson = patchCraftJsonParents(portfolio.layout.craftJson)
-  const craftJsonStr = JSON.stringify(patchedCraftJson)
-
-  // Inject Global Theme tokens vào canvas để preview khớp trang public.
-  // Element *UI đọc var(--portfolio-*) khi prop màu undefined (follow theme).
-  const tColors = portfolio.themeOverride?.colors ?? {}
-  const tFont = portfolio.themeOverride?.font ?? {}
-  const canvasThemeCss = `.pf-canvas {
-    --portfolio-primary: ${tColors.primary || '#6366F1'};
-    --portfolio-bg: ${tColors.background || '#0f172a'};
-    --portfolio-text: ${tColors.text || '#f8fafc'};
-    --portfolio-heading-font: '${tFont.heading || 'Inter'}', sans-serif;
-    --portfolio-body-font: '${tFont.body || 'Inter'}', sans-serif;
-  }`
-
   return (
-    <Editor
-      resolver={craftResolver}
-      onRender={({ render }) => render}
-    >
-      <div className="flex flex-col h-screen bg-slate-950 overflow-hidden">
+    <Editor resolver={craftResolver} onNodesChange={editorSave.handleNodesChange}>
+      {/* Theme tokens + fonts giống hệt trang public (PortfolioView) */}
+      <link rel="stylesheet" href={buildGoogleFontsHref(portfolio.themeOverride)} />
+      <style>{buildThemeCss('.pf-canvas', portfolio.themeOverride)}</style>
+
+      <div className="flex flex-col h-screen w-full bg-slate-950 overflow-hidden">
         {/* Top Toolbar */}
         <EditorToolbar
           portfolioId={portfolioId}
           portfolioName={portfolio.seo?.title || 'My Portfolio'}
-          status={portfolio.status}
-          slug={publishedSlug}
-          onPublishSuccess={(slug) => setPublishedSlug(slug)}
+          isPublished={isPublished}
+          hasUnpublishedChanges={hasUnpublishedChanges}
+          saveStatus={editorSave.status}
+          isDirty={editorSave.isDirty}
+          save={editorSave.save}
+          onPublished={() => {
+            setIsPublished(true)
+            setHasUnpublishedChanges(false)
+          }}
         />
 
         {/* 3-Panel Layout */}
@@ -124,7 +149,6 @@ export const EditorLayout = ({ portfolioId }: EditorLayoutProps) => {
             <div className="p-2 border-b border-slate-700/50">
               <Segmented
                 block
-                size="small"
                 value={leftTab}
                 onChange={(v) => setLeftTab(v as 'components' | 'layers')}
                 options={[
@@ -142,12 +166,11 @@ export const EditorLayout = ({ portfolioId }: EditorLayoutProps) => {
           </aside>
 
           {/* Center — Canvas */}
-          <main className="flex-1 flex flex-col bg-slate-950 overflow-hidden relative">
+          <main className="flex-1 min-w-0 flex flex-col bg-slate-950 overflow-hidden relative">
             {/* Viewport controls */}
             <div className="sticky top-0 z-10 flex justify-center py-2 bg-slate-950/80 backdrop-blur-sm border-b border-slate-800/50">
               <div className="flex items-center gap-4 text-xs">
                 <Segmented
-                  size="small"
                   value={viewMode}
                   onChange={(v) => setViewMode(v as ViewMode)}
                   options={[
@@ -160,11 +183,12 @@ export const EditorLayout = ({ portfolioId }: EditorLayoutProps) => {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto py-8">
-              <style>{canvasThemeCss}</style>
+            <div className="flex-1 overflow-y-auto p-4">
+              {/* Desktop: canvas giãn hết vùng giữa — độ rộng nội dung do từng
+                  section tự giới hạn (max-w-*), giống trang public. */}
               <div
-                className={`pf-canvas mx-auto shadow-2xl shadow-indigo-900/10 border border-slate-800 transition-all duration-300 bg-black-100 ${
-                  viewMode === 'desktop' ? 'w-full max-w-[1024px]' : 'w-[400px]'
+                className={`pf-canvas mx-auto min-h-full shadow-2xl shadow-indigo-900/10 border border-slate-800 transition-[width] duration-300 ${
+                  viewMode === 'desktop' ? 'w-full' : 'w-[400px]'
                 }`}
               >
                 <Frame data={craftJsonStr}>
@@ -179,7 +203,6 @@ export const EditorLayout = ({ portfolioId }: EditorLayoutProps) => {
             <div className="p-2 border-b border-slate-700/50 bg-slate-800/20">
               <Segmented
                 block
-                size="small"
                 value={rightTab}
                 onChange={(v) => setRightTab(v as 'element' | 'global')}
                 options={[
@@ -188,22 +211,28 @@ export const EditorLayout = ({ portfolioId }: EditorLayoutProps) => {
                 ]}
               />
             </div>
-            
+
             <div className="flex-1 overflow-y-auto">
               {rightTab === 'element' && <SettingsPanel />}
-              {rightTab === 'global' && portfolio && (
+              {rightTab === 'global' && (
                 <GlobalSettingsPanel
                   portfolioId={portfolioId}
                   initialSeo={portfolio.seo}
                   initialTheme={portfolio.themeOverride}
-                  onSeoChange={(newSeo) => setPortfolio((p) => p ? { ...p, seo: newSeo } : p)}
-                  onThemeChange={(newTheme) => setPortfolio((p) => p ? { ...p, themeOverride: newTheme } : p)}
+                  onSeoChange={(newSeo) => setPortfolio((p) => (p ? { ...p, seo: newSeo } : p))}
+                  onThemeChange={(newTheme) => {
+                    setPortfolio((p) => (p ? { ...p, themeOverride: newTheme } : p))
+                    setHasUnpublishedChanges(true)
+                  }}
                 />
               )}
             </div>
           </aside>
         </div>
       </div>
+
+      {/* Đặt sau Frame: effect chạy sau khi toàn bộ cây canvas đã mount */}
+      <SaveBaseline onReady={editorSave.setBaseline} />
     </Editor>
   )
 }

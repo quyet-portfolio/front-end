@@ -23,17 +23,19 @@ export const HeroSectionUI = ({
   return (
     <section
       style={{ background: bgColor }}
-      className={`w-full py-24 px-8 flex flex-col gap-4 ${alignClass}`}
+      className="w-full py-16 pf-md:py-24 px-6 pf-md:px-8"
     >
-      <div
-        className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white"
-        style={{ background: accentColor }}
-      >
-        {name.charAt(0).toUpperCase()}
+      <div className={`max-w-5xl mx-auto w-full flex flex-col gap-4 ${alignClass}`}>
+        <div
+          className="w-20 h-20 rounded-full flex items-center justify-center text-3xl font-bold text-white"
+          style={{ background: accentColor }}
+        >
+          {name.charAt(0).toUpperCase()}
+        </div>
+        <h1 className="text-4xl pf-md:text-6xl font-extrabold text-pf-text tracking-tight">{name}</h1>
+        <p className="text-xl font-semibold" style={{ color: accentColor }}>{title}</p>
+        <p className="text-lg text-pf-muted max-w-xl">{subtitle}</p>
       </div>
-      <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight">{name}</h1>
-      <p className="text-xl font-semibold" style={{ color: accentColor }}>{title}</p>
-      <p className="text-lg text-slate-400 max-w-xl">{subtitle}</p>
     </section>
   )
 }

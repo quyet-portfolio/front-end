@@ -1,5 +1,6 @@
 import React from 'react'
 import type { ContactSectionProps } from './ContactSection'
+import { safeUrl } from '../shared/url'
 
 const PLATFORM_ICONS: Record<string, string> = {
   GitHub: '🐙',
@@ -26,8 +27,8 @@ export const ContactSectionUI = ({
       className="w-full py-20 px-8 text-center"
     >
       <div className="max-w-2xl mx-auto">
-        <h2 className="text-3xl font-bold text-white mb-4">Get in Touch</h2>
-        <p className="text-slate-400 mb-8">
+        <h2 className="text-3xl font-bold text-pf-text mb-4">Get in Touch</h2>
+        <p className="text-pf-muted mb-8">
           Reach out via email or find me on the platforms below.
         </p>
         <a
@@ -41,7 +42,7 @@ export const ContactSectionUI = ({
           {socials.map((s, i) => (
             <a
               key={i}
-              href={s.url}
+              href={safeUrl(s.url)}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-5 py-2 rounded-full border font-medium text-sm transition-all hover:scale-105"

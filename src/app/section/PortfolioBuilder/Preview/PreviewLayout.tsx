@@ -1,39 +1,36 @@
+/**
+ * PreviewLayout — Xem trước BẢN NHÁP của portfolio, render y hệt trang public
+ * (cùng PortfolioView / CraftRenderer), chỉ khác nguồn dữ liệu là bản nháp.
+ */
 'use client'
 
-import { Editor, Frame, Element } from '@craftjs/core'
 import { useEffect, useState } from 'react'
-import { craftResolver, CraftContainer } from '@/src/craftjs-components'
 import { usePortfolioApi } from '@/src/hooks/usePortfolioApi'
+import { PortfolioView } from '../PortfolioView'
+import type { PortfolioTheme } from '../theme'
 
 interface PreviewLayoutProps {
   portfolioId: string
+  /** Nhúng trong iframe thumbnail → ẩn banner */
+  embed?: boolean
 }
 
-function patchCraftJsonParents(craftJson: Record<string, any>): Record<string, any> {
-  const patched: Record<string, any> = JSON.parse(JSON.stringify(craftJson))
-  for (const [nodeId, node] of Object.entries(patched)) {
-    for (const childId of node.nodes ?? []) {
-      if (patched[childId]) patched[childId].parent = nodeId
-    }
-    for (const childId of Object.values(node.linkedNodes ?? {})) {
-      if (patched[childId as string]) patched[childId as string].parent = nodeId
-    }
-  }
-  return patched
+interface DraftData {
+  craftJson: Record<string, any>
+  theme?: PortfolioTheme
 }
 
-export const PreviewLayout = ({ portfolioId }: PreviewLayoutProps) => {
+export const PreviewLayout = ({ portfolioId, embed = false }: PreviewLayoutProps) => {
   const { fetchPortfolioById } = usePortfolioApi()
-  const [craftJsonStr, setCraftJsonStr] = useState<string | null>(null)
+  const [draft, setDraft] = useState<DraftData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetchPortfolioById(portfolioId)
-      .then((data) => {
-        const patched = patchCraftJsonParents(data.portfolio.layout.craftJson)
-        setCraftJsonStr(JSON.stringify(patched))
-      })
+      .then((data) =>
+        setDraft({ craftJson: data.portfolio.layout.craftJson, theme: data.portfolio.themeOverride })
+      )
       .catch(() => setError('Failed to load portfolio'))
       .finally(() => setLoading(false))
   }, [portfolioId, fetchPortfolioById])
@@ -46,7 +43,7 @@ export const PreviewLayout = ({ portfolioId }: PreviewLayoutProps) => {
     )
   }
 
-  if (error || !craftJsonStr) {
+  if (error || !draft) {
     return (
       <div className="flex items-center justify-center h-screen bg-slate-950">
         <p className="text-red-400">{error ?? 'Could not load portfolio'}</p>
@@ -55,10 +52,13 @@ export const PreviewLayout = ({ portfolioId }: PreviewLayoutProps) => {
   }
 
   return (
-    <Editor resolver={craftResolver} enabled={false}>
-      <Frame data={craftJsonStr}>
-        <Element is={CraftContainer} canvas id="ROOT" />
-      </Frame>
-    </Editor>
+    <>
+      {!embed && (
+        <div className="sticky top-0 z-50 py-1.5 text-center text-xs font-medium bg-amber-500 text-black">
+          Preview — draft version. Publish from the editor to update your live page.
+        </div>
+      )}
+      <PortfolioView craftJson={draft.craftJson} theme={draft.theme} />
+    </>
   )
 }

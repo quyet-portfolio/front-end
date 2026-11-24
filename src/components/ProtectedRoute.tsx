@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 
 interface ProtectedRouteProps {
@@ -13,16 +13,19 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children, adminOnly = false }: ProtectedRouteProps) {
   const { isAuthenticated, isAdmin, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!loading) {
       if (!isAuthenticated) {
-        router.push('/login');
+        // replace + redirect: login xong quay lại đúng trang, nút Back không bị
+        // dội ngược vào trang protected
+        router.replace(`/login?redirect=${encodeURIComponent(pathname || '/')}`);
       } else if (adminOnly && !isAdmin) {
         router.push('/');
       }
     }
-  }, [isAuthenticated, isAdmin, loading, adminOnly, router]);
+  }, [isAuthenticated, isAdmin, loading, adminOnly, router, pathname]);
 
   if (loading) {
     return (

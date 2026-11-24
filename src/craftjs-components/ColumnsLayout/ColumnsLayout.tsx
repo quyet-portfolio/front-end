@@ -9,6 +9,7 @@ import { useNode, Element } from '@craftjs/core'
 import { CraftContainer } from '../shared/CraftContainer'
 import Select from 'antd/es/select'
 import Slider from 'antd/es/slider'
+import { columnsClass } from './ColumnsLayoutUI'
 
 export interface ColumnsLayoutProps {
   columns?: 2 | 3
@@ -26,8 +27,8 @@ export const ColumnsLayout = ({ columns = 2, gap = 16 }: ColumnsLayoutProps) => 
       ref={(ref: any) => { connect(drag(ref)) }}
       style={{ gap }}
       className={[
-        'w-full grid p-2',
-        columns === 3 ? 'grid-cols-3' : 'grid-cols-2',
+        'w-full max-w-6xl mx-auto p-2',
+        columnsClass(columns),
         isSelected && 'ring-2 ring-indigo-500 ring-offset-1 ring-offset-transparent rounded-sm',
       ]
         .filter(Boolean)

@@ -5,11 +5,12 @@
  */
 import React from 'react'
 import type { TextNodeProps } from './TextNode'
+import { TEXT_THEME_COLOR } from '../shared/color'
 
 export const TextNodeUI = ({
   text = 'Double-click to edit text',
   fontSize = 16,
-  color = '#ffffff',
+  color,
   fontWeight = 'normal',
   textAlign = 'left',
   tag = 'p',
@@ -17,7 +18,7 @@ export const TextNodeUI = ({
   const Tag = tag as React.ElementType
 
   return (
-    <Tag style={{ fontSize, color, fontWeight, textAlign, whiteSpace: 'pre-wrap' }}>
+    <Tag style={{ fontSize, color: color || TEXT_THEME_COLOR, fontWeight, textAlign, whiteSpace: 'pre-wrap' }}>
       {text}
     </Tag>
   )

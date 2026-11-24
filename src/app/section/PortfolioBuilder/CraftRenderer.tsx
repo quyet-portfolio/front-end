@@ -4,38 +4,11 @@
  * KHÔNG import @craftjs/core — zero editor bundle trên public pages.
  */
 import React from 'react'
-import { HeroSectionUI } from '@/src/craftjs-components/HeroSection/HeroSectionUI'
-import { AboutSectionUI } from '@/src/craftjs-components/AboutSection/AboutSectionUI'
-import { SkillsSectionUI } from '@/src/craftjs-components/SkillsSection/SkillsSectionUI'
-import { ProjectsSectionUI } from '@/src/craftjs-components/ProjectsSection/ProjectsSectionUI'
-import { ExperienceSectionUI } from '@/src/craftjs-components/ExperienceSection/ExperienceSectionUI'
-import { ContactSectionUI } from '@/src/craftjs-components/ContactSection/ContactSectionUI'
-import { DividerUI } from '@/src/craftjs-components/Divider/DividerUI'
-import { ButtonNodeUI } from '@/src/craftjs-components/ButtonNode/ButtonNodeUI'
-import { ImageNodeUI } from '@/src/craftjs-components/ImageNode/ImageNodeUI'
-import { IconNodeUI } from '@/src/craftjs-components/IconNode/IconNodeUI'
-import { TextNodeUI } from '@/src/craftjs-components/TextNode/TextNodeUI'
-import { ColumnsLayoutUI } from '@/src/craftjs-components/ColumnsLayout/ColumnsLayoutUI'
-import { CraftContainerUI } from '@/src/craftjs-components/shared/CraftContainerUI'
+import { UI_REGISTRY } from '@/src/craftjs-components/uiRegistry'
 
-// Map resolvedName → Component (không có Craft.js hooks, dùng props trực tiếp)
-// LƯU Ý: MỌI element trong palette (ComponentPanel) PHẢI có mặt ở đây, nếu không
-// trang public sẽ render null + console.warn.
-const COMPONENT_MAP: Record<string, React.FC<any>> = {
-  HeroSection: (props) => <HeroSectionUI {...props} />,
-  AboutSection: (props) => <AboutSectionUI {...props} />,
-  SkillsSection: (props) => <SkillsSectionUI {...props} />,
-  ProjectsSection: (props) => <ProjectsSectionUI {...props} />,
-  ExperienceSection: (props) => <ExperienceSectionUI {...props} />,
-  ContactSection: (props) => <ContactSectionUI {...props} />,
-  Divider: (props) => <DividerUI {...props} />,
-  ButtonNode: (props) => <ButtonNodeUI {...props} />,
-  ImageNode: (props) => <ImageNodeUI {...props} />,
-  IconNode: (props) => <IconNodeUI {...props} />,
-  TextNode: (props) => <TextNodeUI {...props} />,
-  ColumnsLayout: (props) => <ColumnsLayoutUI {...props} />,
-  CraftContainer: (props) => <CraftContainerUI {...props} />,
-}
+// resolvedName → UI thuần (không có Craft.js hooks). Registry được type theo
+// craftjs-components/names.ts nên không thể thiếu element so với editor.
+const COMPONENT_MAP: Record<string, React.ComponentType<any>> = UI_REGISTRY
 
 interface CraftNode {
   type: { resolvedName: string }

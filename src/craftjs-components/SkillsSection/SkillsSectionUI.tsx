@@ -15,17 +15,17 @@ export const SkillsSectionUI = ({
       className="w-full py-16 px-8"
     >
       <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl font-bold text-white mb-8 border-l-4 pl-4" style={{ borderColor: accentColor }}>
+        <h2 className="text-3xl font-bold text-pf-text mb-8 border-l-4 pl-4" style={{ borderColor: accentColor }}>
           Skills
         </h2>
         <div className="space-y-4">
           {skills.map((skill, i) => (
             <div key={i}>
               <div className="flex justify-between mb-1">
-                <span className="text-sm font-semibold text-white">{skill.name}</span>
-                <span className="text-sm text-slate-400">{skill.level}%</span>
+                <span className="text-sm font-semibold text-pf-text">{skill.name}</span>
+                <span className="text-sm text-pf-muted">{skill.level}%</span>
               </div>
-              <div className="w-full bg-slate-700 rounded-full h-2">
+              <div className="w-full bg-pf-border rounded-full h-2">
                 <div
                   className="h-2 rounded-full transition-all duration-700"
                   style={{ width: `${skill.level}%`, background: accentColor }}

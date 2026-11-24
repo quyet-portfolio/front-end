@@ -21,6 +21,10 @@ interface TemplateCardProps {
   template: Template
   onSelect: (id: string) => void
   isSelecting?: boolean
+  /** Template đang được portfolio của user sử dụng */
+  isCurrent?: boolean
+  /** User đã có portfolio → chọn template = đổi template */
+  hasPortfolio?: boolean
 }
 
 const CATEGORY_LABELS = {
@@ -35,17 +39,32 @@ const TEMPLATE_PREVIEW_BG = {
   'student-fresh': 'from-green-50 to-emerald-100',
 }
 
-export const TemplateCard = ({ template, onSelect, isSelecting }: TemplateCardProps) => {
+export const TemplateCard = ({ template, onSelect, isSelecting, isCurrent, hasPortfolio }: TemplateCardProps) => {
   const cat = CATEGORY_LABELS[template.category] ?? CATEGORY_LABELS.developer
   const { colors } = template.defaultTheme
+  const canSelect = !isSelecting && !isCurrent
+  const actionLabel = isSelecting
+    ? hasPortfolio ? 'Switching...' : 'Creating...'
+    : isCurrent
+      ? 'Current template'
+      : hasPortfolio
+        ? 'Switch to this template'
+        : 'Use This Template →'
 
   return (
     <div
-      className="group relative rounded-2xl overflow-hidden border border-slate-700/50
-        hover:border-indigo-500/60 transition-all duration-300 cursor-pointer
-        hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1"
-      onClick={() => !isSelecting && onSelect(template._id)}
+      className={`group relative rounded-2xl overflow-hidden border transition-all duration-300 ${
+        isCurrent
+          ? 'border-indigo-500/70 ring-1 ring-indigo-500/40'
+          : 'border-slate-700/50 hover:border-indigo-500/60 cursor-pointer hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1'
+      }`}
+      onClick={() => canSelect && onSelect(template._id)}
     >
+      {isCurrent && (
+        <span className="absolute top-3 left-3 z-10 text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-500 text-white shadow">
+          ✓ Current
+        </span>
+      )}
       {/* Preview area */}
       <div
         className="h-48 relative overflow-hidden"
@@ -107,15 +126,16 @@ export const TemplateCard = ({ template, onSelect, isSelecting }: TemplateCardPr
         </div>
 
         <Button
-          type="primary"
+          type={hasPortfolio ? 'default' : 'primary'}
           block
           loading={isSelecting}
+          disabled={isCurrent}
           onClick={(e) => {
             e.stopPropagation()
-            onSelect(template._id)
+            if (canSelect) onSelect(template._id)
           }}
         >
-          {isSelecting ? 'Creating...' : 'Use This Template →'}
+          {actionLabel}
         </Button>
       </div>
     </div>

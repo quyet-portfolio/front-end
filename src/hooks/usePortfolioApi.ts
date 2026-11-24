@@ -1,149 +1,123 @@
 /**
  * usePortfolioApi — Hook gọi API portfolio builder.
+ * Dùng axios instance chung (lib/axios) → tự gắn token + tự refresh khi access
+ * token hết hạn, nên autosave không bị 401 giữa chừng khi user sửa lâu.
  */
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
+import axiosInstance from '@/src/lib/axios'
 
-const BASE = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api'}/portfolio-builder`
+const BASE = '/portfolio-builder'
 
-const getToken = () =>
-  typeof window !== 'undefined' ? localStorage.getItem('accessToken') ?? '' : ''
+export interface PortfolioThemePayload {
+  colors?: Record<string, string | undefined>
+  font?: { heading?: string; body?: string }
+}
 
 export function usePortfolioApi() {
-  const headers = useCallback(
-    () => ({
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getToken()}`,
-    }),
-    []
-  )
-
   /** Lấy tất cả templates public */
-  const fetchTemplates = useCallback(
-    async (category?: string) => {
-      const url = category ? `${BASE}/templates?category=${category}` : `${BASE}/templates`
-      const res = await fetch(url)
-      if (!res.ok) throw new Error('Failed to fetch templates')
-      return res.json()
-    },
-    []
-  )
+  const fetchTemplates = useCallback(async (category?: string) => {
+    const { data } = await axiosInstance.get(`${BASE}/templates`, {
+      params: category ? { category } : undefined,
+    })
+    return data
+  }, [])
 
   /** Lấy 1 template chi tiết kèm craftJson */
   const fetchTemplateById = useCallback(async (id: string) => {
-    const res = await fetch(`${BASE}/templates/${id}`)
-    if (!res.ok) throw new Error('Failed to fetch template')
-    return res.json()
+    const { data } = await axiosInstance.get(`${BASE}/templates/${id}`)
+    return data
   }, [])
 
-  /** Tạo portfolio từ template */
+  /**
+   * Tạo portfolio từ template. Mỗi user chỉ có 1 portfolio: nếu đã có, server trả
+   * 409 trừ khi `replace: true` (thay layout + theme của portfolio hiện tại).
+   */
   const createPortfolioFromTemplate = useCallback(
-    async (templateId: string) => {
-      const res = await fetch(`${BASE}/portfolios/from-template/${templateId}`, {
-        method: 'POST',
-        headers: headers(),
-      })
-      if (!res.ok) throw new Error('Failed to create portfolio')
-      return res.json()
+    async (templateId: string, options?: { replace?: boolean }) => {
+      const { data } = await axiosInstance.post(
+        `${BASE}/portfolios/from-template/${templateId}`,
+        null,
+        { params: options?.replace ? { replace: 'true' } : undefined }
+      )
+      return data
     },
-    [headers]
+    []
   )
 
-  /** Lấy portfolio của user hiện tại */
+  /** Lấy portfolio của user hiện tại (null nếu chưa có) */
   const fetchMyPortfolio = useCallback(async () => {
-    const res = await fetch(`${BASE}/portfolios/my`, { headers: headers() })
-    if (res.status === 404) return null
-    if (!res.ok) throw new Error('Failed to fetch portfolio')
-    return res.json()
-  }, [headers])
+    try {
+      const { data } = await axiosInstance.get(`${BASE}/portfolios/my`)
+      return data
+    } catch (err: any) {
+      if (err?.response?.status === 404) return null
+      throw err
+    }
+  }, [])
 
   /** Lấy portfolio theo ID */
-  const fetchPortfolioById = useCallback(
-    async (id: string) => {
-      const res = await fetch(`${BASE}/portfolios/${id}`, { headers: headers() })
-      if (!res.ok) throw new Error('Failed to fetch portfolio')
-      return res.json()
-    },
-    [headers]
-  )
+  const fetchPortfolioById = useCallback(async (id: string) => {
+    const { data } = await axiosInstance.get(`${BASE}/portfolios/${id}`)
+    return data
+  }, [])
 
-  /** Lưu layout (craftJson) */
-  const saveLayout = useCallback(
-    async (id: string, craftJson: Record<string, any>) => {
-      const res = await fetch(`${BASE}/portfolios/${id}/layout`, {
-        method: 'PUT',
-        headers: headers(),
-        body: JSON.stringify({ craftJson }),
-      })
-      if (!res.ok) throw new Error('Failed to save layout')
-      return res.json()
-    },
-    [headers]
-  )
+  /** Lưu layout (craftJson) — bản nháp */
+  const saveLayout = useCallback(async (id: string, craftJson: Record<string, any>) => {
+    const { data } = await axiosInstance.put(`${BASE}/portfolios/${id}/layout`, { craftJson })
+    return data
+  }, [])
 
   /** Cập nhật theme */
-  const updateTheme = useCallback(
-    async (id: string, theme: { colors?: Record<string, string>; font?: { heading?: string; body?: string } }) => {
-      const res = await fetch(`${BASE}/portfolios/${id}/theme`, {
-        method: 'PUT',
-        headers: headers(),
-        body: JSON.stringify(theme),
-      })
-      if (!res.ok) throw new Error('Failed to update theme')
-      return res.json()
-    },
-    [headers]
-  )
+  const updateTheme = useCallback(async (id: string, theme: PortfolioThemePayload) => {
+    const { data } = await axiosInstance.put(`${BASE}/portfolios/${id}/theme`, theme)
+    return data
+  }, [])
 
   /** Cập nhật SEO */
   const updateSeo = useCallback(
     async (id: string, seo: { title?: string; description?: string; ogImage?: string }) => {
-      const res = await fetch(`${BASE}/portfolios/${id}/seo`, {
-        method: 'PUT',
-        headers: headers(),
-        body: JSON.stringify(seo),
-      })
-      if (!res.ok) throw new Error('Failed to update SEO')
-      return res.json()
+      const { data } = await axiosInstance.put(`${BASE}/portfolios/${id}/seo`, seo)
+      return data
     },
-    [headers]
+    []
   )
 
-  /** Publish portfolio */
-  const publishPortfolio = useCallback(
-    async (id: string) => {
-      const res = await fetch(`${BASE}/portfolios/${id}/publish`, {
-        method: 'POST',
-        headers: headers(),
-      })
-      if (!res.ok) throw new Error('Failed to publish')
-      return res.json()
-    },
-    [headers]
-  )
+  /** Publish portfolio — chụp snapshot bản nháp hiện tại lên trang public */
+  const publishPortfolio = useCallback(async (id: string) => {
+    const { data } = await axiosInstance.post(`${BASE}/portfolios/${id}/publish`)
+    return data
+  }, [])
 
   /** Unpublish portfolio */
-  const unpublishPortfolio = useCallback(
-    async (id: string) => {
-      const res = await fetch(`${BASE}/portfolios/${id}/unpublish`, {
-        method: 'POST',
-        headers: headers(),
-      })
-      if (!res.ok) throw new Error('Failed to unpublish')
-      return res.json()
-    },
-    [headers]
-  )
+  const unpublishPortfolio = useCallback(async (id: string) => {
+    const { data } = await axiosInstance.post(`${BASE}/portfolios/${id}/unpublish`)
+    return data
+  }, [])
 
-  return {
-    fetchTemplates,
-    fetchTemplateById,
-    createPortfolioFromTemplate,
-    fetchMyPortfolio,
-    fetchPortfolioById,
-    saveLayout,
-    updateTheme,
-    updateSeo,
-    publishPortfolio,
-    unpublishPortfolio,
-  }
+  return useMemo(
+    () => ({
+      fetchTemplates,
+      fetchTemplateById,
+      createPortfolioFromTemplate,
+      fetchMyPortfolio,
+      fetchPortfolioById,
+      saveLayout,
+      updateTheme,
+      updateSeo,
+      publishPortfolio,
+      unpublishPortfolio,
+    }),
+    [
+      fetchTemplates,
+      fetchTemplateById,
+      createPortfolioFromTemplate,
+      fetchMyPortfolio,
+      fetchPortfolioById,
+      saveLayout,
+      updateTheme,
+      updateSeo,
+      publishPortfolio,
+      unpublishPortfolio,
+    ]
+  )
 }

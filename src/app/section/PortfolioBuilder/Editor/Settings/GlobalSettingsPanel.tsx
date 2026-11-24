@@ -1,8 +1,10 @@
 'use client'
 
 import { usePortfolioApi } from '@/src/hooks/usePortfolioApi'
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { ColorField } from '@/src/craftjs-components/shared/ColorField'
+import { useMessageApi } from '@/src/contexts/MessageContext'
+import { DEFAULT_THEME, FONT_OPTIONS, type PortfolioTheme } from '../../theme'
 import Input from 'antd/es/input'
 import Select from 'antd/es/select'
 import Button from 'antd/es/button'
@@ -10,13 +12,10 @@ import Button from 'antd/es/button'
 interface GlobalSettingsPanelProps {
   portfolioId: string
   initialSeo?: { title?: string; description?: string; ogImage?: string }
-  initialTheme?: { colors?: Record<string, string>; font?: { heading?: string; body?: string } }
+  initialTheme?: PortfolioTheme
   onSeoChange?: (seo: any) => void
-  onThemeChange?: (theme: { colors?: Record<string, string>; font?: { heading?: string; body?: string } }) => void
+  onThemeChange?: (theme: PortfolioTheme) => void
 }
-
-/** Google Fonts được hỗ trợ (load runtime ở trang public /p/[slug]) */
-const FONT_OPTIONS = ['Inter', 'Poppins', 'Roboto', 'Montserrat', 'Lora', 'Playfair Display']
 
 export const GlobalSettingsPanel = ({
   portfolioId,
@@ -26,14 +25,10 @@ export const GlobalSettingsPanel = ({
   onThemeChange,
 }: GlobalSettingsPanelProps) => {
   const { updateSeo, updateTheme } = usePortfolioApi()
+  const messageApi = useMessageApi()
 
   const [seo, setSeo] = useState(initialSeo || { title: '', description: '', ogImage: '' })
-  const [theme, setTheme] = useState(
-    initialTheme || {
-      colors: { primary: '#6366F1', background: '#0f172a', text: '#f8fafc' },
-      font: { heading: 'Inter', body: 'Inter' },
-    }
-  )
+  const [theme, setTheme] = useState<PortfolioTheme>(initialTheme || DEFAULT_THEME)
   const [savingSeo, setSavingSeo] = useState(false)
   const [savingTheme, setSavingTheme] = useState(false)
 
@@ -42,8 +37,10 @@ export const GlobalSettingsPanel = ({
       setSavingSeo(true)
       await updateSeo(portfolioId, seo)
       onSeoChange?.(seo)
-    } catch (err) {
+      messageApi?.success('SEO saved')
+    } catch (err: any) {
       console.error(err)
+      messageApi?.error(err?.response?.data?.message ?? 'Could not save SEO settings')
     } finally {
       setSavingSeo(false)
     }
@@ -54,8 +51,10 @@ export const GlobalSettingsPanel = ({
       setSavingTheme(true)
       await updateTheme(portfolioId, theme)
       onThemeChange?.(theme)
+      messageApi?.success('Theme saved')
     } catch (err) {
       console.error(err)
+      messageApi?.error('Could not save theme')
     } finally {
       setSavingTheme(false)
     }

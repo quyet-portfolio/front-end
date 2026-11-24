@@ -8,7 +8,8 @@
 
 import { useNode } from '@craftjs/core'
 import { useCallback, useRef, useState } from 'react'
-import { ColorField } from '../shared/ColorField'
+import { ThemeColorControl } from '../shared/ThemeColorControl'
+import { TEXT_THEME_COLOR } from '../shared/color'
 import Input from 'antd/es/input'
 import Select from 'antd/es/select'
 import InputNumber from 'antd/es/input-number'
@@ -25,7 +26,7 @@ export interface TextNodeProps {
 export const TextNode = ({
   text = 'Double-click to edit text',
   fontSize = 16,
-  color = '#ffffff',
+  color,
   fontWeight = 'normal',
   textAlign = 'left',
   tag = 'p',
@@ -87,7 +88,7 @@ export const TextNode = ({
         // Prevent Craft.js from catching Delete/Backspace during editing
         if (editing) e.stopPropagation()
       }}
-      style={{ fontSize, color, fontWeight, textAlign, outline: 'none' }}
+      style={{ fontSize, color: color || TEXT_THEME_COLOR, fontWeight, textAlign, outline: 'none' }}
       className={[
         'min-w-[20px] cursor-default select-none whitespace-pre-wrap',
         editing && 'cursor-text select-text',
@@ -145,13 +146,12 @@ const TextNodeSettings = () => {
           onChange={(v) => setProp((p: TextNodeProps) => (p.fontSize = v ?? 16))}
         />
       </div>
-      <div>
-        <label className="block text-xs font-semibold text-slate-400 mb-1">Color</label>
-        <ColorField
-          value={props.color ?? '#ffffff'}
-          onChange={(hex) => setProp((p: TextNodeProps) => (p.color = hex))}
-        />
-      </div>
+      <ThemeColorControl
+        label="Color"
+        value={props.color}
+        fallback="#ffffff"
+        onChange={(v) => setProp((p: TextNodeProps) => (p.color = v))}
+      />
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1">Font Weight</label>
         <Select
@@ -188,7 +188,7 @@ TextNode.craft = {
   props: {
     text: 'Double-click to edit text',
     fontSize: 16,
-    color: '#ffffff',
+    // color KHÔNG seed → follow màu text của Global Theme
     fontWeight: 'normal',
     textAlign: 'left',
     tag: 'p',

@@ -1,5 +1,6 @@
 import React from 'react'
 import type { IconNodeProps } from './IconNode'
+import { safeUrl } from '../shared/url'
 
 export const IconNodeUI = ({
   icon = '⭐',
@@ -8,6 +9,7 @@ export const IconNodeUI = ({
   align = 'center',
   href = '',
 }: IconNodeProps) => {
+  const safeHref = safeUrl(href)
   const justifyMap = { left: 'flex-start', center: 'center', right: 'flex-end' } as const
 
   const content = (
@@ -22,8 +24,8 @@ export const IconNodeUI = ({
 
   return (
     <div style={{ display: 'flex', justifyContent: justifyMap[align] }}>
-      {href ? (
-        <a href={href} target="_blank" rel="noopener noreferrer">
+      {safeHref ? (
+        <a href={safeHref} target="_blank" rel="noopener noreferrer">
           {content}
         </a>
       ) : (

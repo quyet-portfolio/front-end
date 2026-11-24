@@ -9,7 +9,7 @@ export const DividerUI = ({
   return (
     <div
       style={{ paddingTop: spacing, paddingBottom: spacing }}
-      className="w-full flex items-center justify-center px-8"
+      className="w-full max-w-5xl mx-auto flex items-center justify-center px-8"
     >
       {divStyle === 'line' && (
         <div className="w-full h-px" style={{ background: color }} />

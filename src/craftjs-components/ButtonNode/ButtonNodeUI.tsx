@@ -1,5 +1,6 @@
 import React from 'react'
 import type { ButtonNodeProps } from './ButtonNode'
+import { safeUrl } from '../shared/url'
 
 export const ButtonNodeUI = ({
   text = 'Click me',
@@ -40,8 +41,9 @@ export const ButtonNodeUI = ({
     baseStyle.color = color
   }
 
-  const Tag = href ? 'a' : 'span'
-  const linkProps = href ? { href, target: '_blank', rel: 'noopener noreferrer' } : {}
+  const safeHref = safeUrl(href)
+  const Tag = safeHref ? 'a' : 'span'
+  const linkProps = safeHref ? { href: safeHref, target: '_blank', rel: 'noopener noreferrer' } : {}
 
   return (
     <Tag style={baseStyle} {...linkProps}>
